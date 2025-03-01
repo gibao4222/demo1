@@ -1,0 +1,10 @@
+<h1>Danh sách sản phẩm</h1>
+<a href ="{%url 'product_create'%}">Thêm sản phẩm</a>
+<ul>
+	{% for product in products %}
+		<li>{{ product.name }} - {{ product.price }}
+			<a href="{% url 'product_update' product.id %}">Sửa</a> |
+			<a href="{% url 'product_delete' product.id %}">Xóa</a>
+		</li>
+	{% endfor %}
+</ul>
