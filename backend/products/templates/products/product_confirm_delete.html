@@ -1,7 +1,0 @@
-<h1>Xóa sản phẩm</h1>
-<p> Bạn có chắc chắn muốn xóa "{{ product.name }}"?</p>
-<form method="POST">
-	{% csrf_token %}
-	<button type="submit">Xóa</button>
-</form>
-<a href="{% url 'product_list' %}">Hủy</a>

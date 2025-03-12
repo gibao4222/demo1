@@ -37,10 +37,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'products',
     'rest_framework',
     'corsheaders',
-    'api',
+    'song.apps.SongConfig',
+    'album.apps.AlbumConfig',
+    'singer.apps.SingerConfig',
+    'user.apps.UserConfig',
+    'genre.apps.GenreConfig',
+    'history.apps.HistoryConfig',
+    'playlist.apps.PlaylistConfig',
+    
 ]
 
 MIDDLEWARE = [
@@ -83,10 +89,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'demo1_db',
-	'USER': 'user1',
-	'PASSWORD': '3120410057',
-	'HOST': 'localhost',
-	'PORT': '3306',
+	    'USER': 'user1',
+	    'PASSWORD': '3120410057',
+	    'HOST': 'localhost',
+	    'PORT': '3306',
     }
 }
 

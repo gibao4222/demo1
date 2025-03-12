@@ -1,7 +1,0 @@
-<h1>{% if form.instance.pk %}Chỉnh sửa {% else %}Thêm mới {% endif %} sản phẩm</h1>
-<form method="POST" enctype="multipart/form-data">
-	{% csrf_token %}
-	{{ form.as_p }}
-	<button  type="submit">Lưu</button>
-</form>
-<a href="{% url 'product_list' %}"> Quay lại</a>
