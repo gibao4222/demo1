@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'song.apps.SongConfig',
     'album.apps.AlbumConfig',
     'singer.apps.SingerConfig',
-    'user.apps.UserConfig',
+    'spotify_user.apps.SpotifyUserConfig',
     'genre.apps.GenreConfig',
     'history.apps.HistoryConfig',
     'playlist.apps.PlaylistConfig',

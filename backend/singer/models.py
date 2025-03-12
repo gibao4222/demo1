@@ -9,6 +9,18 @@ class Singer(models.Model):
     image = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
 
+    class Meta:
+        db_table = 'singer_singer'
+
+    def __str__(self):
+        return self.name
+    
 class SingerSong(models.Model):  # Cho spotify_clone_singer_song
     id_singer = models.BigIntegerField()
     id_song = models.BigIntegerField()
+    
+    class Meta:
+        db_table = 'singer_singersong'
+
+    def __str__(self):
+        return f"SingerSong: {self.id_singer} - {self.id_song}"

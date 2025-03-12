@@ -19,4 +19,11 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('song.urls')),
+    path('', include('album.urls')),
+    path('', include('singer.urls')),
+    path('', include('spotify_user.urls')),
+    path('', include('genre.urls')),
+    path('', include('history.urls')),
+    path('', include('playlist.urls')),
 ]
