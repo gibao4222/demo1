@@ -1,6 +1,6 @@
 import React from "react";
 
-function Signup (){
+function SignupbyEmail (){
     return (
         <div className="flex items-center justify-center min-h-screen">
             <div class="w-full max-w-md p-8 space-y-6">
@@ -86,4 +86,4 @@ function Signup (){
     );
 }
 
-export default Signup;
+export default SignupbyEmail;
