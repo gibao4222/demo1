@@ -3,7 +3,7 @@ import './App.css';
 import React from "react";
 import PlayListChill from './Pages/PlayListChill';
 import Home from './Pages/Home';
-
+import SignupbyEmail_st3 from './Pages/SignupbyEmail_st3';
 
 
 
@@ -14,7 +14,7 @@ import Home from './Pages/Home';
 
 function App() {
   return (
-    <PlayListChill/>
+    <SignupbyEmail_st3/>
         
   );
 }
