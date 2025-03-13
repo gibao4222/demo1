@@ -81,6 +81,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+# Tùy chỉnh thời gian hết hạn của token (tùy chọn)
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Access token hết hạn sau 60 phút
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Refresh token hết hạn sau 1 ngày
+}
+
+AUTH_USER_MODEL = 'spotify_user.SpotifyUser'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

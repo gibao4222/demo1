@@ -1,6 +1,11 @@
-from django.urls import path
-from . import views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views.views import SingerViewSet, SingerSongViewSet
+
+router = DefaultRouter()
+router.register(r'singers', SingerViewSet)
+router.register(r'singer-songs', SingerSongViewSet)
 
 urlpatterns = [
-    path('singers/', views.singer_list, name='singer_list'),
+    path('', include(router.urls)),
 ]

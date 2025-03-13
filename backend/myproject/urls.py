@@ -16,14 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('song.urls')),
-    path('', include('album.urls')),
-    path('', include('singer.urls')),
-    path('', include('spotify_user.urls')),
-    path('', include('genre.urls')),
-    path('', include('history.urls')),
-    path('', include('playlist.urls')),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/songs/', include('song.urls')),
+    path('api/albums/', include('album.urls')),
+    path('api/singers/', include('singer.urls')),
+    path('api/users/', include('spotify_user.urls')),
+    path('api/genres/', include('genre.urls')),
+    path('api/histories/', include('history.urls')),
+    path('api/playlists/', include('playlist.urls')),
 ]
