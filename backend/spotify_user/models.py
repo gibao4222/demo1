@@ -1,40 +1,32 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 
 # Create your models here.
-class CustomUserManager(BaseUserManager):
-    def create_user(self, username, password=None, **extra_fields):
-        if not username:
-            raise ValueError('The Username field must be set')
-        user = self.model(username=username, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
 
-    def create_superuser(self, username, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        return self.create_user(username, password, **extra_fields)
-
-class SpotifyUser(AbstractBaseUser, PermissionsMixin):
+class SpotifyUser(models.Model):
     id = models.BigAutoField(primary_key=True)
-    author_id = models.CharField(max_length=255)
     email = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     username = models.CharField(max_length=255, unique=True)
+    password = models.CharField(max_length=255)
     vip = models.BooleanField(default=False)
-    role = models.CharField(max_length=10, choices=(('user', 'User'), ('vip', 'VIP'), ('admin', 'Admin')), default='user')
-
-    objects = CustomUserManager()
-
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
+    social_id = models.CharField(max_length=255, blank=True, null=True)  # ID từ Facebook/Google
+    provider = models.CharField(max_length=50, blank=True, null=True)   # 'facebook' hoặc 'google'
     
     class Meta:
         db_table = 'user_user'
+        
+    def set_password(self, raw_password):
+        from django.contrib.auth.hashers import make_password
+        self.password = make_password(raw_password)
+        self.save()
 
+    def check_password(self, raw_password):
+        from django.contrib.auth.hashers import check_password
+        return check_password(raw_password, self.password)
+    
     def __str__(self):
         return self.username
+    
 class UserSinger(models.Model):  # Cho spotify_clone_user_singer
     id_user = models.BigIntegerField()
     id_singer = models.BigIntegerField()
