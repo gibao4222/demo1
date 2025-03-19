@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'song.apps.SongConfig',
     'album.apps.AlbumConfig',
@@ -96,7 +97,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ),
 }
 
@@ -127,8 +128,8 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
         'APP': {
-            'client_id': config('GOOGLE_OAUTH2_CLIENT_ID'),
-            'secret': config('GOOGLE_OAUTH2_CLIENT_SECRET'),
+            'client_id': config('GOOGLE_OAUTH2_CLIENT_ID', default = ''),
+            'secret': config('GOOGLE_OAUTH2_CLIENT_SECRET', default = ''),
             'key': ''
         }
     }
@@ -154,7 +155,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'demo1_db',
 	    'USER': 'user1',
-	    'PASSWORD': '3120410057',
+	    'PASSWORD': '123456789',
 	    'HOST': 'localhost',
 	    'PORT': '3306',
     }
