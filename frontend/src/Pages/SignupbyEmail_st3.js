@@ -15,13 +15,21 @@ function SignupbyEmail_st3(){
         <div className="space-y-4 mb-6">
             <div className="bg-gray-800 p-4 rounded">
                 <label className="flex items-center space-x-3">
-                    <input type="checkbox" className="form-checkbox h-5 w-5 text-green-500"/>
+                <input
+                    type="checkbox"
+                    className="form-checkbox h-5 w-5 text-green-500"
+                    style={{ minWidth: "20px", minHeight: "20px" }}
+                    />
                     <span>Tôi không muốn nhận tin nhắn tiếp thị từ Spotify</span>
                 </label>
             </div>
             <div className="bg-gray-800 p-4 rounded">
                 <label className="flex items-center space-x-3">
-                    <input type="checkbox" className="form-checkbox h-5 w-5 text-green-500"/>
+                <input
+                    type="checkbox"
+                    className="form-checkbox h-5 w-5 text-green-500"
+                    style={{ minWidth: "20px", minHeight: "20px" }}
+                    />
                     <span>Chia sẻ dữ liệu đăng ký của tôi với các nhà cung cấp nội dung của Spotify cho mục đích tiếp thị.</span>
                 </label>
             </div>
