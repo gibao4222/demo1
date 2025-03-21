@@ -89,6 +89,15 @@ TEMPLATES = [
 
 SITE_ID = 1
 
+
+LOGIN_REDIRECT_URL = '/'
+
+LOGOUT_REDIRECT_URL ='/'
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
 REST_FRAMEWORK = {
@@ -117,9 +126,17 @@ SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
         'METHOD': 'oauth2',
         'SCOPE': ['email', 'public_profile'],
+	'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+	'INIT_PARAMS': {'cookie': True},
+	'FIELDS': [
+	    'id','email','name','firt_name','last_name',
+	],
+	'EXCHANGE_TOKEN': True,
+	'VERIFIED_EMAIL': False,
+	'VERSION': 'v13.0',
         'APP': {
-            'client_id': '615395524696516',
-            'secret': '7395abeacd60ffc74ab025fa04aa5b47',
+            'client_id': config('FACEBOOK_APP_ID'),
+            'secret': config('FACEBOOK_APP_SECRET'),
             'key': ''
         }
     },
@@ -136,12 +153,15 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # settings.py
 STATIC_URL = '/static/'
+
+STATIC_ROOT = '/home/ec2-user/backend/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
 ]
 
+DEBUG= False
 ALLOWED_HOSTS = [
-    '*'
+    '13.239.114.4'
+
 ]
 
 # Database
@@ -200,3 +220,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
+
+
