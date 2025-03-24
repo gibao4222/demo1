@@ -12,4 +12,8 @@ __pycache__/
 
 venv/
 venv39/
+# Bỏ qua file ngrok
+ngrok
 
+# Bỏ qua các file SQL
+*.sql
