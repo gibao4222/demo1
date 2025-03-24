@@ -4,7 +4,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-venv/
+
 __pycache__/
 *.log
 .DS_Store
@@ -12,6 +12,7 @@ __pycache__/
 
 venv/
 venv39/
+venv*/
 # Bỏ qua file ngrok
 ngrok
 
