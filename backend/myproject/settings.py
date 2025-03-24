@@ -26,7 +26,35 @@ SECRET_KEY = 'django-insecure-3-(w(i()!jqk3fg@w-1n&i@vi^#7n8#=avazg*mm*wn%d!4x+z
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '13.239.114.4','127.0.0.1', 'localhost'
+
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000/'
+]
+
+#Tạm thời tắt HTTP
+# SECURE_SSL_REDIRECT = False
+# ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+
+
+FACEBOOK_APP_ID = config('FACEBOOK_APP_ID')
+FACEBOOK_APP_SECRET = config('FACEBOOK_APP_SECRET')
+GOOGLE_OAUTH2_CLIENT_ID = config('GOOGLE_OAUTH2_CLIENT_ID')
+GOOGLE_OAUTH2_CLIENT_SECRET = config('GOOGLE_OAUTH2_CLIENT_SECRET')
+
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
+    'spotify_user.auth.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+
+
 
 
 # Application definition
@@ -38,14 +66,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.facebook',
-    'allauth.socialaccount.providers.google',
+    
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+
+    'social_django',
+    
     'song.apps.SongConfig',
     'album.apps.AlbumConfig',
     'singer.apps.SingerConfig',
@@ -53,6 +82,7 @@ INSTALLED_APPS = [
     'genre.apps.GenreConfig',
     'history.apps.HistoryConfig',
     'playlist.apps.PlaylistConfig',
+
     
 ]
 
@@ -65,8 +95,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'
@@ -74,7 +102,7 @@ ROOT_URLCONF = 'myproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,87 +110,15 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
             ],
         },
     },
 ]
 
-SITE_ID = 1
 
 
-LOGIN_REDIRECT_URL = '/'
 
-LOGOUT_REDIRECT_URL ='/'
-
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-
-WSGI_APPLICATION = 'myproject.wsgi.application'
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-}
-
-# Tùy chỉnh thời gian hết hạn của token (tùy chọn)
-from datetime import timedelta
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Access token hết hạn sau 60 phút
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Refresh token hết hạn sau 1 ngày
-}
-
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-)
-
-SOCIALACCOUNT_PROVIDERS = {
-    'facebook': {
-        'METHOD': 'oauth2',
-        'SCOPE': ['email', 'public_profile'],
-	'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
-	'INIT_PARAMS': {'cookie': True},
-	'FIELDS': [
-	    'id','email','name','firt_name','last_name',
-	],
-	'EXCHANGE_TOKEN': True,
-	'VERIFIED_EMAIL': False,
-	'VERSION': 'v13.0',
-        'APP': {
-            'client_id': config('FACEBOOK_APP_ID'),
-            'secret': config('FACEBOOK_APP_SECRET'),
-            'key': ''
-        }
-    },
-    'google': {
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
-        'APP': {
-            'client_id': config('GOOGLE_OAUTH2_CLIENT_ID'),
-            'secret': config('GOOGLE_OAUTH2_CLIENT_SECRET'),
-            'key': ''
-        }
-    }
-}
-
-# settings.py
-STATIC_URL = '/static/'
-
-STATIC_ROOT = '/home/ec2-user/backend/static/'
-STATICFILES_DIRS = [
-]
-
-DEBUG= False
-ALLOWED_HOSTS = [
-    '13.239.114.4'
-
-]
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -214,11 +170,91 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'https://df6b-171-252-189-97.ngrok-free.app',
+]
+
+
+
+
+
+WSGI_APPLICATION = 'myproject.wsgi.application'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    
+}
+
+# Tùy chỉnh thời gian hết hạn của token (tùy chọn)
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Access token hết hạn sau 60 phút
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Refresh token hết hạn sau 1 ngày
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# Cấu hình Facebook
+SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_APP_ID      # Thay bằng App ID
+SOCIAL_AUTH_FACEBOOK_SECRET = FACEBOOK_APP_SECRET  # Thay bằng App Secret
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']                  # Yêu cầu email từ Facebook
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+    'fields': 'id, email',  # Lấy id và email
+}
+
+# Cấu hình Google
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOOGLE_OAUTH2_CLIENT_ID      # Thay bằng Client ID
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = GOOGLE_OAUTH2_CLIENT_SECRET  # Thay bằng Client Secret
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', 'profile']
+
+# Cấu hình user fields
+SOCIAL_AUTH_USER_FIELDS = ['email', 'username']
+
+# URL callback
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/api/auth/facebook/callback/'
+
+
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'debug.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
 
 

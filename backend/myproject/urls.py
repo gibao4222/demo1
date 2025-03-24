@@ -37,7 +37,6 @@ urlpatterns = [
     path('api/histories/', include('history.urls')),
     path('api/playlists/', include('playlist.urls')),
     
-    path('accounts/', include('allauth.urls')),
 
 ]
 

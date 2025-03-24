@@ -1,86 +1,109 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+
 from spotify_user.models import SpotifyUser
-from allauth.socialaccount.models import SocialAccount
-from django.shortcuts import render
 
 
-class SocialLoginView(APIView):
-    permission_classes = [AllowAny]
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from django.conf import settings
+
+
+import requests
+
+from ..serializers import SpotifyUserSerializer
+
+
+
+
+
+
+class LoginStep1View(APIView):
     def post(self, request):
-        provider = request.data.get('provider')
-        token = request.data.get('access_token')
+        email = request.data.get('email')
+        password = request.data.get('password')
         
-        if not provider or not token:
-            return Response({'error': 'Provider and access token are required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not email or not password:
+            return Response({"error": "Vui lòng cung cấp email và mật khẩu"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Xác thực người dùng
+        user = authenticate(request, email=email, password=password)
+        if user is None:
+            return Response({"error": "Email hoặc mật khẩu không đúng"}, status=status.HTTP_401_UNAUTHORIZED)
+
         try:
-            social_account = SocialAccount.objects.get(provider=provider, uid=token)
-            user = social_account.user
-            spotify_user, created = SpotifyUser.objects.get_or_create(
-                email=user.email,
-                default={
-                    'username': user.username or user.email.split('@')[0],
-                    'social_id': token,
-                    'provider': provider,
-                    'password': None
-                }
-            )
+            spotify_user = SpotifyUser.objects.get(email=email)
+            if not spotify_user.is_active:
+                return Response({"error": "Tài khoản đã bị khóa"}, status=status.HTTP_403_FORBIDDEN)
+
+            # Trả về URL mã QR để quét
+            qr_code_url = spotify_user.get_qr_code_url()
+            return Response({
+                "message": "Vui lòng quét mã QR bằng Google Authenticator và nhập mã OTP",
+                "qr_code_url": qr_code_url,
+                "user_id": user.id  # Trả về user_id để dùng ở bước 2
+            }, status=status.HTTP_200_OK)
+        except SpotifyUser.DoesNotExist:
+            return Response({"error": "Không tìm thấy người dùng Spotify"}, status=status.HTTP_404_NOT_FOUND)
+        
+class LoginStep2View(APIView):
+    def post(self, request):
+        user_id = request.data.get('user_id')
+        otp = request.data.get('otp')
+
+        if not user_id or not otp:
+            return Response({"error": "Vui lòng cung cấp user_id và mã OTP"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(id=user_id)
+            spotify_user = SpotifyUser.objects.get(user=user)
+
+            # Xác minh mã OTP
+            if not spotify_user.verify_otp(otp):
+                return Response({"error": "Mã OTP không hợp lệ"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Tạo JWT token
             refresh = RefreshToken.for_user(user)
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
+                'username': spotify_user.username,
+                'role': spotify_user.role,
+                'vip': spotify_user.vip
             }, status=status.HTTP_200_OK)
-        except SocialAccount.DoesNotExist:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class LoginPageView(APIView):
-    permission_classes = [AllowAny]
-    def get(self, request):
-        return render(request, 'login.html')
-
-class RegisterView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        email = request.data.get('email')
-
-        if SpotifyUser.objects.filter(username=username).exists():
-            return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = SpotifyUser(
-            username=username,
-            email=email,
-            is_active=True,
-            vip=False,
-            role='user'
-        )
-        user.set_password(password)
-        user.save()
-
-        return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
-
-class LoginView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        try:
-            user = SpotifyUser.objects.get(username=username)
-            if not user.check_password(password):
-                return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        except User.DoesNotExist:
+            return Response({"error": "Người dùng không tồn tại"}, status=status.HTTP_404_NOT_FOUND)
         except SpotifyUser.DoesNotExist:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error": "Không tìm thấy người dùng Spotify"}, status=status.HTTP_404_NOT_FOUND)
+        
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = SpotifyUserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Đăng ký thành công"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }, status=status.HTTP_200_OK)
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        try:
+            refresh_token = request.data.get("refresh")
+            if not refresh_token:
+                return Response({"error": "Vui lòng cung cấp refresh token"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Blacklist refresh token
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response({"message": "Đăng xuất thành công"}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({"error": f"Lỗi khi đăng xuất: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+

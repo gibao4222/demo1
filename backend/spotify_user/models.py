@@ -1,31 +1,55 @@
 from django.db import models
+from django.contrib.auth.models import User
+import pyotp
 
 # Create your models here.
 
 class SpotifyUser(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    email = models.CharField(max_length=255)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='spotify_user')
+    email = models.EmailField(max_length=255, unique=True)
     is_active = models.BooleanField(default=True)
     username = models.CharField(max_length=255, unique=True)
-    password = models.CharField(max_length=255)
     vip = models.BooleanField(default=False)
     social_id = models.CharField(max_length=255, blank=True, null=True)  # ID từ Facebook/Google
-    provider = models.CharField(max_length=50, blank=True, null=True)   # 'facebook' hoặc 'google'
+    PROVIDER_CHOICES = [
+        ('facebook', 'Facebook'),
+        ('google', 'Google'),
+        ('', 'None'),
+    ]
+    provider = models.CharField(max_length=50, choices=PROVIDER_CHOICES, blank=True, null=True)   # 'facebook' hoặc 'google'
+    role = models.CharField(max_length=50, default='user')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    two_factor_secret = models.CharField(max_length=100, blank=True, null=True)  # Lưu secret key cho 2FA
     
     class Meta:
         db_table = 'user_user'
         
-    def set_password(self, raw_password):
-        from django.contrib.auth.hashers import make_password
-        self.password = make_password(raw_password)
-        self.save()
-
-    def check_password(self, raw_password):
-        from django.contrib.auth.hashers import check_password
-        return check_password(raw_password, self.password)
     
     def __str__(self):
         return self.username
+    
+    def generate_two_factor_secret(self):
+        """Tạo secret key cho Google Authenticator"""
+        if not self.two_factor_secret:
+            self.two_factor_secret = pyotp.random_base32()
+            self.save()
+        return self.two_factor_secret
+
+    def get_qr_code_url(self):
+        """Tạo URL mã QR để quét bằng Google Authenticator"""
+        secret = self.generate_two_factor_secret()
+        return pyotp.totp.TOTP(secret).provisioning_uri(
+            name=self.email,
+            issuer_name="YourAppName"
+        )
+
+    def verify_otp(self, otp):
+        """Xác minh mã OTP"""
+        if not self.two_factor_secret:
+            return False
+        totp = pyotp.TOTP(self.two_factor_secret)
+        return totp.verify(otp)
     
 class UserSinger(models.Model):  # Cho spotify_clone_user_singer
     id_user = models.BigIntegerField()
