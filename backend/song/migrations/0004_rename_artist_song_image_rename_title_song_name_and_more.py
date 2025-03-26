@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='song',
-            name='id_genre',
+            name='id_genre_id',
             field=models.BigIntegerField(default=1),
         ),
         migrations.AddField(

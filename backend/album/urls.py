@@ -9,4 +9,19 @@ router.register(r'singer-albums', SingerAlbumViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+
+    # Album
+    path('create-album/', AlbumViewSet.as_view({'post': 'create_album'}), name='album-create'),
+    path('change-album/<int:pk>/', AlbumViewSet.as_view({'put': 'change_album'}), name='album-change'),
+    path('delete-album/<int:pk>/', AlbumViewSet.as_view({'delete': 'delete_album'}), name='album-delete'),
+
+    # AlbumSong
+    path('create-album-song/', AlbumSongViewSet.as_view({'post': 'create_album_song'}), name='album-song-create'),
+    path('change-album-song/<int:pk>/', AlbumSongViewSet.as_view({'put': 'change_album_song'}), name='album-song-change'),
+    path('delete-album-song/<int:pk>/', AlbumSongViewSet.as_view({'delete': 'delete_album_song'}), name='album-song-delete'),
+
+    # SingerAlbum
+    path('create-singer-album/', SingerAlbumViewSet.as_view({'post': 'create_singer_album'}), name='singer-album-create'),
+    path('change-singer-album/<int:pk>/', SingerAlbumViewSet.as_view({'put': 'change_singer_album'}), name='singer-album-change'),
+    path('delete-singer-album/<int:pk>/', SingerAlbumViewSet.as_view({'delete': 'delete_singer_album'}), name='singer-album-delete'),
 ]

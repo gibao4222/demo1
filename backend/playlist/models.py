@@ -1,4 +1,5 @@
 from django.db import models
+from song.models import Song
 
 # Create your models here.
 class Playlist(models.Model):
@@ -7,7 +8,7 @@ class Playlist(models.Model):
     is_active = models.BooleanField()
     name = models.CharField(max_length=255)
     id_user = models.BigIntegerField()
-    image = models.CharField(max_length=255)
+    image = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         db_table = 'playlist_playlist'
@@ -16,8 +17,8 @@ class Playlist(models.Model):
         return self.name
     
 class PlaylistSong(models.Model):  # Cho spotify_clone_playlist_song
-    id_playlist = models.BigIntegerField()
-    id_song = models.BigIntegerField()
+    id_playlist = models.ForeignKey('Playlist', on_delete=models.CASCADE, related_name='playlist_songs')
+    id_song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='song_playlists')
     
     class Meta:
         db_table = 'playlist_playlistsong'
