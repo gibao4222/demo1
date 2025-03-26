@@ -93,6 +93,8 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
@@ -127,8 +129,8 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
         'APP': {
-            'client_id': config('GOOGLE_OAUTH2_CLIENT_ID'),
-            'secret': config('GOOGLE_OAUTH2_CLIENT_SECRET'),
+            'client_id': config('GOOGLE_OAUTH2_CLIENT_ID', default = ''),
+            'secret': config('GOOGLE_OAUTH2_CLIENT_SECRET', default = ''),
             'key': ''
         }
     }

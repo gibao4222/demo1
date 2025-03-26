@@ -14,8 +14,8 @@ import SignupbyEmail_st3 from './Pages/SignupbyEmail_st3';
 
 function App() {
   return (
-    <SignupbyEmail_st3/>
-        
+    <SignupbyEmail_st3 />
+
   );
 }
 
