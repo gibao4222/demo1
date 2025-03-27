@@ -10,6 +10,7 @@ __pycache__/
 .DS_Store
 
 
+
 venv/
 venv39/
 venv*/
@@ -18,3 +19,4 @@ ngrok
 ngrok-v3-stable-linux-amd64.tgz
 # Bỏ qua các file SQL
 *.sql
+

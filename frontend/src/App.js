@@ -16,6 +16,7 @@ import Register from './Pages/Register';
 
 const App = () => {
   return (
+    <>
     <GoogleOAuthProvider clientId="660579609549-ek5a4k2fo2tkqf1c99mpqv6dqa13gcf8.apps.googleusercontent.com">
       <div className="App">
         <Routes>
@@ -26,6 +27,10 @@ const App = () => {
         </Routes>
       </div>
     </GoogleOAuthProvider>
+
+    <SignupbyEmail_st3 />
+
+    </>
   );
 };
 
