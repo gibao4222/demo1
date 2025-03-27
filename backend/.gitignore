@@ -1,2 +1,21 @@
-venv/
+.env
+
 *.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+
+__pycache__/
+*.log
+.DS_Store
+
+
+venv/
+venv39/
+venv*/
+# Bỏ qua file ngrok
+ngrok
+ngrok-v3-stable-linux-amd64.tgz
+# Bỏ qua các file SQL
+*.sql
+backend/requirements.txt
