@@ -4,6 +4,7 @@ from .views import SpotifyUserViewSet, UserAlbumViewSet, UserSingerViewSet
 from .views.auth_views import LoginStep1View,LoginStep2View, RegisterView, LogoutView
 from .views.facebook_login import FacebookLoginView
 from .views.google_login import GoogleLoginView
+from .views import LikeSongView, FollowArtistView, FollowUserView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 router = DefaultRouter()
@@ -20,4 +21,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('auth/facebook/', FacebookLoginView.as_view(), name='facebook_login'),
     path('auth/google/', GoogleLoginView.as_view(), name='google_login'),
+    path('thich-bai-hat/', LikeSongView.as_view(), name='thich-bai-hat'),
+    path('theo-doi-nghe-si/', FollowArtistView.as_view(), name='theo-doi-nghe-si'),
+    path('theo-doi-nguoi-dung/', FollowUserView.as_view(), name='theo-doi-nguoi-dung'),
 ]
