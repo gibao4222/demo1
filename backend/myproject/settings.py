@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from decouple import config
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 MEDIA_URL = '/media/'
@@ -223,7 +223,15 @@ SOCIAL_AUTH_USER_FIELDS = ['email', 'username']
 # URL callback
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/api/auth/facebook/callback/'
 
+#cấu hình upload
+AWS_ACCESS_KEY_ID = "" #thay bằng aws access key 
+AWS_SECRET_ACCESS_KEY = "" #thay bằng aws secret key
+AWS_STORAGE_BUCKET_NAME = "upload-file-spotify-clone"
+AWS_S3_REGION_NAME = "ap-southeast-2"  
+AWS_S3_CUSTOM_DOMAIN = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
 
+# Cấu hình thư mục lưu trữ trong S3
+AUDIO_UPLOAD_FOLDER = "audio/"
 
 
 LOGGING = {
