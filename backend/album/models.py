@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 class Album(models.Model):
     id = models.BigAutoField(primary_key=True)
     image = models.CharField(max_length=255)
@@ -13,21 +12,23 @@ class Album(models.Model):
 
     def __str__(self):
         return self.name
-    
-class AlbumSong(models.Model):  # Cho spotify_clone_album_song
-    id_album = models.BigIntegerField()
-    id_song = models.BigIntegerField()
+
+class AlbumSong(models.Model):  # Cho Spotify clone album song
+    id = models.BigAutoField(primary_key=True)
+    id_album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name='album_songs')
+    id_song = models.ForeignKey('song.Song', on_delete=models.CASCADE, related_name='song_albums')
 
     class Meta:
         db_table = 'album_albumsong'
 
     def __str__(self):
         return f"AlbumSong: {self.id_album} - {self.id_song}"
-    
-class SingerAlbum(models.Model):  # Cho spotify_clone_singer_album
-    id_singer = models.BigIntegerField()
-    id_album = models.BigIntegerField()
-    
+
+class SingerAlbum(models.Model):  # Cho Spotify clone singer_album
+    id = models.BigAutoField(primary_key=True)
+    id_singer = models.ForeignKey('singer.Singer', on_delete=models.CASCADE, related_name='singer_albums')
+    id_album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name='album_singers')
+
     class Meta:
         db_table = 'album_singeralbum'
 
