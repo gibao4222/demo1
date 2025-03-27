@@ -18,4 +18,3 @@ ngrok
 ngrok-v3-stable-linux-amd64.tgz
 # Bỏ qua các file SQL
 *.sql
-backend/requirements.txt
