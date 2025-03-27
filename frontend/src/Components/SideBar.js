@@ -6,13 +6,13 @@ function SideBar (){
     <div className="mb-8">
      <ul className="mt-8">
       <li className="mb-4 li-inline">
-       <img src="/icon/Home_Fill_S.png"/> Home
+       <img alt="" src="/icon/Home_Fill_S.png"/> Home
       </li>
       <li className="mb-4 li-inline">
-        <img src="/icon/Search_S.png"/> Search
+        <img alt="" src="/icon/Search_S.png"/> Search
       </li>
       <li className="mb-4 li-inline">
-        <img src="/icon/Library_S.png"/>
+        <img alt="" src="/icon/Library_S.png"/>
 
        Your Library
       </li>
@@ -21,11 +21,11 @@ function SideBar (){
     <div className="mb-8">
      <ul>
       <li className="mb-4 li-inline">
-        <img src="/icon/+Library_S.png"/>
+        <img alt="" src="/icon/+Library_S.png"/>
        Create Playlist
       </li>
       <li className="mb-4 li-inline">
-        <img src="/icon/LikedSongs_S.png"/>
+        <img alt="" src="/icon/LikedSongs_S.png"/>
        Liked Songs
       </li>
       <hr/>

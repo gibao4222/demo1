@@ -15,7 +15,12 @@ from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+import os
 
+if not os.path.exists(MEDIA_ROOT / 'qr_codes'):
+    os.makedirs(MEDIA_ROOT / 'qr_codes')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -31,9 +36,6 @@ ALLOWED_HOSTS = [
 
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://127.0.0.1:8000/'
-]
 
 #Tạm thời tắt HTTP
 # SECURE_SSL_REDIRECT = False
@@ -177,7 +179,7 @@ STATIC_ROOT = BASE_DIR / 'static'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
-    'https://df6b-171-252-189-97.ngrok-free.app',
+    "http://localhost:3000",
 ]
 
 

@@ -7,10 +7,10 @@ function MainContent (){
         <div className="flex justify-between items-center mb-8">
         <div className="flex items-center pt-2">
         <button className="mr-4">
-        <img src="./icon/Back.png"/>
+        <img alt="" src="./icon/Back.png"/>
         </button>
         <button>
-            <img src="/icon/Forward.png"/>
+            <img alt="" src="/icon/Forward.png"/>
         </button>
         </div>
         <div className="flex items-center">
@@ -18,7 +18,7 @@ function MainContent (){
         <span>
         davedirects
         </span>
-        <img src="./icon/Polygon3.png" className="rounded-full mr-2 ml-1 pt-1" height="20" width="20"/>
+        <img alt="" src="./icon/Polygon3.png" className="rounded-full mr-2 ml-1 pt-1" height="20" width="20"/>
         </div>
         </div>
         <h1 className="text-3xl font-bold mb-8">
@@ -26,27 +26,27 @@ function MainContent (){
         </h1>
         <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="bg-gray-500 bg-opacity-30 backdrop-blur-lg rounded-lg flex items-center">
-            <img src="./img/AlbumCover.png" className=" object-cover mr-4"/>
+            <img alt="" src="./img/AlbumCover.png" className=" object-cover mr-4"/>
             Chill Mix
         </div>
         <div className="bg-gray-500 bg-opacity-30 backdrop-blur-lg rounded-lg flex items-center">
-            <img src="./img/AlbumCover1.png" className=" object-cover mr-4"/>
+            <img alt="" src="./img/AlbumCover1.png" className=" object-cover mr-4"/>
             Pop Mix
         </div>
         <div className="bg-gray-500 bg-opacity-30 backdrop-blur-lg rounded-lg flex items-center">
-            <img src="./img/AlbumCover2.png" className=" object-cover mr-4"/>
+            <img alt="" src="./img/AlbumCover2.png" className=" object-cover mr-4"/>
             Daily Mix 1
         </div>
         <div className="bg-gray-500 bg-opacity-30 backdrop-blur-lg rounded-lg flex items-center">
-            <img src="./img/AlbumCover3.png" className=" object-cover mr-4"/>
+            <img alt="" src="./img/AlbumCover3.png" className=" object-cover mr-4"/>
             Daily Mix 5
         </div>
         <div className="bg-gray-500 bg-opacity-30 backdrop-blur-lg rounded-lg flex items-center">
-            <img src="./img/AlbumCover4.png" className=" object-cover mr-4"/>
+            <img alt="" src="./img/AlbumCover4.png" className=" object-cover mr-4"/>
             Folk &amp; Acoustic Mix
         </div>
         <div className="bg-gray-500 bg-opacity-30 backdrop-blur-lg rounded-lg flex items-center">
-            <img src="./img/AlbumCover5.png" className=" object-cover mr-4"/>
+            <img alt="" src="./img/AlbumCover5.png" className=" object-cover mr-4"/>
             Daily Mix 4
         </div>
         </div>
@@ -56,9 +56,9 @@ function MainContent (){
       <h2 className="text-2xl font-bold">
        Your top mixes
       </h2>
-      <a className="text-gray-400" href="#">
+      <button className="text-gray-400" >
        SEE ALL
-      </a>
+      </button>
      </div>
      <div className="grid grid-cols-4 gap-4">
       <div className="bg-gray-500 bg-opacity-30 backdrop-blur-lg p-4 rounded-lg">
@@ -104,9 +104,9 @@ function MainContent (){
       <h2 className="text-2xl font-bold">
        Made for you
       </h2>
-      <a className="text-gray-400" href="#">
+      <button className="text-gray-400">
        SEE ALL
-      </a>
+      </button>
      </div>
      <div className="grid grid-cols-4 gap-4">
       <div className="bg-gray-500 bg-opacity-30 backdrop-blur-lg p-4 rounded-lg">
@@ -152,9 +152,9 @@ function MainContent (){
       <h2 className="text-2xl font-bold">
        Recently played
       </h2>
-      <a className="text-gray-400" href="#">
+      <button className="text-gray-400">
        SEE ALL
-      </a>
+      </button>
      </div>
      <div className="grid grid-cols-4 gap-4">
       <div className="bg-gray-500 bg-opacity-30 backdrop-blur-lg p-4 rounded-lg">
@@ -200,9 +200,9 @@ function MainContent (){
       <h2 className="text-2xl font-bold">
        Jump back in
       </h2>
-      <a className="text-gray-400" href="#">
+      <button className="text-gray-400">
        SEE ALL
-      </a>
+      </button>
      </div>
      <div className="grid grid-cols-4 gap-4">
       <div className="bg-gray-500 bg-opacity-30 backdrop-blur-lg p-4 rounded-lg">
@@ -248,9 +248,9 @@ function MainContent (){
       <h2 className="text-2xl font-bold">
        Uniquely yours
       </h2>
-      <a className="text-gray-400" href="#">
+      <button className="text-gray-400">
        SEE ALL
-      </a>
+      </button>
      </div>
      <div className="grid grid-cols-4 gap-4">
       <div className="bg-gray-500 bg-opacity-30 backdrop-blur-lg p-4 rounded-lg">
@@ -296,9 +296,9 @@ function MainContent (){
       <h2 className="text-2xl font-bold">
        Just the hits
       </h2>
-      <a className="text-gray-400" href="#">
+      <button className="text-gray-400">
        SEE ALL
-      </a>
+      </button>
      </div>
      <div className="grid grid-cols-4 gap-4">
       <div className="bg-gray-500 bg-opacity-30 backdrop-blur-lg p-4 rounded-lg">

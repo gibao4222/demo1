@@ -14,7 +14,8 @@ from django.conf import settings
 
 
 import requests
-
+import pyqrcode
+import os
 from ..serializers import SpotifyUserSerializer
 
 

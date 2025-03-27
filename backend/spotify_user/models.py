@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 import pyotp
+import pyqrcode
+import os
+from django.conf import settings
 
 # Create your models here.
 
@@ -39,10 +42,20 @@ class SpotifyUser(models.Model):
     def get_qr_code_url(self):
         """Tạo URL mã QR để quét bằng Google Authenticator"""
         secret = self.generate_two_factor_secret()
-        return pyotp.totp.TOTP(secret).provisioning_uri(
+        uri = pyotp.totp.TOTP(secret).provisioning_uri(
             name=self.email,
             issuer_name="YourAppName"
         )
+
+        # Tạo hình ảnh QR từ URI
+        qr = pyqrcode.create(uri)
+
+        # Lưu hình ảnh QR vào thư mục media
+        qr_path = os.path.join(settings.MEDIA_ROOT, 'qr_codes', f'qr_{self.user.id}.png')
+        qr.png(qr_path, scale=5)
+
+        # Trả về URL tuyệt đối của hình ảnh
+        return f"http://localhost:8000{settings.MEDIA_URL}qr_codes/qr_{self.user.id}.png"
 
     def verify_otp(self, otp):
         """Xác minh mã OTP"""

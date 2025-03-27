@@ -1,16 +1,16 @@
 import React from "react";
 
-function MainContent_PLChill (){
+function MainContentPLChill (){
     return (
         <div className="w-3/5 flex-1 pb-20 relative">
             <div className="p-4 bg-grad relative" style={{height: '600px'}}>
                 <div className="flex justify-between items-center mb-8 pl-4">
                     <div className="flex items-center pt-2">
                     <button className="mr-4">
-                    <img src="./icon/Back.png"/>
+                    <img alt="" src="./icon/Back.png"/>
                     </button>
                     <button>
-                        <img src="/icon/Forward.png"/>
+                        <img alt="" src="/icon/Forward.png"/>
                     </button>
                     </div>
                     <div className="flex items-center">
@@ -18,7 +18,7 @@ function MainContent_PLChill (){
                     <span>
                     davedirects
                     </span>
-                    <img src="./icon/Polygon3.png" className="rounded-full mr-2 ml-1 pt-1" height="20" width="20"/>
+                    <img alt="" src="./icon/Polygon3.png" className="rounded-full mr-2 ml-1 pt-1" height="20" width="20"/>
                     </div>
                 </div>
                 <div className="flex items-end mb-8 pl-3">
@@ -40,16 +40,16 @@ function MainContent_PLChill (){
             <div className="absolute left-0 w-full bottom-[-210px] bg-black/30 backdrop-blur-md p-2 pt-3">
                 <div className="flex items-center pl-8 pb-4">
                     <button className="mr-3">
-                        <img src="./icon/Play_GreemHover.png" height="72" width="72"/>
+                        <img alt="" src="./icon/Play_GreemHover.png" height="72" width="72"/>
                     </button>
                     <button className="mr-3">
-                        <img src="./icon/Heart_XS.png" height="38" width="38"/>
+                        <img alt="" src="./icon/Heart_XS.png" height="38" width="38"/>
                     </button>
                     <button className="mr-3">
-                        <img src="./icon/Download_XS.png" height="38" width="38"/>
+                        <img alt="" src="./icon/Download_XS.png" height="38" width="38"/>
                     </button>
                     <button className="mr-3">
-                        <img src="./icon/Options_XS.png" height="38" width="38"/>
+                        <img alt="" src="./icon/Options_XS.png" height="38" width="38"/>
                     </button>
                 </div>    
                 <div className="mb-1 pl-16">
@@ -64,7 +64,7 @@ function MainContent_PLChill (){
                             ALBUM
                         </div>
                         <div className="w-2/12">
-                        <img src="./icon/Clock_XS.png" className="w-5 h-5"/>
+                        <img alt="" src="./icon/Clock_XS.png" className="w-5 h-5"/>
                         </div>
                     </div>
                 </div>
@@ -90,7 +90,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -119,7 +119,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -148,7 +148,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -177,7 +177,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -206,7 +206,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -235,7 +235,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -264,7 +264,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -293,7 +293,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -322,7 +322,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -351,7 +351,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -380,7 +380,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -409,7 +409,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -438,7 +438,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -467,7 +467,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -496,7 +496,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -525,7 +525,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -554,7 +554,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -583,7 +583,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -612,7 +612,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -641,7 +641,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -670,7 +670,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -699,7 +699,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -728,7 +728,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -757,7 +757,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -786,7 +786,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -815,7 +815,7 @@ function MainContent_PLChill (){
                             
                             <div className="w-4/12 pl-6 flex justify-between items-center">
                                 <p>Play It Safe</p>
-                                <img src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
+                                <img alt="" src="./icon/Heart_Fill_XS.png" className="w-5 h-5"/>
                             </div>
                         
                         
@@ -832,4 +832,4 @@ function MainContent_PLChill (){
     );
 }
 
-export default MainContent_PLChill;
+export default MainContentPLChill;

@@ -27,14 +27,14 @@ function SignupbyEmail_st3(){
             </div>
         </div>
         <div className="text-gray-400 text-sm mb-6">
-            <p>Bằng việc nhấp vào nút Đăng ký, bạn đồng ý với <a href="#" className="text-green-500">Điều khoản và điều kiện sử dụng</a> của Spotify.</p>
-            <p>Để tìm hiểu thêm về cách thức Spotify thu thập, sử dụng, chia sẻ và bảo vệ dữ liệu cá nhân của bạn, vui lòng xem <a href="#" className="text-green-500">Chính sách quyền riêng tư của Spotify</a>.</p>
+            <p>Bằng việc nhấp vào nút Đăng ký, bạn đồng ý với <button className="text-green-500">Điều khoản và điều kiện sử dụng</button> của Spotify.</p>
+            <p>Để tìm hiểu thêm về cách thức Spotify thu thập, sử dụng, chia sẻ và bảo vệ dữ liệu cá nhân của bạn, vui lòng xem <button className="text-green-500">Chính sách quyền riêng tư của Spotify</button>.</p>
         </div>
         <div className="flex justify-center mb-6">
             <button className="bg-green-500 text-black font-bold py-2 px-6 rounded-full">Đăng ký</button>
         </div>
         <div className="text-center text-gray-400 text-xs">
-            <p>This site is protected by reCAPTCHA and the Google <a href="#" className="text-green-500">Privacy Policy</a> and <a href="#" className="text-green-500">Terms of Service</a> apply.</p>
+            <p>This site is protected by reCAPTCHA and the Google <button className="text-green-500">Privacy Policy</button> and <button className="text-green-500">Terms of Service</button> apply.</p>
         </div>
     </div>
         </div>

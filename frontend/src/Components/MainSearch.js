@@ -1,6 +1,6 @@
 import React from "react";
 
-function Main_Search(){
+function MainSearch(){
     return (
         <div className="w-3/5 flex-1 p-4 overflow-y-auto">
         <div className="flex items-center mb-8">
@@ -78,7 +78,7 @@ function Main_Search(){
             <div className="bg-purple-600 p-4 rounded-lg relative min-h-[180px]">
               <span> Pop </span>
               <img
-                alt="Pop genre image"
+                alt="Pop genre"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumCover2.png"
@@ -87,7 +87,7 @@ function Main_Search(){
             <div className="bg-orange-600 p-4 rounded-lg relative min-h-[180px]">
               <span> Hip-Hop </span>
               <img
-                alt="Hip-Hop genre image"
+                alt="Hip-Hop genre"
                 className="rounded-lg absolute bottom-0 right-0"
                 src="./img/AlbumCover3.png"
                 style={{height: "140px", width: "125px !important"}}
@@ -101,7 +101,7 @@ function Main_Search(){
             <div className="bg-green-600 p-4 rounded-lg relative min-h-[180px]">
               <span> Podcasts </span>
               <img
-                alt="Podcasts image"
+                alt="Podcasts"
                 className="rounded-lg absolute bottom-0 right-0"
                 src="./img/0a74d96e091a495bb09c0d83210910c3 6.png"
                 style={{height: "140px", width: "125px !important"}}
@@ -110,7 +110,7 @@ function Main_Search(){
             <div className="bg-blue-600 p-4 rounded-lg relative min-h-[180px]">
               <span> Made For You </span>
               <img
-                alt="Made For You image"
+                alt="Made For You"
                 className="rounded-lg absolute bottom-0 right-0"
                 src="./img/AlbumArt.png"
                 style={{height: "140px", width: "125px !important"}}
@@ -119,7 +119,7 @@ function Main_Search(){
             <div className="bg-purple-600 p-4 rounded-lg relative min-h-[180px]">
               <span> Charts </span>
               <img
-                alt="Charts image"
+                alt="Charts"
                 className="rounded-lg absolute bottom-0 right-0"
                 src="./img/AlbumArt1.png"
                 style={{height: "140px", width: "125px !important"}}
@@ -128,7 +128,7 @@ function Main_Search(){
             <div className="bg-pink-600 p-4 rounded-lg relative min-h-[180px]">
               <span> New Releases </span>
               <img
-                alt="New Releases image"
+                alt="New Releases"
                 className="rounded-lg absolute bottom-0 right-0"
                 src="./img/AlbumArt10.png"
                 style={{height: "140px", width: "125px !important"}}
@@ -137,7 +137,7 @@ function Main_Search(){
             <div className="bg-purple-600 p-4 rounded-lg relative min-h-[180px]">
               <span> Discover </span>
               <img
-                alt="Discover image"
+                alt="Discover"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt11.png"
@@ -146,7 +146,7 @@ function Main_Search(){
             <div className="bg-blue-800 p-4 rounded-lg relative min-h-[180px]">
               <span> Concerts </span>
               <img
-                alt="Concerts image"
+                alt="Concerts"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt12.png"
@@ -155,7 +155,7 @@ function Main_Search(){
             <div className="bg-pink-800 p-4 rounded-lg relative min-h-[180px]">
               <span> R&amp;B </span>
               <img
-                alt="R&amp;B image"
+                alt="R&amp;B"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt13.png"
@@ -164,7 +164,7 @@ function Main_Search(){
             <div className="bg-gray-600 p-4 rounded-lg relative min-h-[180px]">
               <span> Frequency </span>
               <img
-                alt="Frequency image"
+                alt="Frequency"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt14.png"
@@ -173,7 +173,7 @@ function Main_Search(){
             <div className="bg-blue-400 p-4 rounded-lg relative min-h-[180px]">
               <span> Christian &amp; Gospel </span>
               <img
-                alt="Christian &amp; Gospel image"
+                alt="Christian &amp; Gospel"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt15.png"
@@ -182,7 +182,7 @@ function Main_Search(){
             <div className="bg-pink-600 p-4 rounded-lg relative min-h-[180px]">
               <span> Soul </span>
               <img
-                alt="Soul image"
+                alt="Soul"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt16.png"
@@ -191,7 +191,7 @@ function Main_Search(){
             <div className="bg-blue-300 p-4 rounded-lg relative min-h-[180px]">
               <span> Chill </span>
               <img
-                alt="Chill image"
+                alt="Chill"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt2.png"
@@ -200,7 +200,7 @@ function Main_Search(){
             <div className="bg-purple-400 p-4 rounded-lg relative min-h-[180px]">
               <span> Mood </span>
               <img
-                alt="Mood image"
+                alt="Mood"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt3.png"
@@ -209,7 +209,7 @@ function Main_Search(){
             <div className="bg-green-600 p-4 rounded-lg relative min-h-[180px]">
               <span> Equal </span>
               <img
-                alt="Equal image"
+                alt="Equal"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt4.png"
@@ -218,7 +218,7 @@ function Main_Search(){
             <div className="bg-teal-400 p-4 rounded-lg relative min-h-[180px]">
               <span> Alternative </span>
               <img
-                alt="Alternative image"
+                alt="Alternative"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt5.png"
@@ -227,7 +227,7 @@ function Main_Search(){
             <div className="bg-gray-700 p-4 rounded-lg relative min-h-[180px]">
               <span> Workout </span>
               <img
-                alt="Workout image"
+                alt="Workout"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt6.png"
@@ -236,7 +236,7 @@ function Main_Search(){
             <div className="bg-pink-700 p-4 rounded-lg relative min-h-[180px]">
               <span> Party </span>
               <img
-                alt="Party image"
+                alt="Party"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt7.png"
@@ -245,7 +245,7 @@ function Main_Search(){
             <div className="bg-purple-400 p-4 rounded-lg relative min-h-[180px]">
               <span> Pop </span>
               <img
-                alt="Pop image"
+                alt="Pop"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt8.png"
@@ -254,7 +254,7 @@ function Main_Search(){
             <div className="bg-orange-600 p-4 rounded-lg relative min-h-[180px]">
               <span> Hip-Hop </span>
               <img
-                alt="Hip-Hop image"
+                alt="Hip-Hop"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt9.png"
@@ -263,7 +263,7 @@ function Main_Search(){
             <div className="bg-pink-600 p-4 rounded-lg relative min-h-[180px]">
               <span> Afro </span>
               <img
-                alt="Afro image"
+                alt="Afro"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/0a74d96e091a495bb09c0d83210910c3 5.png"
@@ -272,7 +272,7 @@ function Main_Search(){
             <div className="bg-blue-600 p-4 rounded-lg relative min-h-[180px]">
               <span> Rewind </span>
               <img
-                alt="Rewind image"
+                alt="Rewind"
                 className="rounded-lg absolute bottom-0 right-0"
                 style={{height: "140px", width: "125px !important"}}
                 src="./img/AlbumArt16.png"
@@ -283,4 +283,4 @@ function Main_Search(){
       </div>
     );
 }
-export default Main_Search;
+export default MainSearch;

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import SideBar from '/var/www/demo1/frontend/src/Components/SideBar';
-import MainContent_PLChill from '/var/www/demo1/frontend/src/Components/MainContent_PLChill';
+import MainContentPLChill from '../Components/MainContentPLChill';
 import FriendActivity from '/var/www/demo1/frontend/src/Components/FriendActivity';
 import BottomPlayer from '/var/www/demo1/frontend/src/Components/BottomPlayer';
-import Main_Search from '/var/www/demo1/frontend/src/Components/Main_Search';
+import MainSearch from '/var/www/demo1/frontend/src/Components/MainSearch';
 
 
 function PlayListChill(){
