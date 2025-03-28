@@ -83,3 +83,27 @@ class UserAlbum(models.Model):  # Cho spotify_clone_user_album
 
     def __str__(self):
         return f"UserAlbum: {self.id_user} - {self.id_album}"
+    
+
+class UserSong(models.Model):
+    id_user = models.BigIntegerField()
+    id_song = models.BigIntegerField()
+
+    class Meta:
+        db_table = 'user_usersong'
+        unique_together = ('id_user', 'id_song')
+
+    def __str__(self):
+        return f"User: {self.id_user} - Song ID: {self.id_song}"
+
+class UserFollowing(models.Model):
+    follower = models.ForeignKey(SpotifyUser, on_delete=models.CASCADE, related_name='following')
+    following = models.ForeignKey(SpotifyUser, on_delete=models.CASCADE, related_name='followers')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'user_following'
+        unique_together = ('follower', 'following')
+
+    def __str__(self):
+        return f"{self.follower.username} theo dõi {self.following.username}"

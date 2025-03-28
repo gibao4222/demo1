@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import SpotifyUser, UserAlbum, UserSinger
+from ..models import SpotifyUser, UserAlbum, UserSinger, UserSong, UserFollowing
 from django.contrib.auth.models import User
 
 
@@ -36,9 +36,22 @@ class UserAlbumSerializer(serializers.ModelSerializer):
         model = UserAlbum
         fields = '__all__'
         
+class UserSongSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSong
+        fields = ['id_user', 'id_song']
+
 class UserSingerSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSinger
-        fields = '__all__'
+        fields = ['id_user', 'id_singer']
+
+class UserFollowingSerializer(serializers.ModelSerializer):
+    follower = SpotifyUserSerializer(read_only=True)
+    following = SpotifyUserSerializer(read_only=True)
+
+    class Meta:
+        model = UserFollowing
+        fields = ['follower', 'following', 'created_at']
         
         
