@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 // import { GoogleLogin } from '@react-oauth/google';
 // import { FacebookLogin } from '@greatsumini/react-facebook-login';
-import { useAuth } from '../context/AuthContext';
+// import { useAuth } from '../context/AuthContext';
 import LoginStep2 from './LoginStep2';
 
 
@@ -12,8 +12,8 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [step2Data, setStep2Data] = useState(null);
-    const { login } = useAuth();
-    const navigate = useNavigate();
+    // const { login } = useAuth();
+    // const navigate = useNavigate();
 
     const handleManualLogin = async (e) => {
         e.preventDefault();

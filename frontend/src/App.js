@@ -14,6 +14,7 @@ import Register from './Pages/Register';
 
 
 
+
 const App = () => {
   return (
     <>
@@ -27,8 +28,6 @@ const App = () => {
         </Routes>
       </div>
     </GoogleOAuthProvider>
-
-    <SignupbyEmail_st3 />
 
     </>
   );
