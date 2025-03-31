@@ -5,8 +5,10 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from spotify_user.models import SpotifyUser
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.views.decorators.csrf import csrf_exempt
 
 class FacebookLoginView(APIView):
+    @csrf_exempt
     def post(self, request):
         fb_access_token = request.data.get('access_token')
         if not fb_access_token:

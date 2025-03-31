@@ -11,4 +11,3 @@ class EmailBackend(ModelBackend):
                 return user
         except UserModel.DoesNotExist:
             return None
-        return None

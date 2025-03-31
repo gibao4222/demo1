@@ -1,9 +1,9 @@
 import React, { useState } from "react";  
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-// import { GoogleLogin } from '@react-oauth/google';
-// import { FacebookLogin } from '@greatsumini/react-facebook-login';
-// import { useAuth } from '../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
+import FacebookLogin from '@greatsumini/react-facebook-login';
+import { useAuth } from '../context/AuthContext';
 import LoginStep2 from './LoginStep2';
 
 
@@ -12,8 +12,8 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [step2Data, setStep2Data] = useState(null);
-    // const { login } = useAuth();
-    // const navigate = useNavigate();
+    const { login } = useAuth();
+    const navigate = useNavigate();
 
     const handleManualLogin = async (e) => {
         e.preventDefault();
@@ -34,37 +34,40 @@ const Login = () => {
         }
     };
 
-    // const handleSocialLoginSuccess = async (response, provider) => {
-    //     try {
-    //         let accessToken;
-    //         if (provider === 'google') {
-    //             accessToken = response.credential;
-    //         } else if (provider === 'facebook') {
-    //             accessToken = response.accessToken;
-    //         }
+    const handleSocialLoginSuccess = async (response, provider) => {
+        try {
+            let accessToken;
+            if (provider === 'google') {
+                accessToken = response.credential;
+                console.log('Google ID token:', accessToken);
+            } else if (provider === 'facebook') {
+                accessToken = response.accessToken;
+                console.log('Facebook access token:', accessToken);
+            }
 
-    //         const apiResponse = await axios.post('http://localhost:8000/api/auth/${provider}/', {
-    //             accessToken: accessToken,
-    //         });
+            const apiResponse = await axios.post(`http://localhost:8000/api/users/auth/${provider}/`, {
+                access_token: accessToken,
+            });
 
-    //         login(
-    //             {
-    //                 username: apiResponse.data.username,
-    //                 role: apiResponse.data.role,
-    //                 vip: apiResponse.data.vip,
-    //             },
-    //             apiResponse.data.access,
-    //             apiResponse.data.refresh
-    //         );
-    //         navigate('/dashboard');
-    //     } catch (err) {
-    //         setError(err.response?.data?.error || 'Đăng nhập bằng ' + provider + ' thất bại.');
-    //     }
-    // };
+            login(
+                {
+                    username: apiResponse.data.username,
+                    role: apiResponse.data.role,
+                    vip: apiResponse.data.vip,
+                },
+                apiResponse.data.access,
+                apiResponse.data.refresh
+            );
+            navigate('/home');
+        } catch (err) {
+            console.error(`Error logging in with ${provider}:`, err);
+            setError(err.response?.data?.error || 'Đăng nhập bằng ' + provider + ' thất bại.');
+        }
+    };
 
-    // const handleSocialLoginFailure = (provider) => {
-    //     setError('Đăng nhập bằng ${provider} thất bại.');
-    // };
+    const handleSocialLoginFailure = (provider) => {
+        setError('Đăng nhập bằng ${provider} thất bại.');
+    };
 
     if (step2Data) {
         return <LoginStep2 qrCodeUrl={step2Data.qrCodeUrl} userId={step2Data.userId} />
@@ -77,9 +80,17 @@ const Login = () => {
 
                 {/* Phần đăng nhập bằng mạng xã hội */}
                 <div className="space-y-4 mb-6">
-                    {/* <GoogleLogin
+                    <GoogleLogin
                         onSuccess={(response) => handleSocialLoginSuccess(response, 'google')}
                         onError={() => handleSocialLoginFailure('google')}
+                        type="standard"
+                        theme="outline"
+                        size="large"
+                        text="signin_with"
+                        shape="rectangular"
+                        logo_alignment="left"
+                        width="300"
+                        locale="en"
                         className="w-full bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 flex items-center justify-center"
                     />
                     <FacebookLogin
@@ -89,7 +100,7 @@ const Login = () => {
                         className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 flex items-center justify-center"
                     >
                         Đăng nhập bằng Facebook
-                    </FacebookLogin> */}
+                    </FacebookLogin>
                     {/* Giữ nguyên nút Apple và Số điện thoại */}
                     <button
                         className="w-full bg-black text-white p-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"

@@ -5,22 +5,24 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from spotify_user.models import SpotifyUser
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.views.decorators.csrf import csrf_exempt
 
 class GoogleLoginView(APIView):
+    @csrf_exempt
     def post(self, request):
-        google_access_token = request.data.get('access_token')
-        if not google_access_token:
-            return Response({"error": "Vui lòng cung cấp access token từ Google"}, status=status.HTTP_400_BAD_REQUEST)
+        google_id_token = request.data.get('access_token')  # Đây thực chất là ID token
+        if not google_id_token:
+            return Response({"error": "Vui lòng cung cấp ID token từ Google"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Xác thực token với Google
+        # Xác thực ID token với Google
         try:
             google_response = requests.get(
-                f'https://www.googleapis.com/oauth2/v3/userinfo?access_token={google_access_token}'
+                f'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={google_id_token}'
             )
             google_data = google_response.json()
 
             if 'error' in google_data:
-                return Response({"error": "Token Google không hợp lệ"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Token Google không hợp lệ", "details": google_data}, status=status.HTTP_400_BAD_REQUEST)
 
             google_id = google_data.get('sub')  # Google ID
             email = google_data.get('email')
@@ -28,8 +30,8 @@ class GoogleLoginView(APIView):
             if not email:
                 return Response({"error": "Không lấy được email từ Google"}, status=status.HTTP_400_BAD_REQUEST)
 
-        except requests.RequestException:
-            return Response({"error": "Lỗi khi kết nối với Google"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except requests.RequestException as e:
+            return Response({"error": "Lỗi khi kết nối với Google", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Tìm hoặc tạo User
         try:
