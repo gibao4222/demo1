@@ -32,7 +32,7 @@ const Home = () => {
         <>
             <div className="flex">
                 <SideBar/>
-                <h2 className="text-2xl font-bold mb-6 text-center">Chào mừng, {user.username}!</h2>
+                {/* <h2 className="text-2xl font-bold mb-6 text-center">Chào mừng, {user.username}!</h2>
                 <p className="mb-4">Vai trò: {user.role}</p>
                 <p className="mb-6">VIP: {user.vip ? 'Có' : 'Không'}</p>
                 <button
@@ -40,8 +40,8 @@ const Home = () => {
                 className="w-full bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
                 >
                 Đăng xuất
-                </button>
-                <MainContent/>
+                </button> */}
+                <MainContent user={user} onLogout={handleLogout}/>
                 <FriendActivity/>
             </div>
             <BottomPlayer/>

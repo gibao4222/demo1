@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 
-function MainContent (){
+const MainContent = ({ user, onLogout }) =>{
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    const toggleDropdown = () => {
+        setIsDropdownOpen(!isDropdownOpen);
+    };
     return (
         <div className="w-3/5 pb-20 bg-black">
-    <div className="bg-gradient-to-b from-blue-900 to-gray  p-4">
+    <div className="bg-gradient-to-b from-blue-900 to-gray  p-4 flex-1">
         <div className="flex justify-between items-center mb-8">
         <div className="flex items-center pt-2">
         <button className="mr-4">
@@ -13,12 +18,65 @@ function MainContent (){
             <img alt="" src="/icon/Forward.png"/>
         </button>
         </div>
-        <div className="flex items-center">
-        <img alt="User Avatar" className="rounded-full mr-2" height="34" src="https://storage.googleapis.com/a1aa/image/6sVoYM2pamiUdQsWFX8T8LQS67Jh6kXukrbBfDdK9Wg.jpg" width="34"/>
-        <span>
-        davedirects
-        </span>
-        <img alt="" src="./icon/Polygon3.png" className="rounded-full mr-2 ml-1 pt-1" height="20" width="20"/>
+
+        <div className="relative flex items-center space-x-3">
+            {/* Thông tin người dùng */}
+            <div className="flex items-center cursor-pointer" onClick={toggleDropdown}>
+                <img
+                    alt="Ảnh đại diện người dùng"
+                    className="rounded-full mr-2"
+                    height="34"
+                    src="https://storage.googleapis.com/a1aa/image/6sVoYM2pamiUdQsWFX8T8LQS67Jh6kXukrbBfDdK9Wg.jpg"
+                    width="34"
+                />
+                <div className="text-white">
+                    <span className="font-semibold">{user.username}</span>
+                    <div className="text-sm text-gray-400">
+                        {user.role} {user.vip && <span className="text-yellow-400">• VIP</span>}
+                    </div>
+                </div>
+                <img
+                    alt="Menu thả xuống"
+                    src="./icon/Polygon3.png"
+                    className={`rounded-full mr-2 ml-1 pt-1 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
+                    height="20"
+                    width="20"
+                />
+            </div>
+
+            {/* Menu thả xuống */}
+            {isDropdownOpen && (
+                <div className="absolute top-12 right-0 w-48 bg-gray-800 rounded-lg shadow-lg z-10">
+                    <ul className="py-2">
+                        <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                            Tài khoản
+                        </li>
+                        <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                            Hồ sơ
+                        </li>
+                        <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                            Nâng cấp lên Premium
+                        </li>
+                        <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                            Hỗ trợ
+                        </li>
+                        <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                            Tải xuống
+                        </li>
+                        <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                            Cài đặt
+                        </li>
+                        <li className="border-t border-gray-600 px-4 py-2 text-white hover:bg-gray-700 cursor-pointer"
+                            onClick={() => {
+                                onLogout();
+                                setIsDropdownOpen(false); // Đóng menu sau khi đăng xuất
+                            }}
+                        >
+                            Đăng xuất
+                        </li>
+                    </ul>
+                </div>
+            )}
         </div>
         </div>
         <h1 className="text-3xl font-bold mb-8">
