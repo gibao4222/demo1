@@ -6,9 +6,10 @@ import React from "react";
 import Home from './Pages/Home';
 import Login from './Pages/Login';
 import Register from './Pages/Register';
+import SongList from './Components/SongList';
+import SongPage from './Pages/SongPage';
 
-
-
+import DetailSongPage from './Pages/DetailSongPage';
 
 
 
@@ -25,6 +26,9 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />
           <Route path="/" element={<Login />} />
+          <Route path="/song"element={<SongPage/>}/>
+          <Route path="/song/:id" element={<DetailSongPage />} />
+     
         </Routes>
       </div>
     </GoogleOAuthProvider>

@@ -6,7 +6,7 @@ const MusicPlayer = () => {
     const [currentSong, setCurrentSong] = useState(null);
 
     useEffect(() => {
-        axios.get("http://localhost:8000/api/songs/").then((response) => {
+        axios.get("http://localhost:8000/api/songs/songs/").then((response) => {
             setSongs(response.data);
         });
     }, []);

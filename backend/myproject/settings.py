@@ -124,13 +124,24 @@ TEMPLATES = [
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'demo1_db',
+# 	    'USER': 'user1',
+# 	    'PASSWORD': '3120410057',
+# 	    'HOST': 'localhost',
+# 	    'PORT': '3306',
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'demo1_db',
+        'NAME': 'demo5',
 	    'USER': 'user1',
-	    'PASSWORD': '3120410057',
-	    'HOST': 'localhost',
+	    'PASSWORD': '12345',
+	    'HOST': '127.17.163.239',
 	    'PORT': '3306',
     }
 }
@@ -246,10 +257,10 @@ SOCIAL_AUTH_USER_FIELDS = ['email', 'username']
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/api/auth/facebook/callback/'
 
 #cấu hình upload
-AWS_ACCESS_KEY_ID = "" #thay bằng aws access key 
-AWS_SECRET_ACCESS_KEY = "" #thay bằng aws secret key
-AWS_STORAGE_BUCKET_NAME = "upload-file-spotify-clone"
-AWS_S3_REGION_NAME = "ap-southeast-2"  
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID') 
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME')  
 AWS_S3_CUSTOM_DOMAIN = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
 
 # Cấu hình thư mục lưu trữ trong S3
