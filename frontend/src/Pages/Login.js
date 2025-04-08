@@ -1,4 +1,4 @@
-import React, { useState } from "react";  
+import React, { useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { GoogleLogin } from '@react-oauth/google';
@@ -17,8 +17,8 @@ const Login = () => {
 
     const handleManualLogin = async (e) => {
         e.preventDefault();
-        try{
-            const response = await axios.post('http://localhost:8000/api/users/login/step1/',{
+        try {
+            const response = await axios.post('http://localhost:8000/api/users/login/step1/', {
                 email,
                 password,
             });
@@ -28,7 +28,7 @@ const Login = () => {
             });
             setError('');
 
-        } catch (err){
+        } catch (err) {
             setError(err.response?.data?.error || 'Đăng nhập thất bại');
             setStep2Data(null);
         }
@@ -49,12 +49,13 @@ const Login = () => {
                 access_token: accessToken,
             });
 
+            const userData = apiResponse.data.user;
+            if (!userData) {
+                throw new Error('User data not found in API response');
+            }
+
             login(
-                {
-                    username: apiResponse.data.username,
-                    role: apiResponse.data.role,
-                    vip: apiResponse.data.vip,
-                },
+                userData,
                 apiResponse.data.access,
                 apiResponse.data.refresh
             );
@@ -128,21 +129,21 @@ const Login = () => {
                     <div className="mb-4">
                         <label className="block text-gray-700 mb-2">Email:</label>
                         <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
                         />
                     </div>
                     <div className="mb-6">
                         <label className="block text-gray-700 mb-2">Mật khẩu:</label>
                         <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
                         />
                     </div>
                     <button
@@ -158,10 +159,10 @@ const Login = () => {
 
                 {/* Liên kết đến trang đăng ký */}
                 <p className="mt-4 text-center">
-                Chưa có tài khoản?{' '}
-                <Link to="/register" className="text-blue-500 hover:underline">
-                    Đăng ký
-                </Link>
+                    Chưa có tài khoản?{' '}
+                    <Link to="/register" className="text-blue-500 hover:underline">
+                        Đăng ký
+                    </Link>
                 </p>
             </div>
         </div>

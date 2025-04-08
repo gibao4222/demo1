@@ -1,4 +1,4 @@
-import React, {  useEffect } from "react";
+import React, { useEffect } from "react";
 import SideBar from '/var/www/demo1/frontend/src/Components/SideBar';
 import MainContent from '/var/www/demo1/frontend/src/Components/MainCotent';
 import FriendActivity from '/var/www/demo1/frontend/src/Components/FriendActivity';
@@ -10,28 +10,28 @@ import { useNavigate } from 'react-router-dom';
 const Home = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-  
+
     useEffect(() => {
-      if (!user) {
-        navigate('/login');
-      }
+        if (!user) {
+            navigate('/login');
+        }
     }, [user, navigate]); // Chạy lại khi user hoặc navigate thay đổi
-  
+
     if (!user) {
-      return null; // Trả về null trong khi chờ điều hướng
+        return null; // Trả về null trong khi chờ điều hướng
     }
 
     const handleLogout = async () => {
-      await logout();
-      navigate('/login');
+        await logout();
+        navigate('/login');
     };
-  
-    
-    
+
+
+
     return (
         <>
             <div className="flex">
-                <SideBar/>
+                <SideBar />
                 {/* <h2 className="text-2xl font-bold mb-6 text-center">Chào mừng, {user.username}!</h2>
                 <p className="mb-4">Vai trò: {user.role}</p>
                 <p className="mb-6">VIP: {user.vip ? 'Có' : 'Không'}</p>
@@ -41,10 +41,10 @@ const Home = () => {
                 >
                 Đăng xuất
                 </button> */}
-                <MainContent user={user} onLogout={handleLogout}/>
-                <FriendActivity/>
+                <MainContent />
+                <FriendActivity />
             </div>
-            <BottomPlayer/>
+            <BottomPlayer />
         </>
     );
 }

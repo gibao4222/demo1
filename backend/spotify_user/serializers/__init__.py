@@ -15,7 +15,7 @@ class SpotifyUserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = SpotifyUser
-        fields = ['email', 'username', 'user', 'vip', 'role']
+        fields = ['id', 'email', 'username', 'user', 'vip', 'role', 'provider', 'social_id']
         extra_kwargs = {'vip': {'read_only': True}, 'role': {'read_only': True}}
     
     def create(self, validated_data):

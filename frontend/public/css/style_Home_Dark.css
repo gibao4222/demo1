@@ -1,166 +1,193 @@
 .li-inline {
-    display: flex;
-    align-items: center; /* Căn giữa theo chiều dọc */
-    gap: 8px; /* Tạo khoảng cách giữa ảnh và chữ */
-    font-size: 16px;
-    font-weight: 700;
+  display: flex;
+  align-items: center;
+  /* Căn giữa theo chiều dọc */
+  gap: 8px;
+  /* Tạo khoảng cách giữa ảnh và chữ */
+  font-size: 16px;
+  font-weight: 700;
 }
+
 .li-inline-friend {
-    display: flex; /* Sử dụng Flexbox để sắp xếp các phần tử */
-    justify-content: space-between; /* Đẩy các phần tử ra hai bên: chữ bên trái, hình bên phải */
-    align-items: center; /* Căn giữa theo chiều dọc */
-    margin-bottom: 1rem; /* Tương đương với mb-4 */
+  display: flex;
+  /* Sử dụng Flexbox để sắp xếp các phần tử */
+  justify-content: space-between;
+  /* Đẩy các phần tử ra hai bên: chữ bên trái, hình bên phải */
+  align-items: center;
+  /* Căn giữa theo chiều dọc */
+  margin-bottom: 1rem;
+  /* Tương đương với mb-4 */
 }
 
 .li-inline-friend span {
-    font-size: 1rem; /* Kích thước chữ */
+  font-size: 1rem;
+  /* Kích thước chữ */
 }
 
 .li-inline-friend .icons {
-    display: flex; /* Sử dụng Flexbox cho các hình ảnh */
-    flex-direction: row; /* Các hình ảnh xếp theo hàng ngang */
-    gap: 0.1rem; /* Khoảng cách giữa các hình ảnh */
+  display: flex;
+  /* Sử dụng Flexbox cho các hình ảnh */
+  flex-direction: row;
+  /* Các hình ảnh xếp theo hàng ngang */
+  gap: 0.1rem;
+  /* Khoảng cách giữa các hình ảnh */
 }
 
 .li-inline-friend img {
-    object-fit: contain; /* Đảm bảo hình ảnh không bị méo */
+  object-fit: contain;
+  /* Đảm bảo hình ảnh không bị méo */
 }
 
 .bg-grad {
-    background: linear-gradient(to bottom, #DEF628, #000000);
-    
+  background: linear-gradient(to bottom, #DEF628, #000000);
+
 }
-.bg-black{
-    background-color: #171717;
+
+.bg-black {
+  background-color: #171717;
 }
+
 table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
 }
-th, td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+
+th,
+td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }
+
 th {
-    background-color: #f4f4f4;
+  background-color: #f4f4f4;
 }
+
 .title {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
+
 .title img {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 5px;
-    margin-right: 10px;
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-right: 10px;
 }
+
 .song-info {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
+
 .song-title {
-    font-weight: bold;
+  font-weight: bold;
 }
+
 .artist {
-    color: gray;
-    font-size: 0.9em;
+  color: gray;
+  font-size: 0.9em;
 }
+
 /* Đổi màu nền của thanh cuộn */
 ::-webkit-scrollbar {
-    width: 8px; /* Độ rộng thanh cuộn */
-    background-color: black; /* Màu nền */
-    backdrop-filter: blur(8px);
+  width: 8px;
+  /* Độ rộng thanh cuộn */
+  background-color: black;
+  /* Màu nền */
+  backdrop-filter: blur(8px);
 }
 
 /* Đổi màu thanh lăn (phần di chuyển) */
 ::-webkit-scrollbar-thumb {
-    background-color: gray; /* Màu thanh lăn */
-    border-radius: 4px; /* Bo góc */
-    backdrop-filter: blur(8px);
+  background-color: gray;
+  /* Màu thanh lăn */
+  border-radius: 4px;
+  /* Bo góc */
+  backdrop-filter: blur(8px);
 }
 
 /* Khi hover vào thanh lăn */
 ::-webkit-scrollbar-thumb:hover {
-    background-color: darkgray;
-    backdrop-filter: blur(12px);
+  background-color: darkgray;
+  backdrop-filter: blur(12px);
 }
 
 
 .flex-1.p-4.overflow-y-auto {
-    padding: 16px;
-    overflow-y: auto;
-  }
-  
-  .flex.items-center.mb-8 {
-    display: flex;
-    align-items: center;
-    margin-bottom: 32px;
-  }
-  
-  .fas.fa-arrow-left.text-xl.mr-4 {
-    font-size: 20px;
-    margin-right: 16px;
-    color: #b3b3b3;
-  }
-  
-  input.flex-1.p-2.rounded-full.bg-gray-800.text-white {
-    background-color: #242424;
-    padding: 8px 16px;
-    border-radius: 9999px;
-    width: 300px;
-    border: none;
-    outline: none;
-    color: #fff;
-  }
-  
-  input::placeholder {
-    color: #b3b3b3;
-  }
-  
-  .ml-4.flex.items-center {
-    margin-left: 16px;
-  }
-  
-  .rounded-full {
-    border-radius: 9999px;
-  }
-  
-  .ml-2 {
-    margin-left: 8px;
-  }
-  
-  /* Recent Searches */
-  .text-2xl.mb-4 {
-    font-size: 24px;
-    margin-bottom: 16px;
-  }
-  
-  .flex.space-x-4 {
-    display: flex;
-    gap: 16px;
-  }
-  
-  .bg-gray-800.p-4.rounded-lg {
-    background-color: #181818;
-    padding: 16px;
-    border-radius: 8px;
-    width: 150px;
-    transition: background-color 0.3s;
-  }
-  
-  .bg-gray-800.p-4.rounded-lg:hover {
-    background-color: #282828;
-  }
-  
-  .rounded-full.mb-2 {
-    border-radius: 9999px;
-    margin-bottom: 8px;
-  }
-  
-  .flex.justify-between.items-center {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.flex.items-center.mb-8 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.fas.fa-arrow-left.text-xl.mr-4 {
+  font-size: 20px;
+  margin-right: 16px;
+  color: #b3b3b3;
+}
+
+input.flex-1.p-2.rounded-full.bg-gray-800.text-white {
+  background-color: #242424;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  width: 300px;
+  border: none;
+  outline: none;
+  color: #fff;
+}
+
+input::placeholder {
+  color: #b3b3b3;
+}
+
+.ml-4.flex.items-center {
+  margin-left: 16px;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.ml-2 {
+  margin-left: 8px;
+}
+
+/* Recent Searches */
+.text-2xl.mb-4 {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.flex.space-x-4 {
+  display: flex;
+  gap: 16px;
+}
+
+.bg-gray-800.p-4.rounded-lg {
+  background-color: #181818;
+  padding: 16px;
+  border-radius: 8px;
+  width: 150px;
+  transition: background-color 0.3s;
+}
+
+.bg-gray-800.p-4.rounded-lg:hover {
+  background-color: #282828;
+}
+
+.rounded-full.mb-2 {
+  border-radius: 9999px;
+  margin-bottom: 8px;
+}
+
+.flex.justify-between.items-center {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

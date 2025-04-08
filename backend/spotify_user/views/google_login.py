@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from spotify_user.models import SpotifyUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.views.decorators.csrf import csrf_exempt
+from spotify_user.serializers import SpotifyUserSerializer
 
 class GoogleLoginView(APIView):
     @csrf_exempt
@@ -65,10 +66,10 @@ class GoogleLoginView(APIView):
 
         # Tạo JWT token
         refresh = RefreshToken.for_user(user)
+        # Serialize SpotifyUser để trả về thông tin đầy đủ
+        serializer = SpotifyUserSerializer(spotify_user)
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-            'username': spotify_user.username,
-            'role': spotify_user.role,
-            'vip': spotify_user.vip
+            'user': serializer.data  # Trả về thông tin người dùng đầy đủ
         }, status=status.HTTP_200_OK)

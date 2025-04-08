@@ -9,6 +9,7 @@ class Playlist(models.Model):
     name = models.CharField(max_length=255)
     id_user = models.BigIntegerField()
     image = models.CharField(max_length=255, blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         db_table = 'playlist_playlist'

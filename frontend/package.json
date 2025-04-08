@@ -15,6 +15,7 @@
     "postcss": "^8.5.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-modal": "^3.16.3",
     "react-qr-code": "^2.0.15",
     "react-router-dom": "^6.29.0",
     "react-scripts": "^5.0.1",
@@ -46,6 +47,7 @@
   },
   "proxy": "http://127.0.0.1:8000",
   "devDependencies": {
-    "tailwindcss": "^3.4.10"
+    "tailwind-scrollbar": "^4.0.2",
+    "tailwindcss": "^4.1.2"
   }
 }

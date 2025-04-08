@@ -16,12 +16,16 @@ const LoginStep2 = ({ qrCodeUrl, userId }) => {
         user_id: userId,
         otp,
       });
+
+      console.log('API response:', response.data); // Thêm log để kiểm tra response
+
+      const userData = response.data.user; // Lấy dữ liệu từ response.data.user
+      if (!userData) {
+        throw new Error('User data not found in API response');
+      }
+
       login(
-        {
-          username: response.data.username,
-          role: response.data.role,
-          vip: response.data.vip,
-        },
+        userData, // Truyền toàn bộ userData (bao gồm id, username, role, vip, v.v.)
         response.data.access,
         response.data.refresh
       );

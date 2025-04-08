@@ -1,9 +1,10 @@
+from django.db import transaction, connection
+from django.db.models import Max
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from ..serializers import PlaylistSerializer, PlaylistSongSerializer
 from ..models import Playlist, PlaylistSong
-from django.db import connection
 
 class PlaylistViewSet(viewsets.ModelViewSet):
     queryset = Playlist.objects.all()
@@ -19,16 +20,20 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path='create_playlist')
     def create_playlist(self, request):
-        # Kiểm tra xem bảng có dữ liệu không
-        if not Playlist.objects.exists():
-            # Nếu bảng rỗng, reset sequence
+        with transaction.atomic():
+            # Kiểm tra và điều chỉnh AUTO_INCREMENT dựa trên max(id) + 1
             with connection.cursor() as cursor:
-                cursor.execute("ALTER TABLE playlist_playlist AUTO_INCREMENT = 1;")
+                if Playlist.objects.exists():
+                    max_id = Playlist.objects.aggregate(Max('id'))['id__max']
+                    next_id = max_id + 1 if max_id is not None else 1
+                    cursor.execute(f"ALTER TABLE playlist_playlist AUTO_INCREMENT = {next_id};")
+                else:
+                    cursor.execute("ALTER TABLE playlist_playlist AUTO_INCREMENT = 1;")
 
-        # Tạo bản ghi mới
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+            # Tạo bản ghi mới
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['DELETE'], url_path='delete_playlists')
