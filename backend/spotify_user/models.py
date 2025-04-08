@@ -70,15 +70,16 @@ class SpotifyUser(models.Model):
         totp = pyotp.TOTP(self.two_factor_secret)
         return totp.verify(otp)
     
-class UserSinger(models.Model):  # Cho spotify_clone_user_singer
+class UserSinger(models.Model):
     id_user = models.BigIntegerField()
     id_singer = models.BigIntegerField()
-    
+
     class Meta:
         db_table = 'user_usersinger'
+        unique_together = ('id_user', 'id_singer')
 
     def __str__(self):
-        return f"UserSinger: {self.id_user} - {self.id_singer}"
+        return f"User: {self.id_user} - Singer ID: {self.id_singer}"
 
 class UserAlbum(models.Model):  # Cho spotify_clone_user_album
     id_user = models.BigIntegerField()
