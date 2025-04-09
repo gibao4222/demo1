@@ -9,7 +9,8 @@ __pycache__/
 *.log
 .DS_Store
 
-
+node_modules/
+frontend/node_modules/
 
 venv/
 venv39/
