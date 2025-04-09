@@ -1,8 +1,12 @@
 from rest_framework import viewsets
-
+from spotify_user.serializers import SpotifyUserSerializer
+from singer.serializers import SingerSerializer
+from song.serializers import SongSerializer
 from singer.models import Singer
 from song.models import Song
-
+from rest_framework import generics
+from unidecode import unidecode
+from django.contrib.auth.models import User
 
 from ..serializers import SpotifyUserSerializer, UserAlbumSerializer, UserSingerSerializer, UserSongSerializer, UserFollowingSerializer
 from ..models import SpotifyUser, UserAlbum, UserSinger, UserSong, UserFollowing
@@ -81,6 +85,94 @@ class LikeSongView(APIView):
             return Response({"thông báo": "Hủy thích bài hát thành công"}, status=status.HTTP_200_OK)
         except UserSong.DoesNotExist:
             return Response({"lỗi": "Bạn chưa thích bài hát này"}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+
+
+# Tìm kiếm bài hát
+class SongSearchView(generics.ListAPIView):
+    serializer_class = SongSerializer
+
+    def get_queryset(self):
+        search_term = self.request.query_params.get('search', None)
+        if not search_term:
+            return Song.objects.none()
+
+       
+        search_term_no_diacritics = unidecode(search_term).lower().replace(" ", "")
+
+        all_songs = Song.objects.all()
+
+       
+        filtered_songs = [
+            song for song in all_songs
+            if search_term_no_diacritics in unidecode(song.name).lower().replace(" ", "")
+        ]
+
+        return filtered_songs
+    
+
+
+# Tìm kiếm nghệ sĩ
+class SingerSearchView(generics.ListAPIView):
+    serializer_class = SingerSerializer
+
+    def get_queryset(self):
+        search_term = self.request.query_params.get('search', None)
+        if not search_term:
+            return Singer.objects.none()
+
+        # Chuyển search_term thành không dấu, viết thường, và loại bỏ khoảng trắng
+        search_term_no_diacritics = unidecode(search_term).lower().replace(" ", "")
+
+        # Lấy tất cả nghệ sĩ
+        all_singers = Singer.objects.all()
+
+        # Lọc thủ công: so sánh name không dấu với search_term không dấu
+        filtered_singers = [
+            singer for singer in all_singers
+            if search_term_no_diacritics in unidecode(singer.name).lower().replace(" ", "")
+        ]
+
+        return filtered_singers
+
+
+
+class UserSearchView(generics.ListAPIView):
+    serializer_class = SpotifyUserSerializer
+
+    def get_queryset(self):
+        search_term = self.request.query_params.get('search', None)
+        
+        if not search_term:
+            return SpotifyUser.objects.none()
+
+        # Chuyển search_term thành không dấu, viết thường và loại bỏ khoảng trắng thừa
+        search_term_no_diacritics = unidecode(search_term).lower().strip()
+
+        # Lấy tất cả users
+        all_users = SpotifyUser.objects.filter(is_active=True)  
+
+        # Lọc thủ công: so sánh username không dấu với search_term không dấu
+        filtered_users = [
+            user for user in all_users
+            if search_term_no_diacritics in unidecode(user.username).lower()
+        ]
+
+        return filtered_users
+
+    # def get(self, request, *args, **kwargs):
+
+    #     queryset = self.get_queryset()
+    #     serializer = self.serializer_class(queryset, many=True)
+    #     return Response({
+    #         "results": serializer.data,
+    #         "count": len(serializer.data)
+    #     })
+
 
 
 # API Theo dõi/Hủy theo dõi Nghệ sĩ
