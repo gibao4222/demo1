@@ -129,7 +129,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'demo1_db',
 	    'USER': 'user1',
-	    'PASSWORD': '3120410057',
+	    'PASSWORD': '123456',
 	    'HOST': 'localhost',
 	    'PORT': '3306',
     }
@@ -181,6 +181,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://127.0.0.1:3000",
+   
 ]
 CORS_ALLOW_METHODS = [
     "DELETE",

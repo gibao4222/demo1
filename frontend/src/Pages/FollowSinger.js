@@ -7,21 +7,17 @@ import MainSearch from '/var/www/demo1/frontend/src/Components/MainSearch';
 import MainFollowSinger from '/var/www/demo1/frontend/src/Components/MainFollowSinger';
 import MainContent from '/var/www/demo1/frontend/src/Components/MainCotent';
 import MainSinger from '/var/www/demo1/frontend/src/Components/MainSinger';
-import MainSong from '/var/www/demo1/frontend/src/Components/MainSong';
-function PlayListChill(){
+function FollowSinger(){
     
     return (
         <>
             <div className="flex">
                 <SideBar/>
-                {/* <MainContentPLChill/> */}
-                {/* <MainSinger/> */}
-<MainSong/>
-                {/* <MainSearch/> */}
+                <MainFollowSinger/>
                 <FriendActivity/>
             </div>
             <BottomPlayer/>
         </>
     );
 }
-export default PlayListChill;
+export default FollowSinger;
