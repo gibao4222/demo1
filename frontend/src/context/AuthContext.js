@@ -76,17 +76,16 @@ export const AuthProvider = ({ children }) => {
   });
   const [accessToken, setAccessToken] = useState(() => localStorage.getItem('accessToken') || null);
   const [refreshToken, setRefreshToken] = useState(() => localStorage.getItem('refreshToken') || null);
+  const [playlistUpdated, setPlaylistUpdated] = useState(false);
 
   const login = (userData, access, refresh) => {
     setUser(userData);
     setAccessToken(access);
     setRefreshToken(refresh);
 
-    // Lưu token và thông tin người dùng vào localStorage
     try {
       if (access) {
         localStorage.setItem('accessToken', access);
-        // Lưu với key "token" để MainFollowSinger.js có thể lấy
         localStorage.setItem('token', access);
       }
       if (refresh) {
@@ -113,7 +112,6 @@ export const AuthProvider = ({ children }) => {
       setAccessToken(null);
       setRefreshToken(null);
 
-      // Xóa token khỏi localStorage
       try {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
@@ -126,7 +124,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Tự động làm mới token
+  const fetchUser = async (token) => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/users/current/', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
+    } catch (err) {
+      console.error('Error fetching user:', err);
+      logout();
+    }
+  };
+
   useEffect(() => {
     const refreshAccessToken = async () => {
       try {
@@ -135,7 +147,6 @@ export const AuthProvider = ({ children }) => {
         });
         const newAccessToken = response.data.access;
         setAccessToken(newAccessToken);
-        // Cập nhật token trong localStorage
         localStorage.setItem('accessToken', newAccessToken);
         localStorage.setItem('token', newAccessToken);
       } catch (err) {
@@ -145,7 +156,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     if (refreshToken) {
-      const interval = setInterval(refreshAccessToken, 30 * 60 * 1000); // Làm mới mỗi 15 phút
+      const interval = setInterval(refreshAccessToken, 30 * 60 * 1000); // Làm mới mỗi 30 phút
       return () => clearInterval(interval);
     }
   }, [refreshToken]);
@@ -155,13 +166,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    if (token && !user) {
-      fetchUser(token);
+    if (accessToken && !user) {
+      fetchUser(accessToken);
     }
-  }, [token]);
+  }, [accessToken]);
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, refreshToken, login, logout }}>
+    <AuthContext.Provider value={{ user, accessToken, refreshToken, login, logout, notifyPlaylistUpdate, playlistUpdated }}>
       {children}
     </AuthContext.Provider>
   );
