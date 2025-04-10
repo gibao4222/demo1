@@ -10,7 +10,10 @@ import PlayListChill from './Pages/PlayListChill';
 import FollowSinger from './Pages/FollowSinger';
 import FollowUser from './Pages/FollowUser';
 import LikeSong from './Pages/LikeSong';
+import SongList from './Components/SongList';
+import SongPage from './Pages/SongPage';
 
+import DetailSongPage from './Pages/DetailSongPage';
 
 
 
@@ -30,11 +33,17 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />
           <Route path="/" element={<Login />} />
+
           <Route path="/playlist" element={<PlayListChill />} />
           <Route path= "/FollowSinger/:id" element={<FollowSinger/>} /> 
           <Route path= "/FollowUser/:id" element={<FollowUser/>} /> 
           <Route path= "/SongDetail/:id" element={<LikeSong/>} /> 
           
+
+          <Route path="/song"element={<SongPage/>}/>
+          <Route path="/song/:id" element={<DetailSongPage />} />
+     
+
         </Routes>
        
       </div>

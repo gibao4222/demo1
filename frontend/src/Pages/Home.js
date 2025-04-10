@@ -1,9 +1,12 @@
 import React, {  useEffect } from "react";
-import SideBar from '/var/www/demo1/frontend/src/Components/SideBar';
-import MainContent from '/var/www/demo1/frontend/src/Components/MainCotent';
-import FriendActivity from '/var/www/demo1/frontend/src/Components/FriendActivity';
-import BottomPlayer from '/var/www/demo1/frontend/src/Components/BottomPlayer';
-
+// import SideBar from '/var/www/demo1/frontend/src/Components/SideBar';
+// import MainContent from '/var/www/demo1/frontend/src/Components/MainCotent';
+// import FriendActivity from '/var/www/demo1/frontend/src/Components/FriendActivity';
+// import BottomPlayer from '/var/www/demo1/frontend/src/Components/BottomPlayer';
+import SideBar from "../Components/SideBar";
+import MainContent from "../Components/MainCotent";
+import FriendActivity from "../Components/FriendActivity";
+import BottomPlayer from "../Components/BottomPlayer";
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
