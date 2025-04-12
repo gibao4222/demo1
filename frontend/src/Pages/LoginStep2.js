@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,20 +12,18 @@ const LoginStep2 = ({ qrCodeUrl, userId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8000/api/users/login/step2/', {
+      const response = await axios.post('/api/users/login/step2/', {
         user_id: userId,
         otp,
       });
-
-      console.log('API response:', response.data); // Thêm log để kiểm tra response
-
-      const userData = response.data.user; // Lấy dữ liệu từ response.data.user
-      if (!userData) {
-        throw new Error('User data not found in API response');
-      }
-
+      localStorage.setItem('access_token', response.data.access);
+      localStorage.setItem('refresh_token', response.data.refresh);
       login(
-        userData, // Truyền toàn bộ userData (bao gồm id, username, role, vip, v.v.)
+        {
+          username: response.data.username,
+          role: response.data.role,
+          vip: response.data.vip,
+        },
         response.data.access,
         response.data.refresh
       );

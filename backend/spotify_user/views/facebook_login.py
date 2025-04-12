@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from spotify_user.models import SpotifyUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.views.decorators.csrf import csrf_exempt
+import facebook
 
 class FacebookLoginView(APIView):
     @csrf_exempt
@@ -14,15 +15,9 @@ class FacebookLoginView(APIView):
         if not fb_access_token:
             return Response({"error": "Vui lòng cung cấp access token từ Facebook"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Xác thực token với Facebook
         try:
-            fb_response = requests.get(
-                f'https://graph.facebook.com/me?access_token={fb_access_token}&fields=id,email'
-            )
-            fb_data = fb_response.json()
-
-            if 'error' in fb_data:
-                return Response({"error": "Token Facebook không hợp lệ"}, status=status.HTTP_400_BAD_REQUEST)
+            graph = facebook.GraphAPI(fb_access_token)
+            fb_data = graph.get_object('me', fields='id,email')
 
             fb_id = fb_data.get('id')
             email = fb_data.get('email')
@@ -30,14 +25,12 @@ class FacebookLoginView(APIView):
             if not email:
                 return Response({"error": "Không lấy được email từ Facebook"}, status=status.HTTP_400_BAD_REQUEST)
 
-        except requests.RequestException:
-            return Response({"error": "Lỗi khi kết nối với Facebook"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except facebook.GraphAPIError as e:
+            return Response({"error": "Token Facebook không hợp lệ", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Tìm hoặc tạo User
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            # Tạo username từ email hoặc FB ID (tránh trùng lặp)
             username = f"fb_{fb_id}"
             if User.objects.filter(username=username).exists():
                 username = f"fb_{fb_id}_{email.split('@')[0]}"
@@ -45,10 +38,9 @@ class FacebookLoginView(APIView):
             user = User.objects.create_user(
                 username=username,
                 email=email,
-                password=None  # Không cần password cho đăng nhập xã hội
+                password=None
             )
 
-        # Tìm hoặc tạo SpotifyUser
         try:
             spotify_user = SpotifyUser.objects.get(user=user)
         except SpotifyUser.DoesNotExist:
@@ -63,7 +55,6 @@ class FacebookLoginView(APIView):
                 vip=False
             )
 
-        # Tạo JWT token
         refresh = RefreshToken.for_user(user)
         return Response({
             'refresh': str(refresh),

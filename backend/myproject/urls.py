@@ -16,7 +16,6 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -38,6 +37,7 @@ urlpatterns = [
     path('api/histories/', include('history.urls')),
     path('api/playlists/', include('playlist.urls')),
   
+    path('api/chat/', include('chat.urls')),
     
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

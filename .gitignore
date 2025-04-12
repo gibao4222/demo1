@@ -22,3 +22,5 @@ ngrok-v3-stable-linux-amd64.tgz
 *.sql
 
 __pycache__/
+frontend/node_modules/
+frontend/node_modules/.cache/

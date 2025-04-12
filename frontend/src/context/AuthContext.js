@@ -1,178 +1,89 @@
-// import React, { createContext, useState, useContext } from 'react';
-// import axios from 'axios';
-
-// const AuthContext = createContext();
-
-// export const AuthProvider = ({ children }) => {
-//   const [user, setUser] = useState(null);
-//   const [token, setToken] = useState(localStorage.getItem('access_token'));
-
-//   const login = (userData, accessToken, refreshToken) => {
-//     setUser(userData);
-//     setToken(accessToken);
-//     localStorage.setItem('access_token', accessToken);
-//     localStorage.setItem('refresh_token', refreshToken);
-//   };
-
-//   const logout = async () => {
-//     try {
-//       const refreshToken = localStorage.getItem('refresh_token');
-//       const accessToken = localStorage.getItem('access_token');
-//       if (refreshToken) {
-//         await axios.post(
-//           'http://localhost:8000/api/users/logout/',
-//           { refresh: refreshToken },
-//           {
-//             headers: {
-//               Authorization: `Bearer ${accessToken}`,
-//             },
-//           }
-//         );
-//       }
-//     } catch (err) {
-//       console.error('Đăng xuất thất bại:', err);
-//     }
-//     setUser(null);
-//     setToken(null);
-//     localStorage.removeItem('access_token');
-//     localStorage.removeItem('refresh_token');
-//   };
-
-//   const refreshToken = async () => {
-//     try {
-//       const refresh = localStorage.getItem('refresh_token');
-//       const response = await axios.post('http://localhost:8000/api/users/token/refresh/', { refresh });
-//       const newAccessToken = response.data.access;
-//       setToken(newAccessToken);
-//       localStorage.setItem('access_token', newAccessToken);
-//       return newAccessToken;
-//     } catch (err) {
-//       console.error('Làm mới token thất bại:', err);
-//       logout();
-//       return null;
-//     }
-//   };
-
-//   return (
-//     <AuthContext.Provider value={{ user, token, login, logout, refreshToken }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
-
-// export const useAuth = () => useContext(AuthContext);
-
-
-
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from '../axios';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
   });
-  const [accessToken, setAccessToken] = useState(() => localStorage.getItem('accessToken') || null);
-  const [refreshToken, setRefreshToken] = useState(() => localStorage.getItem('refreshToken') || null);
-  const [playlistUpdated, setPlaylistUpdated] = useState(false);
+  const [token, setToken] = useState(localStorage.getItem('access_token'));
 
-  const login = (userData, access, refresh) => {
-    setUser(userData);
-    setAccessToken(access);
-    setRefreshToken(refresh);
-
-    try {
-      if (access) {
-        localStorage.setItem('accessToken', access);
-        localStorage.setItem('token', access);
-      }
-      if (refresh) {
-        localStorage.setItem('refreshToken', refresh);
-      }
-      if (userData) {
-        localStorage.setItem('user', JSON.stringify(userData));
-      }
-      console.log('Tokens saved to localStorage:', { accessToken: access, refreshToken: refresh, userData });
-    } catch (error) {
-      console.error('Error saving tokens to localStorage:', error);
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
     }
+  }, [user]);
+
+  const login = async (userData, accessToken, refreshToken) => {
+    try {
+      const response = await axios.get('/api/users/users/', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const currentUser = response.data.find(u => u.username === userData.username);
+      if (currentUser) {
+        userData.user_id = currentUser.user.id;
+      } else {
+        console.error('Không tìm thấy người dùng trong danh sách trả về từ API');
+        if (!userData.user_id) {
+          throw new Error('Không thể xác định user_id cho người dùng');
+        }
+      }
+    } catch (err) {
+      console.error('Lỗi khi lấy user_id:', err);
+      throw err;
+    }
+    setUser(userData);
+    setToken(accessToken);
+    localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('refresh_token', refreshToken);
   };
 
   const logout = async () => {
     try {
-      await axios.post('http://localhost:8000/api/users/logout/', {
-        refresh_token: refreshToken,
-      });
-    } catch (err) {
-      console.error('Error logging out:', err);
-    } finally {
-      setUser(null);
-      setAccessToken(null);
-      setRefreshToken(null);
-
-      try {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        console.log('Tokens cleared from localStorage');
-      } catch (error) {
-        console.error('Error clearing tokens from localStorage:', error);
+      const refreshToken = localStorage.getItem('refresh_token');
+      const accessToken = localStorage.getItem('access_token');
+      if (refreshToken) {
+        await axios.post(
+          '/api/users/logout/',
+          { refresh: refreshToken },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
       }
+    } catch (err) {
+      console.error('Đăng xuất thất bại:', err);
     }
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
   };
 
-  const fetchUser = async (token) => {
+  const refreshToken = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/users/current/', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUser(response.data);
-      localStorage.setItem('user', JSON.stringify(response.data));
+      const refresh = localStorage.getItem('refresh_token');
+      const response = await axios.post('/api/users/token/refresh/', { refresh });
+      const newAccessToken = response.data.access;
+      setToken(newAccessToken);
+      localStorage.setItem('access_token', newAccessToken);
+      return newAccessToken;
     } catch (err) {
-      console.error('Error fetching user:', err);
+      console.error('Làm mới token thất bại:', err);
       logout();
+      return null;
     }
   };
-
-  useEffect(() => {
-    const refreshAccessToken = async () => {
-      try {
-        const response = await axios.post('http://localhost:8000/api/token/refresh/', {
-          refresh: refreshToken,
-        });
-        const newAccessToken = response.data.access;
-        setAccessToken(newAccessToken);
-        localStorage.setItem('accessToken', newAccessToken);
-        localStorage.setItem('token', newAccessToken);
-      } catch (err) {
-        console.error('Error refreshing token:', err);
-        logout();
-      }
-    };
-
-    if (refreshToken) {
-      const interval = setInterval(refreshAccessToken, 30 * 60 * 1000); // Làm mới mỗi 30 phút
-      return () => clearInterval(interval);
-    }
-  }, [refreshToken]);
-
-  const notifyPlaylistUpdate = () => {
-    setPlaylistUpdated(prev => !prev);
-  };
-
-  useEffect(() => {
-    if (accessToken && !user) {
-      fetchUser(accessToken);
-    }
-  }, [accessToken]);
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, refreshToken, login, logout, notifyPlaylistUpdate, playlistUpdated }}>
+    <AuthContext.Provider value={{ user, token, login, logout, refreshToken }}>
       {children}
     </AuthContext.Provider>
   );

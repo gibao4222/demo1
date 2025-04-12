@@ -19,8 +19,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 import os
 
-if not os.path.exists(MEDIA_ROOT / 'qr_codes'):
-    os.makedirs(MEDIA_ROOT / 'qr_codes')
+# if not os.path.exists(MEDIA_ROOT / 'qr_codes'):
+#     os.makedirs(MEDIA_ROOT / 'qr_codes')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -31,11 +31,15 @@ SECRET_KEY = 'django-insecure-3-(w(i()!jqk3fg@w-1n&i@vi^#7n8#=avazg*mm*wn%d!4x+z
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 ALLOWED_HOSTS = [
     '13.239.114.4','127.0.0.1', 'localhost'
 
 ]
-
+SECURE_SSL_REDIRECT = True  # Chuyển hướng HTTP sang HTTPS
+SESSION_COOKIE_SECURE = True  # Cookie chỉ hoạt động trên HTTPS
+CSRF_COOKIE_SECURE = True  # CSRF token chỉ hoạt động trên HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 #Tạm thời tắt HTTP
 # SECURE_SSL_REDIRECT = False
@@ -86,19 +90,21 @@ INSTALLED_APPS = [
     'genre.apps.GenreConfig',
     'history.apps.HistoryConfig',
     'playlist.apps.PlaylistConfig',
-
+    'chat.apps.ChatConfig',
+    
+    'channels',
     
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'
@@ -134,18 +140,6 @@ DATABASES = {
 	    'PORT': '3306',
     }
 }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'demo1_db',
-# 	    'USER': 'user1',
-# 	    'PASSWORD': '123456789',
-# 	    'HOST': 'localhost',
-
-# 	    'PORT': '3306',
-#     }
-# }
 
 
 # Password validation
@@ -189,12 +183,11 @@ STATIC_ROOT = BASE_DIR / 'static'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://localhost:3000",
-    "http://127.0.0.1:3000",
     "https://127.0.0.1:3000",
-   
 ]
 CORS_ALLOW_METHODS = [
     "DELETE",
@@ -217,7 +210,7 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
-
+CORS_ALLOW_CREDENTIALS = True
 
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
@@ -301,4 +294,12 @@ LOGGING = {
     },
 }
 
-
+ASGI_APPLICATION = 'myproject.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}
