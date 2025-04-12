@@ -6,38 +6,37 @@ from django.contrib.auth.models import User
 from spotify_user.models import SpotifyUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.views.decorators.csrf import csrf_exempt
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 class GoogleLoginView(APIView):
     @csrf_exempt
     def post(self, request):
-        google_id_token = request.data.get('access_token')  # Đây thực chất là ID token
+        google_id_token = request.data.get('access_token')
         if not google_id_token:
             return Response({"error": "Vui lòng cung cấp ID token từ Google"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Xác thực ID token với Google
         try:
-            google_response = requests.get(
-                f'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={google_id_token}'
+            # Xác thực ID token với Google
+            idinfo = id_token.verify_oauth2_token(
+                google_id_token,
+                google_requests.Request(),
+                "660579609549-kogcos0i04ldpherele2li974f9ulm01.apps.googleusercontent.com"  # Client ID của bạn
             )
-            google_data = google_response.json()
 
-            if 'error' in google_data:
-                return Response({"error": "Token Google không hợp lệ", "details": google_data}, status=status.HTTP_400_BAD_REQUEST)
-
-            google_id = google_data.get('sub')  # Google ID
-            email = google_data.get('email')
+            google_id = idinfo['sub']
+            email = idinfo['email']
 
             if not email:
                 return Response({"error": "Không lấy được email từ Google"}, status=status.HTTP_400_BAD_REQUEST)
 
-        except requests.RequestException as e:
-            return Response({"error": "Lỗi khi kết nối với Google", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except ValueError as e:
+            return Response({"error": "Token Google không hợp lệ", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Tìm hoặc tạo User
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            # Tạo username từ email hoặc Google ID
             username = f"google_{google_id}"
             if User.objects.filter(username=username).exists():
                 username = f"google_{google_id}_{email.split('@')[0]}"
@@ -45,7 +44,7 @@ class GoogleLoginView(APIView):
             user = User.objects.create_user(
                 username=username,
                 email=email,
-                password=None  # Không cần password cho đăng nhập xã hội
+                password=None
             )
 
         # Tìm hoặc tạo SpotifyUser
@@ -63,7 +62,6 @@ class GoogleLoginView(APIView):
                 vip=False
             )
 
-        # Tạo JWT token
         refresh = RefreshToken.for_user(user)
         return Response({
             'refresh': str(refresh),

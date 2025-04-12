@@ -24,13 +24,14 @@ class Message(models.Model):
     sender = models.ForeignKey(SpotifyUser, on_delete=models.CASCADE, related_name='sent_messages')
     receiver = models.ForeignKey(SpotifyUser, on_delete=models.CASCADE, related_name='received_messages')
     content = models.TextField(blank=True, null=True)
-    image = models.URLField(blank=True, null=True)
+    image = models.ImageField(upload_to='images/', blank=True, null=True)
     music_link = models.URLField(blank=True, null=True)
     is_pending = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)  # Đánh dấu tin nhắn đã bị xóa
     is_recalled = models.BooleanField(default=False)  # Đánh dấu tin nhắn đã bị thu hồi
     created_at = models.DateTimeField(auto_now_add=True)
-
+    is_seen = models.BooleanField(default=False)
+    
     class Meta:
         db_table = 'messages'
         indexes = [

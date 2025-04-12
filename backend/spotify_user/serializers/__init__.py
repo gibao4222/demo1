@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['id', 'username', 'email', 'password']
         extra_kwargs = {'password': {'write_only': True}}
         
         
@@ -15,7 +15,7 @@ class SpotifyUserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = SpotifyUser
-        fields = ['email', 'username', 'user', 'vip', 'role']
+        fields = ['id', 'email', 'username', 'user', 'vip', 'role']
         extra_kwargs = {'vip': {'read_only': True}, 'role': {'read_only': True}}
     
     def create(self, validated_data):

@@ -6,6 +6,7 @@ import React from "react";
 import Home from './Pages/Home';
 import Login from './Pages/Login';
 import Register from './Pages/Register';
+import ChatPage from './Pages/ChatPage';
 
 
 
@@ -17,7 +18,7 @@ import Register from './Pages/Register';
 
 const App = () => {
   return (
-    <>
+    
     <GoogleOAuthProvider clientId="660579609549-kogcos0i04ldpherele2li974f9ulm01.apps.googleusercontent.com">
       <div className="App">
         <Routes>
@@ -25,11 +26,12 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />
           <Route path="/" element={<Login />} />
+          <Route path='/chat' element={<ChatPage />}/>
         </Routes>
       </div>
     </GoogleOAuthProvider>
 
-    </>
+    
   );
 };
 

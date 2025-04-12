@@ -56,7 +56,7 @@ class SpotifyUser(models.Model):
             qr.png(qr_path, scale=5)
 
             # Trả về URL tuyệt đối của hình ảnh
-            return f"http://localhost:8000{settings.MEDIA_URL}qr_codes/qr_{self.user.id}.png"
+            return f"https://localhost{settings.MEDIA_URL}qr_codes/qr_{self.user.id}.png"
         except Exception as e:
             print(f"Error generating QR code: {str(e)}")
             raise

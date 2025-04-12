@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,10 +12,12 @@ const LoginStep2 = ({ qrCodeUrl, userId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8000/api/users/login/step2/', {
+      const response = await axios.post('/api/users/login/step2/', {
         user_id: userId,
         otp,
       });
+      localStorage.setItem('access_token', response.data.access);
+      localStorage.setItem('refresh_token', response.data.refresh);
       login(
         {
           username: response.data.username,

@@ -1,6 +1,6 @@
 import React, { useState } from "react";  
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../axios';
 import { GoogleLogin } from '@react-oauth/google';
 import FacebookLogin from '@greatsumini/react-facebook-login';
 import { useAuth } from '../context/AuthContext';
@@ -18,7 +18,7 @@ const Login = () => {
     const handleManualLogin = async (e) => {
         e.preventDefault();
         try{
-            const response = await axios.post('http://localhost:8000/api/users/login/step1/',{
+            const response = await axios.post('/api/users/login/step1/',{
                 email,
                 password,
             });
@@ -39,16 +39,16 @@ const Login = () => {
             let accessToken;
             if (provider === 'google') {
                 accessToken = response.credential;
-                console.log('Google ID token:', accessToken);
             } else if (provider === 'facebook') {
                 accessToken = response.accessToken;
-                console.log('Facebook access token:', accessToken);
             }
 
-            const apiResponse = await axios.post(`http://localhost:8000/api/users/auth/${provider}/`, {
+            const apiResponse = await axios.post(`/api/users/auth/${provider}/`, {
                 access_token: accessToken,
             });
-
+            
+            localStorage.setItem('access_token', apiResponse.data.access);
+            localStorage.setItem('refresh_token', apiResponse.data.refresh);
             login(
                 {
                     username: apiResponse.data.username,
