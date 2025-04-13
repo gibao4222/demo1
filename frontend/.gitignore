@@ -10,7 +10,7 @@
 
 # production
 /build
-
+node_modules/.cache/
 # misc
 .DS_Store
 .env.local

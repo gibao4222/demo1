@@ -5,6 +5,7 @@ import React from "react";
 import Home from './Pages/Home';
 import Login from './Pages/Login';
 import Register from './Pages/Register';
+
 import PlayListChill from './Pages/PlayListChill';
 import FollowSinger from './Pages/FollowSinger';
 import FollowUser from './Pages/FollowUser';
@@ -12,12 +13,15 @@ import LikeSong from './Pages/LikeSong';
 import SongList from './Components/SongList';
 import SongPage from './Pages/SongPage';
 
+import ChatPage from './Pages/ChatPage';
+
+
 import DetailSongPage from './Pages/DetailSongPage';
 import PlaylistPage from './Pages/PlaylistPage';
 
 const App = () => {
   return (
-    <>
+
       <GoogleOAuthProvider clientId="660579609549-kogcos0i04ldpherele2li974f9ulm01.apps.googleusercontent.com">
         <div className="App">
 
@@ -27,7 +31,7 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/home" element={<Home />} />
             <Route path="/" element={<Login />} />
-
+            <Route path='/chat' element={<ChatPage />}/>
             <Route path="/PlaylistDetail" element={<PlaylistPage />} />
 
             <Route path="/playlist" element={<PlayListChill />} />
@@ -45,7 +49,8 @@ const App = () => {
         </div>
       </GoogleOAuthProvider>
 
-    </>
+
+    
   );
 };
 

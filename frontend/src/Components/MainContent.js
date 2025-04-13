@@ -30,9 +30,9 @@ const MainContent = ({ user, onLogout }) => {
                                 width="34"
                             />
                             <div className="text-white">
-                                <span className="font-semibold">{user.username || "Guest"}</span>
+                                <span className="font-semibold">{user.username}</span>
                                 <div className="text-sm text-gray-400">
-                                    {user?.role || "User"} {user.vip && <span className="text-yellow-400">• VIP</span>}
+                                    {user?.role} {user.vip && <span className="text-yellow-400">• VIP</span>}
                                 </div>
                             </div>
                             <img

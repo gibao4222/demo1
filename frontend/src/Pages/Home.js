@@ -1,8 +1,4 @@
 import React, { useEffect } from "react";
-// import SideBar from '/var/www/demo1/frontend/src/Components/SideBar';
-// import MainContent from '/var/www/demo1/frontend/src/Components/MainCotent';
-// import FriendActivity from '/var/www/demo1/frontend/src/Components/FriendActivity';
-// import BottomPlayer from '/var/www/demo1/frontend/src/Components/BottomPlayer';
 import SideBar from "../Components/SideBar";
 import MainContent from "../Components/MainContent";
 import FriendActivity from "../Components/FriendActivity";
@@ -35,16 +31,7 @@ const Home = () => {
         <>
             <div className="flex">
                 <SideBar />
-                {/* <h2 className="text-2xl font-bold mb-6 text-center">Chào mừng, {user.username}!</h2>
-                <p className="mb-4">Vai trò: {user.role}</p>
-                <p className="mb-6">VIP: {user.vip ? 'Có' : 'Không'}</p>
-                <button
-                onClick={handleLogout}
-                className="w-full bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-                >
-                Đăng xuất
-                </button> */}
-                <MainContent />
+                <MainContent user={user} onLogout={handleLogout}/>
                 <FriendActivity />
             </div>
             <BottomPlayer />
