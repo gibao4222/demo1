@@ -9,7 +9,7 @@
 //   const [isFollowing, setIsFollowing] = useState(false);
 //   const [user, setUser] = useState(null);
 //   const [loading, setLoading] = useState(true);
-//   const { accessToken } = useAuth();
+//   const { token } = useAuth();
 
 //   // Lấy thông tin chi tiết user
 //   useEffect(() => {
@@ -37,7 +37,7 @@
 //     try {
 //       const response = await axios.get(`http://127.0.0.1:8000/api/users/current-user/`, {
 //         headers: {
-//           Authorization: `Bearer ${accessToken}`,
+//           Authorization: `Bearer ${token}`,
 //         },
 //       });
 //       console.log("User hiện tại:", response.data);
@@ -47,16 +47,16 @@
 //     }
 //   };
 
-//   if (accessToken) {
+//   if (token) {
 //     fetchCurrentUser();
 //   }
-// }, [accessToken]);
+// }, [token]);
 
 //   // Kiểm tra trạng thái theo dõi khi component được render
 //   useEffect(() => {
 //     const checkFollowStatus = async () => {
 //       try {
-//         if (!accessToken) {
+//         if (!token) {
 //           console.log("Chưa đăng nhập, không kiểm tra trạng thái theo dõi.");
 //           return;
 //         }
@@ -66,7 +66,7 @@
 //           `http://127.0.0.1:8000/api/users/theo-doi-nguoi-dung/?user_id=${userId}`,
 //           {
 //             headers: {
-//               Authorization: `Bearer ${accessToken}`,
+//               Authorization: `Bearer ${token}`,
 //             },
 //           }
 //         );
@@ -80,13 +80,13 @@
 //     };
 
 //     checkFollowStatus();
-//   }, [userId, accessToken]);
+//   }, [userId, token]);
 
 
 //   // const handleFollowToggle = async () => {
 //   //   try {
-//   //     console.log("Token:", accessToken);
-//   //     if (!accessToken) {
+//   //     console.log("Token:", token);
+//   //     if (!token) {
 //   //       toast.error("Vui lòng đăng nhập để theo dõi!");
 //   //       return;
 //   //     }
@@ -97,7 +97,7 @@
 //   //         `http://127.0.0.1:8000/api/users/theo-doi-nguoi-dung/?following_id=${userId}`,
 //   //         {
 //   //           headers: {
-//   //             Authorization: `Bearer ${accessToken}`,
+//   //             Authorization: `Bearer ${token}`,
 //   //           },
 //   //         }
 //   //       );
@@ -111,7 +111,7 @@
 //   //         { following_id: userId },
 //   //         {
 //   //           headers: {
-//   //             Authorization: `Bearer ${accessToken}`,
+//   //             Authorization: `Bearer ${token}`,
 //   //           },
 //   //         }
 //   //       );
@@ -135,8 +135,8 @@
 
 //   const handleFollowToggle = async () => {
 //   try {
-//     console.log("Token:", accessToken);
-//     if (!accessToken) {
+//     console.log("Token:", token);
+//     if (!token) {
 //       toast.error("Vui lòng đăng nhập để theo dõi!");
 //       return;
 //     }
@@ -147,7 +147,7 @@
 //         `http://127.0.0.1:8000/api/users/theo-doi-nguoi-dung/?following_id=${userId}`,
 //         {
 //           headers: {
-//             Authorization: `Bearer ${accessToken}`,
+//             Authorization: `Bearer ${token}`,
 //           },
 //         }
 //       );
@@ -161,7 +161,7 @@
 //         { following_id: userId },
 //         {
 //           headers: {
-//             Authorization: `Bearer ${accessToken}`,
+//             Authorization: `Bearer ${token}`,
 //           },
 //         }
 //       );
@@ -282,7 +282,7 @@
 //   const [isFollowing, setIsFollowing] = useState(false);
 //   const [user, setUser] = useState(null);
 //   const [loading, setLoading] = useState(true);
-//   const { accessToken } = useAuth();
+//   const { token } = useAuth();
 
 //   // Lấy thông tin chi tiết user
 //   useEffect(() => {
@@ -305,7 +305,7 @@
 //   useEffect(() => {
 //     const checkFollowStatus = async () => {
 //       try {
-//         if (!accessToken) {
+//         if (!token) {
 //           console.log("Chưa đăng nhập, không kiểm tra trạng thái theo dõi.");
 //           return;
 //         }
@@ -315,7 +315,7 @@
 //           `http://127.0.0.1:8000/api/users/theo-doi-nguoi-dung/?user_id=${userId}`,
 //           {
 //             headers: {
-//               Authorization: `Bearer ${accessToken}`,
+//               Authorization: `Bearer ${token}`,
 //             },
 //           }
 //         );
@@ -329,13 +329,13 @@
 //     };
 
 //     checkFollowStatus();
-//   }, [userId, accessToken]);
+//   }, [userId, token]);
 
 //   // Xử lý theo dõi/hủy theo dõi
 //   const handleFollowToggle = async () => {
 //     try {
-//       console.log("Token:", accessToken);
-//       if (!accessToken) {
+//       console.log("Token:", token);
+//       if (!token) {
 //         toast.error("Vui lòng đăng nhập để theo dõi!");
 //         return;
 //       }
@@ -346,7 +346,7 @@
 //           `http://127.0.0.1:8000/api/users/theo-doi-nguoi-dung/?following_id=${userId}`,
 //           {
 //             headers: {
-//               Authorization: `Bearer ${accessToken}`,
+//               Authorization: `Bearer ${token}`,
 //             },
 //           }
 //         );
@@ -360,7 +360,7 @@
 //           { following_id: userId },
 //           {
 //             headers: {
-//               Authorization: `Bearer ${accessToken}`,
+//               Authorization: `Bearer ${token}`,
 //             },
 //           }
 //         );
@@ -465,7 +465,7 @@
 
 
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../axios";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -477,13 +477,13 @@ function MainFollowUser() {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentUserLoading, setCurrentUserLoading] = useState(true);
-  const { accessToken } = useAuth();
+  const { token } = useAuth();
 
   // Lấy thông tin chi tiết của người dùng
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/users/users/${userId}/`);
+        const response = await axios.get(`/api/users/users/${userId}/`);
         setUser(response.data);
         setLoading(false);
       } catch (error) {
@@ -500,9 +500,9 @@ function MainFollowUser() {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/users/current-user/`, {
+        const response = await axios.get(`/api/users/current-user/`, {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         if (response.data && response.data.id) {
@@ -521,29 +521,29 @@ function MainFollowUser() {
       }
     };
 
-    if (accessToken) {
+    if (token) {
       fetchCurrentUser();
     } else {
       setCurrentUserLoading(false);
       toast.error("Vui lòng đăng nhập để sử dụng tính năng này!");
     }
-  }, [accessToken]);
+  }, [token]);
 
   // Kiểm tra trạng thái theo dõi
   useEffect(() => {
     const checkFollowStatus = async () => {
       try {
-        if (!accessToken) {
+        if (!token) {
           console.log("Chưa đăng nhập, không kiểm tra trạng thái theo dõi.");
           return;
         }
 
         console.log("Kiểm tra trạng thái theo dõi cho userId:", userId);
         const response = await axios.get(
-          `http://127.0.0.1:8000/api/users/theo-doi-nguoi-dung/?user_id=${userId}`,
+          `/api/users/theo-doi-nguoi-dung/?user_id=${userId}`,
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -559,7 +559,7 @@ function MainFollowUser() {
     if (!currentUserLoading && currentUserId) {
       checkFollowStatus();
     }
-  }, [userId, accessToken, currentUserLoading, currentUserId]);
+  }, [userId, token, currentUserLoading, currentUserId]);
 
   // Hàm xử lý theo dõi/hủy theo dõi
   const handleFollowToggle = async () => {
@@ -587,8 +587,8 @@ function MainFollowUser() {
     }
 
     try {
-      console.log("Token:", accessToken);
-      if (!accessToken) {
+      console.log("Token:", token);
+      if (!token) {
         toast.error("Vui lòng đăng nhập để theo dõi!");
         return;
       }
@@ -596,10 +596,10 @@ function MainFollowUser() {
       if (isFollowing) {
         console.log("Gửi yêu cầu DELETE để hủy theo dõi:", userId);
         const response = await axios.delete(
-          `http://127.0.0.1:8000/api/users/theo-doi-nguoi-dung/?following_id=${userId}`,
+          `/api/users/theo-doi-nguoi-dung/?following_id=${userId}`,
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -609,11 +609,11 @@ function MainFollowUser() {
       } else {
         console.log("Gửi yêu cầu POST để theo dõi:", userId);
         const response = await axios.post(
-          `http://127.0.0.1:8000/api/users/theo-doi-nguoi-dung/`,
+          `/api/users/theo-doi-nguoi-dung/`,
           { following_id: parsedUserId }, // Gửi parsedUserId đã kiểm tra
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -647,7 +647,9 @@ function MainFollowUser() {
             height="400"
             src={
               user.avatar
-                ? `http://127.0.0.1:8000/media/${user.avatar}`
+                ? user.avatar.startWith('http')
+                  ? user.avatar
+                  : `/media/${user.avatar}`
                 : "https://storage.googleapis.com/a1aa/image/N5Ae48WVgHcJ7vgKi6lA3tz5FvQ3gwiFky_1XteLMpY.jpg"
             }
             width="800"
