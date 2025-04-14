@@ -12,7 +12,7 @@ function SongList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/songs/songs/')
+    axios.get('https://localhost/api/songs/songs/')
       .then(response => setSongs(response.data))
       .catch(error => console.error('Error fetching songs:', error));
   }, []);

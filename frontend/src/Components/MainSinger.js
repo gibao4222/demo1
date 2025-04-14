@@ -101,7 +101,7 @@ function MainSinger() {
   useEffect(() => {
     const fetchArtists = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/singers/singers/");
+        const response = await axios.get("https://localhost/api/singers/singers/");
         if (Array.isArray(response.data)) {
           setArtists(response.data);
         } else {
@@ -151,8 +151,10 @@ function MainSinger() {
                   height="100"
                   src={
                     artist.image
-                      ? `http://localhost:8000/media/${artist.image}`
-                      : "https://storage.googleapis.com/a1aa/image/_CJYsizjY3hL_rf2L0alx_iaUDz0EXttAkg_pl1vBNE.jpg"
+                      ? artist.image.startsWith('http')
+                        ? artist.image
+                        : `/media/${artist.image}`
+                      : "https://storage.googleapis.com/a1aa/image/_CJYsizjY3hL_rf2L0alx_iaUDz0EXttAkg_pl1vBNE.jpg" 
                   }
                   width="100"
                 />

@@ -15,8 +15,8 @@ function PlayListChill() {
             <div className="flex">
                 <SideBar />
                 {/* <MainContentPLChill/> */}
-                {/* <MainSinger/> */}
-                <MainSong />
+                <MainSinger/>
+                {/* <MainSong /> */}
                 {/* <MainSearch/> */}
                 <FriendActivity />
             </div>

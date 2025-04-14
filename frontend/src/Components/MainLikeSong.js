@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../axios";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -9,7 +9,8 @@ function MainLikeSong() {
   const [isLiked, setIsLiked] = useState(false);
   const [song, setSong] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { accessToken } = useAuth();
+  const { token } = useAuth();
+  
 
   // Lấy thông tin chi tiết bài hát
   useEffect(() => {
@@ -32,7 +33,7 @@ function MainLikeSong() {
   useEffect(() => {
     const checkLikeStatus = async () => {
       try {
-        if (!accessToken) {
+        if (!token) {
           console.log("Chưa đăng nhập, không kiểm tra trạng thái thích.");
           return;
         }
@@ -42,7 +43,7 @@ function MainLikeSong() {
           `/api/users/thich-bai-hat/?song_id=${songId}`,
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -56,12 +57,12 @@ function MainLikeSong() {
     };
 
     checkLikeStatus();
-  }, [songId, accessToken]);
+  }, [songId, token]);
 
   const handleLikeToggle = async () => {
     try {
-      console.log("Token:", accessToken);
-      if (!accessToken) {
+      console.log("Token:", token);
+      if (!token) {
         toast.error("Vui lòng đăng nhập để thích bài hát!");
         return;
       }
@@ -72,7 +73,7 @@ function MainLikeSong() {
           `/api/users/thich-bai-hat/?song_id=${songId}`,
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -86,7 +87,7 @@ function MainLikeSong() {
           { song_id: songId },
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -120,8 +121,10 @@ function MainLikeSong() {
             height="400"
             src={
               song.image
-                ? `/media/${song.image}`
-                : "https://storage.googleapis.com/a1aa/image/N5Ae48WVgHcJ7vgKi6lA3tz5FvQ3gwiFky_1XteLMpY.jpg"
+                ? song.image.startsWith('http') // Kiểm tra nếu là URL đầy đủ
+                  ? song.image
+                  : `/media/${song.image}`
+                : "https://storage.googleapis.com/a1aa/image/..."
             }
             width="800"
           />
@@ -155,8 +158,10 @@ function MainLikeSong() {
                 height="40"
                 src={
                   song.image
-                    ? `/media/${song.image}`
-                    : "https://storage.googleapis.com/a1aa/image/qHjEinP2BZjVW90YIyUCD5vnA6yQCbCN6tj8Pp63Vco.jpg"
+                    ? song.image.startsWith('http') // Kiểm tra nếu là URL đầy đủ
+                      ? song.image
+                      : `/media/${song.image}`
+                    : "https://storage.googleapis.com/a1aa/image/..."
                 }
                 width="40"
               />

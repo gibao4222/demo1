@@ -17,19 +17,19 @@ function BottomPlayer(){
     <div className="flex flex-column items-center">
         <div className="flex items-center">
             <button className="mr-4 mb-2">
-                <img alt="" src="./icon/Shuffle_S.png"/>
+                <img alt="" src="/icon/Shuffle_S.png"/>
             </button>
             <button className="mr-4">
-                <img alt="" src="./icon/Component2.png"/>
+                <img alt="" src="/icon/Component2.png"/>
             </button>
             <button className="mr-4">
-                <img alt="" src="./icon/Component1.png"/>
+                <img alt="" src="/icon/Component1.png"/>
             </button>
             <button className="mr-4">
-                <img alt="" src="./icon/Component3.png"/>
+                <img alt="" src="/icon/Component3.png"/>
             </button>
             <button className="mr-4">
-                <img alt="" src="./icon/Repeat_S.png"/>
+                <img alt="" src="/icon/Repeat_S.png"/>
             </button>
         </div>
         
@@ -49,13 +49,13 @@ function BottomPlayer(){
    <div className="flex items-center">
         <div className="flex items-center">
             <button className="mr-1">
-                <img alt="" src="./icon/Queue_XS.png"/>
+                <img alt="" src="/icon/Queue_XS.png"/>
             </button>
             <button className="mr-1">
-                <img alt="" src="./icon/Devices_XS.png"/>
+                <img alt="" src="/icon/Devices_XS.png"/>
             </button>
             <button className="mr-1">
-                <img alt="" src="./icon/Volume_XS.png"/>
+                <img alt="" src="/icon/Volume_XS.png"/>
             </button>
         </div>
         <div className="w-24 h-1 bg-gray-700 rounded-full overflow-hidden">
@@ -64,7 +64,7 @@ function BottomPlayer(){
         </div>
         <div className="flex items-center">
             <button className="ml-1">
-                <img src="./icon/FullScreen_S.png" alt=""/>
+                <img src="/icon/FullScreen_S.png" alt=""/>
             </button>
         </div>
    </div>
