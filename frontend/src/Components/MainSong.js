@@ -16,8 +16,8 @@ function MainSong() {
     setLoading(true);
     try {
       const url = term.trim()
-        ? `http://127.0.0.1:8001/api/songs/songs/?search=${term}`
-        : "http://127.0.0.1:8001/api/songs/songs/";
+        ? `https://localhost/api/songs/songs/?search=${term}`
+        : "https://localhost/api/songs/songs/";
       const response = await axios.get(url);
       if (Array.isArray(response.data)) {
         setSongs(response.data);

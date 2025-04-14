@@ -37,7 +37,7 @@ function SongDetail() {
     };
 
     useEffect(() => {
-        axios.get(`http://127.0.0.1:8000/api/songs/songs/${id}/`)
+        axios.get(`https://localhost/api/songs/songs/${id}/`)
             .then(response => setSong(response.data))
             .catch(error => console.error('Error fetching song details:', error));
     }, [id]);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../axios";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -9,7 +9,7 @@ function MainFollowSinger() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [artist, setArtist] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { accessToken } = useAuth();
+  const { token } = useAuth();
 
   // Lấy thông tin chi tiết nghệ sĩ
   useEffect(() => {
@@ -32,7 +32,7 @@ function MainFollowSinger() {
   useEffect(() => {
     const checkFollowStatus = async () => {
       try {
-        if (!accessToken) {
+        if (!token) {
           console.log("Chưa đăng nhập, không kiểm tra trạng thái theo dõi.");
           return;
         }
@@ -42,7 +42,7 @@ function MainFollowSinger() {
           `/api/users/theo-doi-nghe-si/?singer_id=${singerId}`,
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -56,12 +56,12 @@ function MainFollowSinger() {
     };
 
     checkFollowStatus();
-  }, [singerId, accessToken]);
+  }, [singerId, token]);
 
   const handleFollowToggle = async () => {
     try {
-      console.log("Token:", accessToken);
-      if (!accessToken) {
+      console.log("Token:", token);
+      if (!token) {
         toast.error("Vui lòng đăng nhập để theo dõi!");
         return;
       }
@@ -72,7 +72,7 @@ function MainFollowSinger() {
           `/api/users/theo-doi-nghe-si/?singer_id=${singerId}`,
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -86,7 +86,7 @@ function MainFollowSinger() {
           { singer_id: singerId },
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -120,8 +120,10 @@ function MainFollowSinger() {
             height="400"
             src={
               artist.image
-                ? `/media/${artist.image}`
-                : "https://storage.googleapis.com/a1aa/image/N5Ae48WVgHcJ7vgKi6lA3tz5FvQ3gwiFky_1XteLMpY.jpg"
+                ? artist.image.startsWith('http')
+                  ? artist.image
+                  : `/media/${artist.image}`
+                : "https://storage.googleapis.com/a1aa/image/_CJYsizjY3hL_rf2L0alx_iaUDz0EXttAkg_pl1vBNE.jpg" 
             }
             width="800"
           />
