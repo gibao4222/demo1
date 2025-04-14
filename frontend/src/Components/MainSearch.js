@@ -328,7 +328,7 @@
 
 
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../axios";
 import { useNavigate } from "react-router-dom";
 
 function MainSearch() {
@@ -342,7 +342,7 @@ function MainSearch() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8001/api/users/users/");
+        const response = await axios.get("/api/users/users/");
         if (Array.isArray(response.data)) {
           setUsers(response.data);
           localStorage.setItem("recentSearches", JSON.stringify(response.data));
