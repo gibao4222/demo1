@@ -5,6 +5,7 @@ import FriendActivity from "../Components/FriendActivity";
 import BottomPlayer from "../Components/BottomPlayer";
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import NavBar from "../Components/NavBar";
 
 const Home = () => {
     const { user, logout } = useAuth();
@@ -29,12 +30,20 @@ const Home = () => {
 
     return (
         <>
-            <div className="flex">
-                <SideBar />
-                <MainContent user={user} onLogout={handleLogout}/>
-                <FriendActivity />
+            <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+                {/* NavBar - Full width and sticky */}
+                <NavBar user={user} onLogout={handleLogout}/>
+
+                {/* Main Content Area - Flex container for Sidebar, MainContent, and FriendActivity */}
+                <div className="flex flex-1">
+                    <SideBar />
+                    <MainContent user={user} onLogout={handleLogout} />
+                    <FriendActivity />
+                </div>
+
+                {/* Bottom Player - Fixed at the bottom */}
+                <BottomPlayer />
             </div>
-            <BottomPlayer />
         </>
     );
 }

@@ -46,7 +46,7 @@ const MainContent = ({ user, onLogout }) => {
 
                         {/* Menu thả xuống */}
                         {isDropdownOpen && (
-                            <div className="absolute top-12 right-0 w-48 bg-gray-800 rounded-lg shadow-lg z-10">
+                            <div className="absolute top-12 right-4 translate-x-[-100%] w-48 bg-gray-800 rounded-lg shadow-lg z-10">
                                 <ul className="py-2">
                                     <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
                                         Tài khoản

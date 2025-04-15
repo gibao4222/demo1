@@ -16,8 +16,8 @@ function PlayListChill() {
                 <SideBar />
                 {/* <MainContentPLChill/> */}
                 {/* <MainSinger/> */}
-                {/* <MainSong /> */}
-                <MainSearch/>
+                <MainSong />
+                {/* <MainSearch/> */}
                 <FriendActivity />
             </div>
             <BottomPlayer />

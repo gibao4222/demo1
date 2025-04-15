@@ -4,7 +4,7 @@ import axios from '../axios';
 
 export const getPlaylists = async (token) => {
     try {
-        const response = await axios.get('api/playlists/playlists/', {
+        const response = await axios.get('/api/playlists/playlists/', {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -18,7 +18,7 @@ export const getPlaylists = async (token) => {
 
 export const createPlaylist = async (playlistData, token) => {
     try {
-        const response = await axios.post('api/playlists/create_playlist/', playlistData, {
+        const response = await axios.post('/api/playlists/create_playlist/', playlistData, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -32,7 +32,7 @@ export const createPlaylist = async (playlistData, token) => {
 
 export const updatePlaylist = async (id, playlistData, token) => {
     try {
-        const response = await axios.put(`api/playlists/change_playlist/${id}/`, playlistData, {
+        const response = await axios.put(`/api/playlists/change_playlist/${id}/`, playlistData, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ export const updatePlaylist = async (id, playlistData, token) => {
 
 export const deletePlaylist = async (id, token) => {
     try {
-        const response = await axios.delete(`api/playlists/delete_playlist/${id}/`, {
+        const response = await axios.delete(`/api/playlists/delete_playlist/${id}/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
