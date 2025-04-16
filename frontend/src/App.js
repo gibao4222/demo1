@@ -14,7 +14,8 @@ import SongList from './Components/SongList';
 import SongPage from './Pages/SongPage';
 
 import ChatPage from './Pages/ChatPage';
-
+import PaymentPage from './Pages/PaymentPage';
+import PaymentResult from './Pages/PaymentResult';
 
 import DetailSongPage from './Pages/DetailSongPage';
 import PlaylistPage from './Pages/PlaylistPage';
@@ -42,7 +43,8 @@ const App = () => {
 
             <Route path="/song" element={<SongPage />} />
             <Route path="/song/:id" element={<DetailSongPage />} />
-
+            <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/payment/result" element={<PaymentResult />} />
 
           </Routes>
 
