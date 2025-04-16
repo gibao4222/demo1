@@ -38,6 +38,7 @@ urlpatterns = [
     path('api/playlists/', include('playlist.urls')),
   
     path('api/chat/', include('chat.urls')),
+    path('api/payment/', include('payment.urls')),
     
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
