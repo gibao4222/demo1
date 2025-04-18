@@ -6,7 +6,7 @@ import PlaylistItem from './Playlist/PlaylistItem';
 
 function SideBar() {
   const navigate = useNavigate();
-  const { token, user, playlistUpdated } = useAuth();
+  const { token, user } = useAuth();
   const [playlists, setPlaylists] = useState([]);
 
   const fetchPlaylists = useCallback(async () => {
@@ -15,7 +15,6 @@ function SideBar() {
       const data = await getPlaylists(token);
       console.log('Fetched playlists:', data);
       setPlaylists([...data]);
-      console.log('State playlists updated:', data);
     } catch (error) {
       console.error('Failed to fetch playlists:', error);
     }
@@ -27,7 +26,13 @@ function SideBar() {
     } else {
       navigate('/login');
     }
-  }, [token, playlistUpdated, fetchPlaylists, navigate]);
+
+    window.addEventListener('playlistUpdated', fetchPlaylists);
+
+    return () => {
+      window.removeEventListener('playlistUpdated', fetchPlaylists);
+    };
+  }, [token, fetchPlaylists, navigate]);
 
   const handleCreatePlaylist = async () => {
     try {
@@ -37,14 +42,8 @@ function SideBar() {
         return;
       }
 
-      if (!user.id) {
+      if (!user.user_id) {
         console.error('User ID is missing:', user);
-        navigate('/login');
-        return;
-      }
-
-      if (!user.username) {
-        console.error('Username is missing:', user);
         navigate('/login');
         return;
       }
@@ -59,7 +58,7 @@ function SideBar() {
         description: 'Thêm phần mô tả không bắt buộc',
         image: '/img/null.png',
         create_date: currentDate,
-        id_user: user.id,
+        id_user: user.user_id,
         is_active: true,
       };
 
@@ -67,14 +66,16 @@ function SideBar() {
       console.log('Playlist created successfully:', newPlaylist);
 
       setPlaylists([...playlists, newPlaylist]);
-      navigate('/create', { state: { playlist: newPlaylist } });
+      navigate(`/PlaylistDetail/${newPlaylist.id}`, {
+        state: { playlist: newPlaylist },
+      });
     } catch (error) {
       console.error('Failed to create playlist:', error.response?.data || error.message);
     }
   };
 
   return (
-    <div className="w-2/7 bg-black p-4 sideBar sticky top-0 h-[calc(100vh-100px)] overflow-y-auto scrollbar scrollbar-thumb-transparent scrollbar-track-transparent hover:scrollbar-thumb-gray-600 scrollbar-width-thin">
+    <div className="w-2/7 bg-black p-4 sideBar sticky top-0 h-[calc(100vh-150px)] overflow-y-auto scrollbar scrollbar-thumb-transparent scrollbar-track-transparent hover:scrollbar-thumb-gray-600 scrollbar-width-thin">
       <div className="mb-8">
         <ul className="mt-8">
           <li className="mb-4 li-inline">
@@ -117,12 +118,7 @@ function SideBar() {
         {playlists.length > 0 ? (
           <ul className="mt-4">
             {playlists.map((playlist) => (
-              <PlaylistItem
-                key={playlist.id}
-                playlist={playlist}
-                setPlaylists={setPlaylists}
-                playlists={playlists}
-              />
+              <PlaylistItem key={playlist.id} playlist={playlist} />
             ))}
           </ul>
         ) : (

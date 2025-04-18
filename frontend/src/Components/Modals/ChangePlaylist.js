@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { HiOutlinePencil } from 'react-icons/hi2';
-// import { SlOptions } from 'react-icons/sl';
-// import { AiOutlinePicture } from 'react-icons/ai';
 import { RiDeleteBin7Line } from 'react-icons/ri';
 import { IoMusicalNotesOutline } from 'react-icons/io5';
 import { updatePlaylist } from '../../Services/PlaylistService';
-import { useAuth } from '../../context/AuthContext';
 
 const ModalChangePlaylist = ({
   isModalOpen,
@@ -20,9 +17,7 @@ const ModalChangePlaylist = ({
   playlistId,
   token,
 }) => {
-  const { notifyPlaylistUpdate } = useAuth();
   const [isHoveredModal, setIsHoveredModal] = useState(false);
-  // const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [tempImageSrc, setTempImageSrc] = useState(imageSrc);
@@ -63,7 +58,8 @@ const ModalChangePlaylist = ({
       setName(updatedPlaylist.name);
       setDescription(updatedPlaylist.description);
 
-      notifyPlaylistUpdate();
+      // Gửi sự kiện playlistUpdated
+      window.dispatchEvent(new Event('playlistUpdated'));
 
       closeModal();
     } catch (error) {
