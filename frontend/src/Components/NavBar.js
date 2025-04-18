@@ -36,12 +36,12 @@ const NavBar = ({ user, onLogout }) => {
                     <input
                         type="text"
                         placeholder="Bạn muốn phát nội dung gì?"
-                        className="bg-gray-800 text-white placeholder-gray-400 rounded-full py-2.5 pl-10 pr-12 w-[500px] focus:outline-none focus:ring-2 focus:ring-white"
+                        className="bg-neutral-800 text-white placeholder-neutral-400 rounded-full py-2.5 pl-10 pr-12 w-[500px] focus:outline-none focus:ring-2 focus:ring-white"
                     />
                     <img
                     src="/icon/Search_S.png"
                     alt="Tìm kiếm"
-                    className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 opacity-50"
+                    className="w-5 h-5 text-neutral-400 absolute left-3 top-1/2 transform -translate-y-1/2 opacity-50"
                     />
                     
                     <div className="absolute right-16 top-1/2 transform -translate-y-1/2 h-5 w-px bg-white opacity-50" />
@@ -59,13 +59,13 @@ const NavBar = ({ user, onLogout }) => {
             {/* Right Section: Premium and User Profile */}
             <div className="flex items-center space-x-6 ml-6">
                 {/* Premium Button */}
-                <button className="bg-white text-black rounded-full px-4 py-2 text-sm font-semibold hover:bg-gray-500">
+                <button className="bg-white text-black rounded-full px-4 py-2 text-sm font-semibold hover:bg-neutral-500">
                     Khám phá Premium
                 </button>
                 {/* User Profile */}
                 <div className="relative flex items-center space-x-4">
                     {/* Notification Bell Icon */}
-                    <button className="text-gray-400 hover:text-white">
+                    <button className="text-neutral-400 hover:text-white">
                         <svg
                         className="w-6 h-6"
                         fill="currentColor"
@@ -75,7 +75,7 @@ const NavBar = ({ user, onLogout }) => {
                         <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z" />
                         </svg>
                     </button>
-                    <div className='flex bg-gray-700 rounded-full h-9 w-9 items-center justify-center' onClick={toggleDropdown}>
+                    <div className='flex bg-neutral-700 rounded-full h-9 w-9 items-center justify-center' onClick={toggleDropdown}>
                         <img
                             src="/images/blog/blog-10.jpg"
                             alt="User Avatar"
@@ -83,27 +83,27 @@ const NavBar = ({ user, onLogout }) => {
                         />
                     </div>
                     {isDropdownOpen && (
-                            <div className="absolute top-12 right-0 w-48 bg-gray-800 rounded-lg shadow-lg z-10">
+                            <div className="absolute top-12 right-0 w-48 bg-neutral-800 rounded-lg shadow-lg z-10">
                                 <ul className="py-2">
-                                    <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                                    <li className="px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer">
                                         Tài khoản
                                     </li>
-                                    <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                                    <li className="px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer">
                                         Hồ sơ
                                     </li>
-                                    <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                                    <li className="px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer">
                                         Nâng cấp lên Premium
                                     </li>
-                                    <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                                    <li className="px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer">
                                         Hỗ trợ
                                     </li>
-                                    <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                                    <li className="px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer">
                                         Tải xuống
                                     </li>
-                                    <li className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                                    <li className="px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer">
                                         Cài đặt
                                     </li>
-                                    <li className="border-t border-gray-600 px-4 py-2 text-white hover:bg-gray-700 cursor-pointer"
+                                    <li className="border-t border-neutral-600 px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer"
                                         onClick={() => {
                                             onLogout();
                                             setIsDropdownOpen(false); // Đóng menu sau khi đăng xuất
