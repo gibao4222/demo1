@@ -51,7 +51,7 @@ function SideBar({ onToggleExpand, isExpanded }) {
 
   const handleCreatePlaylist = async () => {
     try {
-      if (!user || !user.id || !user.username) {
+      if (!user || !user.user_id) {
         console.error('Thiếu thông tin người dùng:', user);
         navigate('/login');
         return;

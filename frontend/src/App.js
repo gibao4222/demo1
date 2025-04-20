@@ -19,6 +19,7 @@ import PaymentResult from './Pages/PaymentResult';
 
 import DetailSongPage from './Pages/DetailSongPage';
 import PlaylistPage from './Pages/PlaylistPage';
+import AlbumPage from './Pages/AlbumPage';
 import SearchPage from './Pages/SearchPage';
 
 const App = () => {
@@ -41,6 +42,8 @@ const App = () => {
           <Route path="/FollowSinger/:id" element={<FollowSinger />} />
           <Route path="/FollowUser/:id" element={<FollowUser />} />
           <Route path="/SongDetail/:id" element={<LikeSong />} />
+          <Route path="/AlbumDetail" element={<AlbumPage />} />
+          <Route path="/PlaylistDetail/:id" element={<PlaylistPage />} />
 
 
           <Route path="/song" element={<SongPage />} />
