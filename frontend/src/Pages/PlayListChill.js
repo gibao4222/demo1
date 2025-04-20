@@ -1,27 +1,28 @@
 import React, { useState } from "react";
 import SideBar from '/var/www/demo1/frontend/src/Components/SideBar';
-import MainContentPLChill from '../Components/MainContentPLChill';
 import FriendActivity from '/var/www/demo1/frontend/src/Components/FriendActivity';
 import BottomPlayer from '/var/www/demo1/frontend/src/Components/BottomPlayer';
 import MainSearch from '/var/www/demo1/frontend/src/Components/MainSearch';
-import MainFollowSinger from '/var/www/demo1/frontend/src/Components/MainFollowSinger';
-import MainContent from '../Components/MainContent';
-import MainSinger from '/var/www/demo1/frontend/src/Components/MainSinger';
-import MainSong from '/var/www/demo1/frontend/src/Components/MainSong';
-function PlayListChill() {
+import NavBar from "../Components/NavBar";
 
-    return (
-        <>
-            <div className="flex">
-                <SideBar />
-                {/* <MainContentPLChill/> */}
-                {/* <MainSinger/> */}
-                <MainSong />
-                {/* <MainSearch/> */}
-                <FriendActivity />
-            </div>
-            <BottomPlayer />
-        </>
-    );
+function PlayListChill() {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+      <NavBar onSearch={handleSearch} />
+      <div className="flex flex-1">
+        <SideBar />
+        <MainSearch searchQuery={searchQuery} />
+        <FriendActivity />
+      </div>
+      <BottomPlayer />
+    </div>
+  );
 }
+
 export default PlayListChill;

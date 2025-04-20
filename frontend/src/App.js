@@ -14,10 +14,12 @@ import SongList from './Components/SongList';
 import SongPage from './Pages/SongPage';
 
 import ChatPage from './Pages/ChatPage';
-
+import PaymentPage from './Pages/PaymentPage';
+import PaymentResult from './Pages/PaymentResult';
 
 import DetailSongPage from './Pages/DetailSongPage';
 import PlaylistPage from './Pages/PlaylistPage';
+import SearchPage from './Pages/SearchPage';
 
 const App = () => {
   return (
@@ -32,7 +34,8 @@ const App = () => {
           <Route path="/home" element={<Home />} />
           <Route path="/" element={<Login />} />
           <Route path='/chat' element={<ChatPage />} />
-          <Route path="/PlaylistDetail/:id" element={<PlaylistPage />} />
+          <Route path="/PlaylistDetail" element={<PlaylistPage />} />
+          <Route path="/Search" element={<SearchPage />} />
 
           <Route path="/playlist" element={<PlayListChill />} />
           <Route path="/FollowSinger/:id" element={<FollowSinger />} />
@@ -42,7 +45,8 @@ const App = () => {
 
           <Route path="/song" element={<SongPage />} />
           <Route path="/song/:id" element={<DetailSongPage />} />
-
+          <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/payment/result" element={<PaymentResult />} />
 
         </Routes>
 

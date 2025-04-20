@@ -7,8 +7,8 @@ const MainContent = ({ user, onLogout }) => {
         setIsDropdownOpen(!isDropdownOpen);
     };
     return (
-        <div className="w-3/5 pb-20 bg-black">
-            <div className="bg-gradient-to-b from-blue-900 to-gray  p-4 flex-1">
+        <div className="z-0 w-3/5 pb-20 bg-neutral-900 rounded-lg">
+            <div className="bg-gradient-to-b from-blue-900 to-gray  p-4 flex-1 rounded-lg">
                 <div className="flex justify-between items-center mb-8">
                     <div className="flex items-center pt-2">
                         <button className="mr-4">
