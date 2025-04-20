@@ -13,6 +13,7 @@ class SpotifyUser(models.Model):
     is_active = models.BooleanField(default=True)
     username = models.CharField(max_length=255, unique=True)
     vip = models.BooleanField(default=False)
+    vip_start_date = models.DateTimeField(null=True, blank=True)
     social_id = models.CharField(max_length=255, blank=True, null=True)  # ID từ Facebook/Google
     PROVIDER_CHOICES = [
         ('facebook', 'Facebook'),

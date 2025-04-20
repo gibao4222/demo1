@@ -1,18 +1,29 @@
 import React, { useState } from 'react';
 import NavItem from './Item/NavItem';
+import { useNavigate } from 'react-router-dom';
 
-const NavBar = ({ user, onLogout }) => {
+
+const NavBar = ({ user, onLogout, onSearch }) => {
+    const navigate = useNavigate();
     const [activeItem, setActiveItem] = useState('null');
-    
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const handleItemClick = (item) => {
         setActiveItem((prev) => (prev === item ? null : item)); 
       };
     
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
     
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
+    const handleSearchChange = (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+        if (typeof onSearch === 'function') {
+          onSearch(query);
+        }
+      };
     return (
         <div className="sticky top-0 z-50 w-full flex items-center gap-96 bg-black px-4 py-2.5">
             {/* Left Section: Logo and Navigation Icons */}
@@ -37,6 +48,8 @@ const NavBar = ({ user, onLogout }) => {
                         type="text"
                         placeholder="Bạn muốn phát nội dung gì?"
                         className="bg-gray-800 text-white placeholder-gray-400 rounded-full py-2.5 pl-10 pr-12 w-[500px] focus:outline-none focus:ring-2 focus:ring-white"
+                        value={searchQuery}
+                        onChange={handleSearchChange}
                     />
                     <img
                     src="/icon/Search_S.png"
@@ -59,8 +72,10 @@ const NavBar = ({ user, onLogout }) => {
             {/* Right Section: Premium and User Profile */}
             <div className="flex items-center space-x-6 ml-6">
                 {/* Premium Button */}
-                <button className="bg-white text-black rounded-full px-4 py-2 text-sm font-semibold hover:bg-gray-500">
+                <button className="bg-white text-black rounded-full px-4 py-2 text-sm font-semibold hover:bg-gray-500"
+                onClick={() => navigate("/payment")}>
                     Khám phá Premium
+                    
                 </button>
                 {/* User Profile */}
                 <div className="relative flex items-center space-x-4">

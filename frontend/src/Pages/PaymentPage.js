@@ -1,3 +1,142 @@
+// import React, { useState, useEffect } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import { useAuth } from '../context/AuthContext';
+// import axios from '../axios';
+
+// const PaymentPage = () => {
+//     const { user, token, logout } = useAuth();
+//     const navigate = useNavigate();
+//     const [formData, setFormData] = useState({
+//         amount: '100000',
+//         order_desc: 'Thanh toan VIP',
+//         bank_code: 'NCB',
+//     });
+//     const [error, setError] = useState('');
+//     const [loading, setLoading] = useState(false);
+
+//     // Kiểm tra nếu chưa đăng nhập, chuyển hướng về trang login
+//     useEffect(() => {
+//         if (!token || !user) {
+//             navigate('/login');
+//         }
+//     }, [token, user, navigate]);
+
+//     const handleInputChange = (e) => {
+//         const { name, value } = e.target;
+//         setFormData({ ...formData, [name]: value });
+//     };
+
+//     const handleSubmit = async (e) => {
+//         e.preventDefault();
+//         setError('');
+//         setLoading(true);
+
+//         try {
+//             const response = await axios.post(
+//                 'api/payment/vnpay/create/',
+//                 formData,
+//                 {
+//                     headers: {
+//                         'Authorization': `Token ${token}`,
+//                         'Content-Type': 'application/x-www-form-urlencoded',
+//                     },
+//                 }
+//             );
+
+//             if (response.data.payment_url) {
+//                 // Chuyển hướng đến URL thanh toán của VNPay
+//                 window.location.href = response.data.payment_url;
+//             } else {
+//                 setError('Không thể tạo URL thanh toán');
+//             }
+//         } catch (err) {
+//             if (err.response?.status === 401) {
+//                 logout();
+//                 navigate('/login');
+//             } else {
+//                 setError(err.response?.data?.error || 'Lỗi khi tạo thanh toán');
+//             }
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//     if (!token || !user) {
+//         return null; // Hoặc hiển thị loading
+//     }
+
+//     const mystyle = {
+//         color: "black",
+//         backgroundColor: "white",
+//         fontFamily: "Arial",
+//         padding: "24px",
+//         minHeight: "100vh",
+//     };
+
+//     return (
+//         <div className="payment-page" style={mystyle}>
+//             <h1 className="text-2xl font-bold mb-6">Thanh toán VIP</h1>
+//             <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+//                 <div className="mb-4">
+//                     <label className="block text-gray-700 mb-2">Số tiền (VNĐ):</label>
+//                     <input
+//                         type="number"
+//                         name="amount"
+//                         value={formData.amount}
+//                         onChange={handleInputChange}
+//                         className="w-full border p-2 rounded"
+//                         required
+//                         min="10000"
+//                     />
+//                 </div>
+//                 <div className="mb-4">
+//                     <label className="block text-gray-700 mb-2">Mô tả đơn hàng:</label>
+//                     <input
+//                         type="text"
+//                         name="order_desc"
+//                         value={formData.order_desc}
+//                         onChange={handleInputChange}
+//                         className="w-full border p-2 rounded"
+//                         required
+//                     />
+//                 </div>
+//                 <div className="mb-4">
+//                     <label className="block text-gray-700 mb-2">Chọn ngân hàng:</label>
+//                     <select
+//                         name="bank_code"
+//                         value={formData.bank_code}
+//                         onChange={handleInputChange}
+//                         className="w-full border p-2 rounded"
+//                     >
+//                         <option value="NCB">NCB</option>
+//                         <option value="VNPAYQR">VNPAYQR</option>
+//                         <option value="VPBANK">VPBank</option>
+//                         <option value="VIETCOMBANK">Vietcombank</option>
+//                         <option value="">Không chọn (Hiển thị tất cả)</option>
+//                     </select>
+//                 </div>
+//                 {error && <p className="text-red-500 mb-4">{error}</p>}
+//                 <button
+//                     type="submit"
+//                     className={`w-full bg-blue-500 text-white p-2 rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+//                     disabled={loading}
+//                 >
+//                     {loading ? 'Đang xử lý...' : 'Thanh toán'}
+//                 </button>
+//             </form>
+//             <button
+//                 onClick={() => navigate('/home')}
+//                 className="mt-4 text-blue-500 underline"
+//             >
+//                 Quay lại trang chủ
+//             </button>
+//         </div>
+//     );
+// };
+
+// export default PaymentPage;
+
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +151,7 @@ const PaymentPage = () => {
         bank_code: 'NCB',
     });
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
 
     // Kiểm tra nếu chưa đăng nhập, chuyển hướng về trang login
@@ -29,6 +169,7 @@ const PaymentPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setSuccess('');
         setLoading(true);
 
         try {
@@ -45,16 +186,24 @@ const PaymentPage = () => {
 
             if (response.data.payment_url) {
                 // Chuyển hướng đến URL thanh toán của VNPay
-                window.location.href = response.data.payment_url;
+                setSuccess('Đang chuyển hướng đến cổng thanh toán VNPay...');
+                setTimeout(() => {
+                    window.location.href = response.data.payment_url;
+                }, 1000); // Chờ 1 giây để người dùng thấy thông báo
             } else {
-                setError('Không thể tạo URL thanh toán');
+                setError('Không thể tạo URL thanh toán. Vui lòng thử lại.');
             }
         } catch (err) {
             if (err.response?.status === 401) {
                 logout();
                 navigate('/login');
             } else {
-                setError(err.response?.data?.error || 'Lỗi khi tạo thanh toán');
+                const errorMessage = err.response?.data?.error || 'Lỗi khi tạo thanh toán';
+                if (errorMessage === 'Bạn đã là thành viên VIP. Không cần thanh toán thêm.') {
+                    setSuccess(errorMessage);
+                } else {
+                    setError(errorMessage);
+                }
             }
         } finally {
             setLoading(false);
@@ -62,7 +211,7 @@ const PaymentPage = () => {
     };
 
     if (!token || !user) {
-        return null; // Hoặc hiển thị loading
+        return null; 
     }
 
     const mystyle = {
@@ -71,65 +220,98 @@ const PaymentPage = () => {
         fontFamily: "Arial",
         padding: "24px",
         minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+    };
+
+    const containerStyle = {
+        maxWidth: "500px",
+        width: "100%",
+        padding: "20px",
+        borderRadius: "8px",
+        boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+        textAlign: "center",
+    };
+
+    const successStyle = {
+        color: "#28a745",
+        backgroundColor: "#e6ffe6",
+        padding: "10px",
+        borderRadius: "4px",
+        marginBottom: "15px",
+    };
+
+    const errorStyle = {
+        color: "#dc3545",
+        backgroundColor: "#ffebee",
+        padding: "10px",
+        borderRadius: "4px",
+        marginBottom: "15px",
     };
 
     return (
         <div className="payment-page" style={mystyle}>
             <h1 className="text-2xl font-bold mb-6">Thanh toán VIP</h1>
-            <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-                <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Số tiền (VNĐ):</label>
-                    <input
-                        type="number"
-                        name="amount"
-                        value={formData.amount}
-                        onChange={handleInputChange}
-                        className="w-full border p-2 rounded"
-                        required
-                        min="10000"
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Mô tả đơn hàng:</label>
-                    <input
-                        type="text"
-                        name="order_desc"
-                        value={formData.order_desc}
-                        onChange={handleInputChange}
-                        className="w-full border p-2 rounded"
-                        required
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Chọn ngân hàng:</label>
-                    <select
-                        name="bank_code"
-                        value={formData.bank_code}
-                        onChange={handleInputChange}
-                        className="w-full border p-2 rounded"
+            <div style={containerStyle}>
+                {success && <div style={successStyle}>{success}</div>}
+                {error && <div style={errorStyle}>{error}</div>}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-gray-700 mb-2">Số tiền (VNĐ):</label>
+                        <input
+                            type="number"
+                            name="amount"
+                            value={formData.amount}
+                            onChange={handleInputChange}
+                            className="w-full border p-2 rounded"
+                            required
+                            min="10000"
+                            readOnly
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-gray-700 mb-2">Mô tả đơn hàng:</label>
+                        <input
+                            type="text"
+                            name="order_desc"
+                            value={formData.order_desc}
+                            onChange={handleInputChange}
+                            className="w-full border p-2 rounded"
+                            required
+                            readOnly
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-gray-700 mb-2">Chọn ngân hàng:</label>
+                        <select
+                            name="bank_code"
+                            value={formData.bank_code}
+                            onChange={handleInputChange}
+                            className="w-full border p-2 rounded"
+                        >
+                            <option value="NCB">NCB</option>
+                            <option value="VNPAYQR">VNPAYQR</option>
+                            <option value="VPBANK">VPBank</option>
+                            <option value="VIETCOMBANK">Vietcombank</option>
+                            <option value="">Không chọn (Hiển thị tất cả)</option>
+                        </select>
+                    </div>
+                    <button
+                        type="submit"
+                        className={`w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={loading}
                     >
-                        <option value="NCB">NCB</option>
-                        <option value="VNPAYQR">VNPAYQR</option>
-                        <option value="VPBANK">VPBank</option>
-                        <option value="VIETCOMBANK">Vietcombank</option>
-                        <option value="">Không chọn (Hiển thị tất cả)</option>
-                    </select>
-                </div>
-                {error && <p className="text-red-500 mb-4">{error}</p>}
+                        {loading ? 'Đang xử lý...' : 'Thanh toán'}
+                    </button>
+                </form>
                 <button
-                    type="submit"
-                    className={`w-full bg-blue-500 text-white p-2 rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={loading}
+                    onClick={() => navigate('/home')}
+                    className="mt-4 text-blue-500 underline"
                 >
-                    {loading ? 'Đang xử lý...' : 'Thanh toán'}
+                    Quay lại trang chủ
                 </button>
-            </form>
-            <button
-                onClick={() => navigate('/home')}
-                className="mt-4 text-blue-500 underline"
-            >
-                Quay lại trang chủ
-            </button>
+            </div>
         </div>
     );
 };
