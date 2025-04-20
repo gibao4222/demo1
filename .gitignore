@@ -11,7 +11,7 @@ __pycache__/
 
 node_modules/
 frontend/node_modules/
-
+backend/media/qr_codes/
 venv/
 venv39/
 venv*/

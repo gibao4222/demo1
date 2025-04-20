@@ -2,7 +2,7 @@ import React from "react";
 
 function BottomPlayer(){
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 p-2 flex items-center justify-between">
+        <div className="fixed bottom-0 left-0 right-0 bg-black p-2 flex items-center justify-between">
    <div className="flex items-center">
     <img alt="Album Art" className="mr-4 rounded" height="60" src="https://storage.googleapis.com/a1aa/image/aiQnv1Js-FnLIFN8chtTtxqacIq1nVaWV5PdzzgH_Fk.jpg" width="60"/>
     <div>
