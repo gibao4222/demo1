@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import NavItem from './Item/NavItem';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 
 
 const NavBar = ({ user, onLogout, onSearch }) => {
@@ -8,11 +8,16 @@ const NavBar = ({ user, onLogout, onSearch }) => {
     const [activeItem, setActiveItem] = useState('null');
     const [searchQuery, setSearchQuery] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const location = useLocation();
     const handleItemClick = (item) => {
         setActiveItem((prev) => (prev === item ? null : item)); 
       };
     
-
+      useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const query = searchParams.get('query') || '';
+        setSearchQuery(query);
+    }, [location.search]);
     
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);

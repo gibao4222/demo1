@@ -19,6 +19,7 @@ import PaymentResult from './Pages/PaymentResult';
 
 import DetailSongPage from './Pages/DetailSongPage';
 import PlaylistPage from './Pages/PlaylistPage';
+import SearchPage from './Pages/SearchPage';
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const App = () => {
             <Route path="/" element={<Login />} />
             <Route path='/chat' element={<ChatPage />}/>
             <Route path="/PlaylistDetail" element={<PlaylistPage />} />
+            <Route path="/Search" element={<SearchPage />} />
 
             <Route path="/playlist" element={<PlayListChill />} />
             <Route path="/FollowSinger/:id" element={<FollowSinger />} />
