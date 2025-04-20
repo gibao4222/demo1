@@ -9,6 +9,7 @@ function MainSearch({ searchQuery }) {
   });
   const [artists, setArtists] = useState([]);
   const [songs, setSongs] = useState([]);
+  const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -52,6 +53,17 @@ function MainSearch({ searchQuery }) {
         } else {
           console.error("Dữ liệu bài hát từ API không phải là mảng:", songResponse.data);
           setSongs([]);
+        }
+
+        // Tìm kiếm albums
+        const albumResponse = await axios.get(`/api/users/albums/search/?search=${searchQuery}`);
+        console.log("Dữ liệu album từ API:", albumResponse.data);
+        if (Array.isArray(albumResponse.data)) {
+          setAlbums(albumResponse.data);
+          console.log("albums state:", albumResponse.data);
+        } else {
+          console.error("Dữ liệu albums từ API không phải là mảng:", albumResponse.data);
+          setAlbums([]);
         }
       } catch (error) {
         console.error("Lỗi khi tìm kiếm:", error);
@@ -170,17 +182,29 @@ function MainSearch({ searchQuery }) {
 
       <div className="mb-8">
         <h2 className="text-2xl mb-4">Album</h2>
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-green-600 p-4 rounded-lg relative min-h-[180px]">
-            <span>Podcasts</span>
-            <img
-              alt="Podcasts"
-              className="rounded-lg absolute bottom-0 right-0"
-              src="./img/0a74d96e091a495bb09c0d83210910c3 6.png"
-              style={{ height: "140px", width: "125px !important" }}
-            />
+        {loading ? (
+          <p>Đang tải...</p>
+        ) : albums.length > 0 ? (
+          <div className="grid grid-cols-4 gap-4">
+            {albums.map((album) => (
+              <div
+                key={album.id}
+                className="bg-green-600 p-4 rounded-lg relative min-h-[180px] cursor-pointer"
+                onClick={() => navigate(`/AlbumDetail`)}
+              >
+                <span>{album.name}</span>
+                <img
+                  alt={album.name}
+                  className="rounded-lg absolute bottom-0 right-0"
+                  src={album.image || "./img/default-avatar.png"}
+                  style={{ height: "140px", width: "125px !important" }}
+                />
+              </div>
+            ))}
           </div>
-        </div>
+        ) : (
+          <p>Không tìm thấy album</p>
+        )}
       </div>
     </div>
   );
