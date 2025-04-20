@@ -3,41 +3,29 @@ import hashlib
 import json
 import random
 import urllib.parse
-from django.http import HttpResponseRedirect
-import requests
+import logging
+from decimal import Decimal
 from datetime import datetime, timedelta
+
+import requests
 from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+
 from .models import Payment
 from spotify_user.models import SpotifyUser
-from decimal import Decimal
-import logging
+from .vnpay import vnpay
 
 logger = logging.getLogger(__name__)
 
-import logging
-import urllib.parse
-from datetime import datetime, timedelta
-from decimal import Decimal
-
-from django.conf import settings
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-
-from .models import Payment, SpotifyUser
-from .vnpay import vnpay 
-
-logger = logging.getLogger(__name__)
 
 class CreatePaymentView(APIView):
     permission_classes = [IsAuthenticated]
@@ -62,6 +50,26 @@ class CreatePaymentView(APIView):
             return Response(
                 {"error": "SpotifyUser not found for this user"},
                 status=status.HTTP_404_NOT_FOUND,
+            )
+
+    
+
+        current_time = timezone.now()
+        if spotify_user.vip and spotify_user.vip_start_date:
+            time_elapsed = current_time - spotify_user.vip_start_date
+            if time_elapsed <= timedelta(days=30):  # Nếu còn trong 30 ngày
+                logger.info(f"User {spotify_user.username} is still within VIP period.")
+                return Response(
+                    {"error": "Bạn đã là thành viên VIP. Hệ thống sẽ cho phép gia hạn khi gói hiện tại kết thúc."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+
+        if spotify_user.vip:
+            logger.info(f"User {spotify_user.username} is already a VIP.")
+            return Response(
+                {"error": "Bạn đã là thành viên VIP. Không cần thanh toán thêm."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         order_id = "ORDER_" + datetime.now().strftime("%Y%m%d%H%M%S")
@@ -151,89 +159,6 @@ class CreatePaymentView(APIView):
             ip = request.META.get('REMOTE_ADDR')
         return ip
 
-# class PaymentReturnView(APIView):
-#     @method_decorator(csrf_exempt)
-#     def dispatch(self, *args, **kwargs):
-#         return super().dispatch(*args, **kwargs)
-
-#     def get(self, request):
-#         vnp = vnpay()
-#         vnp.responseData = request.GET.dict()
-#         logger.debug(f"VNPay return data: {vnp.responseData}")
-
-#         # Xác thực checksum
-#         if not vnp.validate_response(settings.VNPAY_CONFIG['VNP_HASH_SECRET']):
-#             logger.error("Invalid checksum")
-#             params = {
-#                 'status': 'error',
-#                 'message': 'Sai checksum',
-#                 'vnp_Amount': vnp.responseData.get('vnp_Amount', ''),
-#                 'vnp_BankCode': vnp.responseData.get('vnp_BankCode', ''),
-#                 'vnp_ResponseCode': vnp.responseData.get('vnp_ResponseCode', ''),
-#                 'vnp_TxnRef': vnp.responseData.get('vnp_TxnRef', ''),
-#             }
-#             redirect_url = f"{settings.FRONTEND_URL}?{urllib.parse.urlencode(params)}"
-#             logger.debug(f"Redirecting to: {redirect_url}")
-#             return HttpResponseRedirect(redirect_url)
-
-#         order_id = vnp.responseData.get('vnp_TxnRef')
-#         vnp_response_code = vnp.responseData.get('vnp_ResponseCode')
-#         vnp_amount = vnp.responseData.get('vnp_Amount', '')
-
-#         try:
-#             payment = Payment.objects.get(order_id=order_id)
-#         except Payment.DoesNotExist:
-#             logger.error(f"Payment with order_id {order_id} not found")
-#             params = {
-#                 'status': 'error',
-#                 'message': 'Không tìm thấy giao dịch',
-#                 'vnp_Amount': vnp_amount,
-#                 'vnp_BankCode': vnp.responseData.get('vnp_BankCode', ''),
-#                 'vnp_ResponseCode': vnp_response_code,
-#                 'vnp_TxnRef': order_id,
-#             }
-#             redirect_url = f"{settings.FRONTEND_URL}?{urllib.parse.urlencode(params)}"
-#             logger.debug(f"Redirecting to: {redirect_url}")
-#             return HttpResponseRedirect(redirect_url)
-
-#         # Cập nhật trạng thái thanh toán
-#         if vnp_response_code == "00":
-#             payment.status = "COMPLETED"
-#             payment.save()
-
-#             try:
-#                 spotify_user = SpotifyUser.objects.get(user=payment.user)
-#                 spotify_user.vip = True
-#                 spotify_user.save()
-#                 logger.debug(f"Updated SpotifyUser {spotify_user.user.username} to VIP")
-#             except SpotifyUser.DoesNotExist:
-#                 logger.error(f"SpotifyUser for payment {order_id} not found")
-
-#             params = {
-#                 'status': 'success',
-#                 'message': 'Thanh toán thành công',
-#                 'vnp_Amount': vnp_amount,
-#                 'vnp_BankCode': vnp.responseData.get('vnp_BankCode', ''),
-#                 'vnp_ResponseCode': vnp_response_code,
-#                 'vnp_TxnRef': order_id,
-#             }
-#         else:
-#             payment.status = "FAILED"
-#             payment.save()
-#             params = {
-#                 'status': 'error',
-#                 'message': 'Thanh toán thất bại',
-#                 'vnp_Amount': vnp_amount,
-#                 'vnp_BankCode': vnp.responseData.get('vnp_BankCode', ''),
-#                 'vnp_ResponseCode': vnp_response_code,
-#                 'vnp_TxnRef': order_id,
-#             }
-
-#         redirect_url = f"{settings.FRONTEND_URL}?{urllib.parse.urlencode(params)}"
-#         logger.debug(f"Redirecting to: {redirect_url}")
-#         return HttpResponseRedirect(redirect_url)
-
-
 
 
 class PaymentReturnView(APIView):
@@ -288,15 +213,15 @@ class PaymentReturnView(APIView):
 
             spotify_user = payment.user
             logger.debug(f"SpotifyUser instance: {spotify_user}, username: {spotify_user.username}, current vip: {spotify_user.vip}")
-            if not spotify_user.vip:
-                try:
-                    spotify_user.vip = True
-                    spotify_user.save()
-                    logger.debug(f"Updated SpotifyUser {spotify_user.username} to VIP")
-                except Exception as e:
-                    logger.error(f"Failed to update SpotifyUser {spotify_user.username} to VIP: {str(e)}")
+            if not spotify_user.vip:  # Chỉ cập nhật nếu chưa là VIP
+                spotify_user.vip = True
+                spotify_user.vip_start_date = datetime.now()  # Cập nhật lại thời gian bắt đầu VIP
+                spotify_user.save()
+                logger.debug(f"Updated SpotifyUser {spotify_user.username} to VIP with start date {spotify_user.vip_start_date}")
             else:
-                logger.debug(f"SpotifyUser {spotify_user.username} is already VIP")
+                logger.debug(f"SpotifyUser {spotify_user.username} is already VIP, updating start date")
+                spotify_user.vip_start_date = datetime.now()  # Gia hạn bằng cách cập nhật thời gian
+                spotify_user.save()
 
             params = {
                 'status': 'success',
@@ -321,6 +246,7 @@ class PaymentReturnView(APIView):
         redirect_url = f"{settings.FRONTEND_URL}?{urllib.parse.urlencode(params)}"
         logger.debug(f"Redirecting to: {redirect_url}")
         return HttpResponseRedirect(redirect_url)
+
     
 class QueryView(APIView):
     permission_classes = [IsAuthenticated]

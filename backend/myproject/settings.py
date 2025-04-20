@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     'chat.apps.ChatConfig',
     'payment',
     'channels',
+    'django_crontab',
     
 ]
 
@@ -326,3 +327,8 @@ VNPAY_CONFIG = {
 }
 
 FRONTEND_URL = f"{FRONTEND_DOMAIN}/payment/result"
+
+
+CRONJOBS = [
+    ('0 0 * * *', 'payment.management.commands.reset_vip', '>> /var/log/reset_vip.log 2>&1'),
+]
