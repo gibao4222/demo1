@@ -20,14 +20,55 @@ logger = logging.getLogger(__name__)
 # Kết nối Redis
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
+# def store_message_in_redis(message):
+#     sender_id = message.sender.user.id
+#     receiver_id = message.receiver.user.id
+#     room_key = f"chat:{min(sender_id, receiver_id)}_{max(sender_id, receiver_id)}"
+#     message_data = {
+#         'id': message.id,
+#         'sender_id': message.sender.id,
+#         'receiver_id': message.receiver.id,
+#         'content': message.content,
+#         'image': message.image.url if message.image else '',
+#         'music_link': message.music_link,
+#         'is_pending': message.is_pending,
+#         'is_deleted': message.is_deleted,
+#         'is_recalled': message.is_recalled,
+#         'is_seen': message.is_seen,
+#         'created_at': message.created_at.isoformat(),
+#         'sender': message.sender.username,
+#     }
+#     try:
+#         redis_client.rpush(room_key, json.dumps(message_data))
+#         redis_client.expire(room_key, 24 * 60 * 60)
+#         logger.debug(f"Lưu tin nhắn vào Redis thành công: {room_key}")
+#     except Exception as e:
+#         logger.error(f"Lỗi khi lưu tin nhắn vào Redis: {str(e)}")
+
+
+# views.py
 def store_message_in_redis(message):
-    sender_id = message.sender.user.id
-    receiver_id = message.receiver.user.id
+    # Kiểm tra message.sender và message.receiver
+    if not message.sender or not message.receiver:
+        logger.error(f"Tin nhắn không có sender hoặc receiver: {message.id}")
+        return
+
+    # Kiểm tra message.sender.user và message.receiver.user
+    if not hasattr(message.sender, 'user') or not message.sender.user:
+        logger.error(f"Sender không có user liên kết: sender_id={message.sender.id}")
+        return
+    if not hasattr(message.receiver, 'user') or not message.receiver.user:
+        logger.error(f"Receiver không có user liên kết: receiver_id={message.receiver.id}")
+        return
+
+    sender_id = message.sender.user.id  # auth_user ID
+    receiver_id = message.receiver.user.id  # auth_user ID
     room_key = f"chat:{min(sender_id, receiver_id)}_{max(sender_id, receiver_id)}"
     message_data = {
         'id': message.id,
-        'sender_id': message.sender.id,
-        'receiver_id': message.receiver.id,
+        'sender_id': sender_id,  # auth_user ID
+        'sender': message.sender.username if message.sender and message.sender.username else 'Người dùng không xác định',
+        'receiver_id': receiver_id,  # auth_user ID
         'content': message.content,
         'image': message.image.url if message.image else '',
         'music_link': message.music_link,
@@ -36,7 +77,6 @@ def store_message_in_redis(message):
         'is_recalled': message.is_recalled,
         'is_seen': message.is_seen,
         'created_at': message.created_at.isoformat(),
-        'sender': message.sender.username,
     }
     try:
         redis_client.rpush(room_key, json.dumps(message_data))
