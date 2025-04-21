@@ -106,7 +106,7 @@ function SideBar({ onToggleExpand, isExpanded }) {
               rotateDegree={180}
               onClick={onToggleExpand}
               noBackground={true}
-              className="py-2 px-0"
+              className="py-2 pr-0"
             >
               <img src="/icon/Arrow.png" alt="Arrow Icon" className="w-4 h-4" />
             </NavItem>

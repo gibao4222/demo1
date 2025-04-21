@@ -2,7 +2,7 @@ import React from "react";
 
 function FriendActivity(){
     return (
-        <div className="w-1/5 bg-neutral-900 p-3 sideBar sticky top-0 h-screen rounded-lg">
+        <div className=" bg-neutral-900 p-3 sideBar rounded-lg flex flex-col min-h-[calc(100vh-136px)]">
         <ul className="mt-3">
             <li className="mb-4 li-inline-friend">
                 <span>Friend Activity</span>

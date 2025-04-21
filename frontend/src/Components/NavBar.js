@@ -59,7 +59,7 @@ const NavBar = ({ user, onLogout }) => {
             {/* Right Section: Premium and User Profile */}
             <div className="flex items-center space-x-6 ml-6">
                 {/* Premium Button */}
-                <button className="bg-white text-black rounded-full px-4 py-2 text-sm font-semibold hover:bg-neutral-500">
+                <button className="bg-white text-black rounded-full px-4 py-2 text-sm font-semibold hover:bg-neutral-500 truncate">
                     Khám phá Premium
                 </button>
                 {/* User Profile */}
