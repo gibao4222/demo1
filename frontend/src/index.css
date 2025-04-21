@@ -16,3 +16,30 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+/* Tùy chỉnh thanh cuộn để phủ lên nội dung */
+.overlay-scroll {
+  /* Ẩn thanh cuộn mặc định trên Firefox */
+  scrollbar-width: none;
+  /* Đảm bảo nội dung không bị cắt khi thanh cuộn xuất hiện */
+  padding-right: 0;
+}
+
+/* Tùy chỉnh thanh cuộn trên Webkit (Chrome, Edge, Safari) */
+.overlay-scroll::-webkit-scrollbar {
+  width: 8px; /* Chiều rộng mỏng để trông gọn gàng */
+  background: transparent; /* Nền trong suốt để phủ lên nội dung */
+}
+
+.overlay-scroll::-webkit-scrollbar-thumb {
+  background: transparent; /* Thanh cuộn trong suốt khi không hover */
+  border-radius: 4px;
+}
+
+.overlay-scroll:hover::-webkit-scrollbar-thumb {
+  background: #525252; /* Màu xám nhạt (neutral-600) khi hover */
+}
+
+/* Đảm bảo Firefox ẩn thanh cuộn mặc định */
+.overlay-scroll::-moz-scrollbar {
+  display: none;
+}
