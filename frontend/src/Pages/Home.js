@@ -34,16 +34,27 @@ const Home = () => {
                 <NavBar user={user} onLogout={handleLogout} onSearch={handleSearch}/>
 
                 {/* Main Content Area - Flex container for Sidebar, MainContent, and FriendActivity */}
-                <div className="flex flex-1 h-[calc(100vh-136px)]">
+                <div className="flex flex-1">
 
                     <div className="fixed top-[64px] h-[calc(100vh-136px)] w-1/5 z-10">
                         <SideBar />
                     </div>
+
                     <div className="w-1/5"></div>
-                    <div className="w-px bg-black cursor-col-resize resize-x min-w-[2px] px-1"></div>
-                    <MainContent user={user} onLogout={handleLogout}  />
-                    <div className="w-px bg-black cursor-col-resize resize-x min-w-[2px] px-1"></div>
-                    <FriendActivity />
+
+                    <div className="w-px bg-black cursor-col-resize resize-x min-w-[4px] px-1"></div>
+
+                    <div className="fixed top-[64px] left-[calc(20%+6px)] h-[calc(100vh-136px)] w-[calc(60%-12px)] z-0 ">
+                        <MainContent />
+                    </div>
+
+                    <div className="flex-1"></div>
+
+                    <div className="w-px bg-black cursor-col-resize resize-x min-w-[4px] px-1"></div>
+                    
+                    <div className="fixed top-[64px] right-0 h-[calc(100vh-136px)] w-1/5 z-10">
+                        <FriendActivity />
+                    </div>
                 </div>
 
                 {/* Bottom Player - Fixed at the bottom */}

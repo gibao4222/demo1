@@ -73,9 +73,9 @@ const NavBar = ({ user, onLogout, onSearch }) => {
 
             <div className="flex items-center space-x-6 ml-6">
                 {/* Premium Button */}
-
                 <button className="bg-white text-black rounded-full px-4 py-2 text-sm font-semibold hover:bg-gray-500"
                     onClick={() => navigate("/payment")}>
+
                     Khám phá Premium
 
                 </button>
