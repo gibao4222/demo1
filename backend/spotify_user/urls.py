@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import  CurrentUserView, FollowArtistView, SingerSearchView, SongSearchView, SpotifyUserViewSet, UserAlbumViewSet, UserSearchView, UserSingerViewSet
+from .views import  CurrentUserView, FollowArtistView, SingerSearchView, SongSearchView, SpotifyUserViewSet, UserAlbumViewSet, UserSearchView, UserSingerViewSet, PlaylistSearchView, AlbumSearchView
 from .views.auth_views import LoginStep1View,LoginStep2View, RegisterView, LogoutView
 from .views.facebook_login import FacebookLoginView
 from .views.google_login import GoogleLoginView
@@ -29,7 +29,8 @@ urlpatterns = [
     path('songs/songs/', SongSearchView.as_view(), name='song-search'),
     path("current-user/", CurrentUserView.as_view(), name="current-user"),
     path('singers/search/', SingerSearchView.as_view(), name='singer-search'),
-    
+    path('playlists/playlists/', PlaylistSearchView.as_view(), name='playlist-search'),
+    path('albums/search/', AlbumSearchView.as_view(), name='album-search'),
 
 
 ]

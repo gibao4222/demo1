@@ -17,6 +17,7 @@ urlpatterns = [
     path('delete_playlist/<int:pk>/', PlaylistViewSet.as_view({'delete': 'delete_playlists'}), name='playlist-delete'),
 
     # PlaylistSong
+    path('playlist-songs/<int:playlistId>/', PlaylistSongViewSet.as_view({'get': 'retrieve'}), name='playlist-songs-list'),
     path('create-playlist-song/', PlaylistSongViewSet.as_view({'post': 'create_playlist_song'}), name='playlist-song-create'),
     path('change-playlist-song/<int:pk>/', PlaylistSongViewSet.as_view({'put': 'change_playlist_song'}), name='playlist-song-change'),
     path('delete-playlist-song/<int:pk>/', PlaylistSongViewSet.as_view({'delete': 'delete_playlist_song'}), name='playlist-song-delete'),

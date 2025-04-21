@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import SideBar from "../Components/SideBar";
 import BottomPlayer from "../Components/BottomPlayer";
-import PlaylistDetail from '../Components/Playlist/PlaylistDetail';
 import { useAuth } from '../context/AuthContext';
+import AlbumDetail from '../Components/AlbumDetail';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NavBar from "../Components/NavBar";
 
-const PlaylistPage = () => {
+const AlbumPage = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -34,7 +34,7 @@ const PlaylistPage = () => {
             {/* Main Content Area - Flex container for Sidebar and CreatePlaylist */}
             <div className="flex flex-1 ">
                 <SideBar />
-                <PlaylistDetail playlist={location.state?.playlist} /> {/* Truyền playlist từ state */}
+                <AlbumDetail playlist={location.state?.playlist} /> {/* Truyền playlist từ state */}
             </div>
 
             {/* Bottom Player - Fixed at the bottom */}
@@ -43,4 +43,4 @@ const PlaylistPage = () => {
     );
 };
 
-export default PlaylistPage;
+export default AlbumPage;

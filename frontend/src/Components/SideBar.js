@@ -7,7 +7,7 @@ import NavItem from './Item/NavItem';
 
 function SideBar({ onToggleExpand, isExpanded }) {
   const navigate = useNavigate();
-  const { token, user, playlistUpdated } = useAuth();
+  const { token, user } = useAuth();
   const [playlists, setPlaylists] = useState([]);
   const [activeTab, setActiveTab] = useState('Danh sách phát');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,7 +31,13 @@ function SideBar({ onToggleExpand, isExpanded }) {
     } else {
       navigate('/login');
     }
-  }, [token, playlistUpdated, fetchPlaylists, navigate]);
+
+    window.addEventListener('playlistUpdated', fetchPlaylists);
+
+    return () => {
+      window.removeEventListener('playlistUpdated', fetchPlaylists);
+    };
+  }, [token, fetchPlaylists, navigate]);
 
   useEffect(() => {
     if (isModalOpen && createButtonRef.current) {
@@ -45,7 +51,7 @@ function SideBar({ onToggleExpand, isExpanded }) {
 
   const handleCreatePlaylist = async () => {
     try {
-      if (!user || !user.id || !user.username) {
+      if (!user || !user.user_id) {
         console.error('Thiếu thông tin người dùng:', user);
         navigate('/login');
         return;
@@ -61,14 +67,15 @@ function SideBar({ onToggleExpand, isExpanded }) {
         description: 'Thêm phần mô tả không bắt buộc',
         image: '/img/null.png',
         create_date: currentDate,
-        id_user: user.id,
+        id_user: user.user_id,
         is_active: true,
       };
 
       const newPlaylist = await createPlaylist(playlistData, token);
       setPlaylists([...playlists, newPlaylist]);
-      navigate('/create', { state: { playlist: newPlaylist } });
-      setIsModalOpen(false);
+      navigate(`/PlaylistDetail/${newPlaylist.id}`, {
+        state: { playlist: newPlaylist },
+      });
     } catch (error) {
       console.error('Lỗi khi tạo danh sách phát:', error.response?.data || error.message);
     }
