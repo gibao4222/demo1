@@ -3,10 +3,7 @@ import axios from "../axios";
 import { useNavigate } from "react-router-dom";
 
 function MainSearch({ searchQuery }) {
-  const [users, setUsers] = useState(() => {
-    const savedUsers = localStorage.getItem("recentSearches");
-    return savedUsers ? JSON.parse(savedUsers) : [];
-  });
+  const [users, setUsers] = useState([]);
   const [artists, setArtists] = useState([]);
   const [songs, setSongs] = useState([]);
   const [albums, setAlbums] = useState([]);
@@ -19,6 +16,7 @@ function MainSearch({ searchQuery }) {
         setUsers([]);
         setArtists([]);
         setSongs([]);
+        setAlbums([]);
         return;
       }
 
@@ -26,6 +24,7 @@ function MainSearch({ searchQuery }) {
       try {
         // Tìm kiếm user
         const userResponse = await axios.get(`/api/users/users/search/?search=${searchQuery}`);
+        console.log("Dữ liệu user từ API:", userResponse.data);
         if (Array.isArray(userResponse.data)) {
           setUsers(userResponse.data);
           localStorage.setItem("recentSearches", JSON.stringify(userResponse.data));
@@ -45,11 +44,11 @@ function MainSearch({ searchQuery }) {
         }
 
         // Tìm kiếm bài hát
-        const songResponse = await axios.get(`/api/users/songs/songs/?search=${searchQuery}`); // Giữ đúng endpoint
+        const songResponse = await axios.get(`/api/users/songs/songs/?search=${searchQuery}`); 
         console.log("Dữ liệu bài hát từ API:", songResponse.data);
         if (Array.isArray(songResponse.data)) {
           setSongs(songResponse.data);
-          console.log("songs state:", songResponse.data); // Debug
+          console.log("songs state:", songResponse.data); 
         } else {
           console.error("Dữ liệu bài hát từ API không phải là mảng:", songResponse.data);
           setSongs([]);
@@ -70,6 +69,7 @@ function MainSearch({ searchQuery }) {
         setUsers([]);
         setArtists([]);
         setSongs([]);
+        setAlbums([]);
       } finally {
         setLoading(false);
       }
@@ -78,51 +78,34 @@ function MainSearch({ searchQuery }) {
     fetchSearchResults();
   }, [searchQuery]);
 
-  const handleRemoveUser = (userId) => {
-    const updatedUsers = users.filter((user) => user.id !== userId);
-    setUsers(updatedUsers);
-    localStorage.setItem("recentSearches", JSON.stringify(updatedUsers));
-  };
-
-  const handleUserClick = (userId) => {
-    navigate(`/FollowUser/${userId}`);
-  };
-
   return (
     <div className="w-3/5 flex-1 p-4 overflow-y-auto">
-      <div className="mb-8">
-        <h2 className="text-2xl mb-4">Hồ sơ</h2>
+
+
+<div className="mb-8">
+        <h2 className="text-2xl mb-4">Bài hát</h2>
         {loading ? (
           <p>Đang tải...</p>
-        ) : users.length > 0 ? (
+        ) : songs.length > 0 ? (
           <div className="grid grid-cols-4 gap-4">
-            {users.map((user) => (
+            {songs.map((song) => (
               <div
-                key={user.id}
+                key={song.id}
                 className="bg-green-600 p-4 rounded-lg relative min-h-[180px] cursor-pointer"
-                onClick={() => handleUserClick(user.id)}
+                onClick={() => navigate(`/SongDetail/${song.id}`)}
               >
-                <span>{user.username}</span>
-                <button
-                  className="absolute top-2 right-2 text-red-500"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveUser(user.id);
-                  }}
-                >
-                  X
-                </button>
+                <span>{song.name}</span>
                 <img
-                  alt={user.username}
+                  alt={song.name}
                   className="rounded-lg absolute bottom-0 right-0"
-                  src={user.avatar || "./img/default-avatar.png"}
+                  src={song.image || "./img/default-avatar.png"} 
                   style={{ height: "140px", width: "125px !important" }}
                 />
               </div>
             ))}
           </div>
         ) : (
-          <p>Không tìm thấy user</p>
+          <p>Không tìm thấy bài hát</p>
         )}
       </div>
 
@@ -153,32 +136,36 @@ function MainSearch({ searchQuery }) {
         )}
       </div>
 
+
       <div className="mb-8">
-        <h2 className="text-2xl mb-4">Bài hát</h2>
+        <h2 className="text-2xl mb-4">Hồ sơ</h2>
         {loading ? (
           <p>Đang tải...</p>
-        ) : songs.length > 0 ? (
+        ) : users.length > 0 ? (
           <div className="grid grid-cols-4 gap-4">
-            {songs.map((song) => (
+            {users.map((user) => (
               <div
-                key={song.id}
+                key={user.id}
                 className="bg-green-600 p-4 rounded-lg relative min-h-[180px] cursor-pointer"
-                onClick={() => navigate(`/SongDetail/${song.id}`)}
+                onClick={() => navigate(`/FollowUser/${user.id}`)}
               >
-                <span>{song.name}</span>
+                <span>{user.username}</span>
                 <img
-                  alt={song.name}
+                  alt={user.username}
                   className="rounded-lg absolute bottom-0 right-0"
-                  src={song.image || "./img/default-avatar.png"} 
+                  src={user.avatar || "./img/default-avatar.png"}
                   style={{ height: "140px", width: "125px !important" }}
                 />
               </div>
             ))}
           </div>
         ) : (
-          <p>Không tìm thấy bài hát</p>
+          <p>Không tìm thấy user</p>
         )}
       </div>
+
+      
+
 
       <div className="mb-8">
         <h2 className="text-2xl mb-4">Album</h2>
