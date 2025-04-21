@@ -20,6 +20,7 @@ class Playlist(models.Model):
 class PlaylistSong(models.Model):  # Cho spotify_clone_playlist_song
     id_playlist = models.ForeignKey('Playlist', on_delete=models.CASCADE, related_name='playlist_songs')
     id_song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='song_playlists')
+    date_added = models.DateField(auto_now_add=True, null=True)
     
     class Meta:
         db_table = 'playlist_playlistsong'

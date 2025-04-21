@@ -4,12 +4,13 @@ import { SlOptions } from 'react-icons/sl';
 import { HiOutlinePencil } from 'react-icons/hi2';
 import ModalChangePlaylist from '../Modals/ChangePlaylist';
 import OptionPlaylist from '../Modals/OptionPlaylist';
-import { getPlaylists, deletePlaylist } from '../../Services/PlaylistService';
+import { getPlaylists, deletePlaylist, getSongPlaylist, addSongToPlaylist } from '../../Services/PlaylistService';
 import PlaylistSong from './PlaylistSong';
 import { useAuth } from '../../context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import axios from '../../axios';
 
-const CreatePlaylist = () => {
+const CreatePlaylist = ({ playlist }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, token } = useAuth();
@@ -17,15 +18,15 @@ const CreatePlaylist = () => {
   const optionsButtonRef = useRef(null);
 
   const newPlaylist = useMemo(() => {
-    return location.state?.playlist || {
+    const selectedPlaylist = playlist || location.state?.playlist || {
       id: null,
       name: 'Danh sách phát của tôi #1',
       description: 'Thêm phần mô tả không bắt buộc',
       image: '/img/null.png',
     };
-  }, [location.state?.playlist]);
-
-  // console.log('Received playlist:', newPlaylist);
+    console.log('Selected playlist:', selectedPlaylist);
+    return selectedPlaylist;
+  }, [playlist, location.state?.playlist]);
 
   const [imageSrc, setImageSrc] = useState(newPlaylist.image);
   const [name, setName] = useState(newPlaylist.name);
@@ -36,12 +37,16 @@ const CreatePlaylist = () => {
   const [playlists, setPlaylists] = useState([]);
   const [imageError, setImageError] = useState(false);
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+  const [hasSongs, setHasSongs] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
     setImageSrc(newPlaylist.image);
     setName(newPlaylist.name);
     setDescription(newPlaylist.description);
     setImageError(false);
+    console.log('Updated newPlaylist ID:', newPlaylist.id);
   }, [newPlaylist]);
 
   useEffect(() => {
@@ -66,6 +71,74 @@ const CreatePlaylist = () => {
     }
   }, [token]);
 
+  useEffect(() => {
+    const checkSongs = async () => {
+      if (!newPlaylist.id || !token) {
+        setHasSongs(false);
+        return;
+      }
+
+      try {
+        const playlistSongs = await getSongPlaylist(newPlaylist.id, token);
+        console.log('Check songs response:', playlistSongs);
+        const songsArray = Array.isArray(playlistSongs) ? playlistSongs : playlistSongs.id_playlist ? [playlistSongs] : [];
+        setHasSongs(songsArray.length > 0);
+      } catch (error) {
+        console.error('Failed to check songs for playlist ID:', newPlaylist.id, error);
+        setHasSongs(false);
+      }
+    };
+
+    checkSongs();
+  }, [newPlaylist.id, token]);
+
+  useEffect(() => {
+    const searchSongs = async () => {
+      if (!searchTerm || !token) {
+        setSearchResults([]);
+        return;
+      }
+
+      try {
+        const response = await axios.get(`/api/songs/songs/?search=${encodeURIComponent(searchTerm)}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log('Search songs response:', response.data);
+        const filteredResults = response.data.filter(song =>
+          (song.name && song.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (song.artist && song.artist.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+        setSearchResults(filteredResults);
+      } catch (error) {
+        console.error('Failed to search songs:', error);
+        setSearchResults([]);
+      }
+    };
+
+    const debounce = setTimeout(searchSongs, 300);
+    return () => clearTimeout(debounce);
+  }, [searchTerm, token]);
+
+  const handleAddSong = async (songId) => {
+    if (!newPlaylist.id || !token) {
+      alert('Không thể thêm bài hát: thiếu thông tin playlist hoặc token.');
+      return;
+    }
+
+    try {
+      await addSongToPlaylist(newPlaylist.id, songId, token);
+      console.log('Song added to playlist:', { playlistId: newPlaylist.id, songId });
+      setHasSongs(true);
+      setSearchTerm('');
+      setSearchResults([]);
+    } catch (error) {
+      console.error('Failed to add song to playlist:', error);
+      alert('Có lỗi xảy ra khi thêm bài hát. Vui lòng thử lại.');
+    }
+  };
+
   const handleImageError = () => {
     console.error('Failed to load image:', imageSrc);
     setImageError(true);
@@ -87,6 +160,7 @@ const CreatePlaylist = () => {
     try {
       await deletePlaylist(newPlaylist.id, token);
       console.log('Playlist deleted successfully');
+      window.dispatchEvent(new Event('playlistUpdated')); // Gửi sự kiện
       navigate('/home');
     } catch (error) {
       console.error('Failed to delete playlist:', error);
@@ -106,7 +180,7 @@ const CreatePlaylist = () => {
   };
 
   return (
-    <div className="w-full p-6 bg-gradient-to-b from-[#434343] to-black text-white h-[calc(100vh-100px)] overflow-y-auto scrollbar scrollbar-thumb-transparent scrollbar-track-transparent hover:scrollbar-thumb-gray-600">
+    <div className="w-full p-6 bg-gradient-to-b from-[#434343] to-black text-white h-[calc(100vh-180px)] overflow-y-auto scrollbar scrollbar-thumb-transparent scrollbar-track-transparent hover:scrollbar-thumb-gray-600">
       <div className="flex justify-start items-start gap-4">
         <div
           className="relative w-47 h-47 shadow-2xl shadow-black rounded overflow-hidden"
@@ -158,19 +232,51 @@ const CreatePlaylist = () => {
         )}
       </div>
 
-      <PlaylistSong playlist={newPlaylist} />
-
-      <div className="mt-6">
-        <p className="text-xl font-bold">Hãy cùng tìm nội dung cho danh sách phát của bạn</p>
-        <div className="mt-4 flex items-center bg-[#3F4040] p-2 rounded">
-          <FaSearch className="text-gray-300" />
-          <input
-            type="text"
-            placeholder="Tìm bài hát"
-            className="bg-[#3F4040] text-gray-200 ml-2 w-full focus:outline-none"
-          />
+      {hasSongs ? (
+        <PlaylistSong playlist={newPlaylist} token={token} />
+      ) : (
+        <div className="mt-6">
+          <p className="text-xl font-bold">Hãy cùng tìm nội dung cho danh sách phát của bạn</p>
+          <div className="mt-4 flex items-center bg-[#3F4040] p-2 rounded">
+            <FaSearch className="text-gray-300" />
+            <input
+              type="text"
+              placeholder="Tìm bài hát"
+              className="bg-[#3F4040] text-gray-200 ml-2 w-full focus:outline-none"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          {searchResults.length > 0 && (
+            <div className="mt-4">
+              {searchResults.map((song) => (
+                <div
+                  key={song.id}
+                  className="flex items-center justify-between py-2 px-4 hover:bg-neutral-800 rounded"
+                >
+                  <div className="flex items-center">
+                    <img
+                      src={song.image || '/img/null.png'}
+                      alt={song.name}
+                      className="w-12 h-12 rounded mr-4"
+                    />
+                    <div>
+                      <p className="text-white font-medium">{song.name}</p>
+                      <p className="text-gray-400 text-sm">{song.artist || 'Không rõ'}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleAddSong(song.id)}
+                    className="bg-transparent text-gray-300 border border-gray-300 px-4 py-1 rounded hover:bg-gray-300 hover:text-black"
+                  >
+                    Thêm
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       <ModalChangePlaylist
         isModalOpen={isModalOpen}

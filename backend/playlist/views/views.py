@@ -21,7 +21,6 @@ class PlaylistViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path='create_playlist')
     def create_playlist(self, request):
         with transaction.atomic():
-            # Kiểm tra và điều chỉnh AUTO_INCREMENT dựa trên max(id) + 1
             with connection.cursor() as cursor:
                 if Playlist.objects.exists():
                     max_id = Playlist.objects.aggregate(Max('id'))['id__max']
@@ -29,8 +28,6 @@ class PlaylistViewSet(viewsets.ModelViewSet):
                     cursor.execute(f"ALTER TABLE playlist_playlist AUTO_INCREMENT = {next_id};")
                 else:
                     cursor.execute("ALTER TABLE playlist_playlist AUTO_INCREMENT = 1;")
-
-            # Tạo bản ghi mới
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -46,12 +43,16 @@ class PlaylistSongViewSet(viewsets.ModelViewSet):
     queryset = PlaylistSong.objects.all()
     serializer_class = PlaylistSongSerializer
 
+    def retrieve(self, request, pk=None):
+        playlist_songs = PlaylistSong.objects.filter(id_playlist=pk)
+        serializer = self.get_serializer(playlist_songs, many=True)
+        return Response(serializer.data)
+
     @action(detail=False, methods=['POST'], url_path='create-playlist-song')
     def create_playlist_song(self, request):
         if not PlaylistSong.objects.exists():
             with connection.cursor() as cursor:
                 cursor.execute("ALTER TABLE playlist_playlistsong AUTO_INCREMENT = 1;")
-                
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -67,6 +68,12 @@ class PlaylistSongViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['DELETE'], url_path='delete-playlist-song')
     def delete_playlist_song(self, request, pk=None):
-        playlist_song = self.get_object()
-        playlist_song.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            playlist_song = self.get_object()
+            playlist_song.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except PlaylistSong.DoesNotExist:
+            return Response(
+                {"detail": "Không tìm thấy bài hát trong danh sách phát."},
+                status=status.HTTP_404_NOT_FOUND
+            )
