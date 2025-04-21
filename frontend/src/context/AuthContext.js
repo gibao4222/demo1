@@ -82,6 +82,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+
+  const refreshUser = async () => {
+    if (!user || !token) return;
+    try {
+        const response = await axios.get('/api/users/users/', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const currentUser = response.data.find(u => u.username === user.username);
+        if (currentUser) {
+            setUser({ ...user, ...currentUser });
+        }
+    } catch (err) {
+        console.error('Lỗi khi làm mới người dùng:', err);
+        if (err.response?.status === 401) {
+            const newToken = await refreshToken();
+            if (newToken) {
+                try {
+                    const response = await axios.get('/api/users/users/', {
+                        headers: { Authorization: `Bearer ${newToken}` }
+                    });
+                    const currentUser = response.data.find(u => u.username === user.username);
+                    if (currentUser) {
+                        setUser({ ...user, ...currentUser });
+                    }
+                } catch (retryErr) {
+                    console.error('Lỗi khi thử lại:', retryErr);
+                }
+            }
+        }
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ user, token, login, logout, refreshToken }}>
       {children}
@@ -90,3 +122,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+

@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import BottomPlayer_ex from './BottomPlayer_ex';
 import { useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function SongDetail() {
     const { id } = useParams();
     const [song, setSong] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef(null);
+    const { user } = useAuth();
 
     const playlistData = {
         name: "Gentle Classical Sleep Mix",
@@ -58,6 +60,9 @@ function SongDetail() {
 
     if (!song) {
         return <div>Loading...</div>;
+    }
+    if (!user) {
+        return <div>Loading user...</div>;
     }
 
     return (
@@ -113,7 +118,7 @@ function SongDetail() {
                 </div>
             </div>
             <div className="w-1/3 p-4"> 
-                {song.file_video ? (
+                {user.vip && song.file_video ? (
                     <video
                         src={song.url_video}
                         className="w-full h-auto object-contain rounded-md" 
@@ -127,6 +132,7 @@ function SongDetail() {
                         alt={song.name} 
                         className="w-full h-auto object-contain rounded-md"
                     />
+                    
                 )}
             </div>
         </div>

@@ -157,7 +157,7 @@ function MainSearch({ searchQuery }) {
                 <img
                   alt={song.name}
                   className="rounded-lg absolute bottom-0 right-0"
-                  src={song.image || "./img/default-avatar.png"} // Sửa avatar thành image
+                  src={song.image || "./img/default-avatar.png"} 
                   style={{ height: "140px", width: "125px !important" }}
                 />
               </div>

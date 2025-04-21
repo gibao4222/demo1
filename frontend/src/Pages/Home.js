@@ -11,14 +11,9 @@ const Home = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-        }
-    }, [user, navigate]); // Chạy lại khi user hoặc navigate thay đổi
 
     if (!user) {
-        return null; // Trả về null trong khi chờ điều hướng
+        return null; 
     }
 
     const handleLogout = async () => {
