@@ -4,13 +4,13 @@ import { SlOptions } from 'react-icons/sl';
 import { HiOutlinePencil } from 'react-icons/hi2';
 import ModalChangePlaylist from '../Modals/ChangePlaylist';
 import OptionPlaylist from '../Modals/OptionPlaylist';
-import { getPlaylists, deletePlaylist, getSongPlaylist, addSongToPlaylist } from '../../Services/PlaylistService';
+import { getPlaylists, deletePlaylist, addSongToPlaylist, getPlaylistDetail } from '../../Services/PlaylistService';
 import PlaylistSong from './PlaylistSong';
 import { useAuth } from '../../context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from '../../axios';
 
-const CreatePlaylist = ({ playlist }) => {
+const PlaylistDetail = ({ playlist }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, token } = useAuth();
@@ -37,7 +37,6 @@ const CreatePlaylist = ({ playlist }) => {
   const [playlists, setPlaylists] = useState([]);
   const [imageError, setImageError] = useState(false);
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
-  const [hasSongs, setHasSongs] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
 
@@ -70,27 +69,6 @@ const CreatePlaylist = ({ playlist }) => {
       fetchPlaylists();
     }
   }, [token]);
-
-  useEffect(() => {
-    const checkSongs = async () => {
-      if (!newPlaylist.id || !token) {
-        setHasSongs(false);
-        return;
-      }
-
-      try {
-        const playlistSongs = await getSongPlaylist(newPlaylist.id, token);
-        console.log('Check songs response:', playlistSongs);
-        const songsArray = Array.isArray(playlistSongs) ? playlistSongs : playlistSongs.id_playlist ? [playlistSongs] : [];
-        setHasSongs(songsArray.length > 0);
-      } catch (error) {
-        console.error('Failed to check songs for playlist ID:', newPlaylist.id, error);
-        setHasSongs(false);
-      }
-    };
-
-    checkSongs();
-  }, [newPlaylist.id, token]);
 
   useEffect(() => {
     const searchSongs = async () => {
@@ -130,7 +108,6 @@ const CreatePlaylist = ({ playlist }) => {
     try {
       await addSongToPlaylist(newPlaylist.id, songId, token);
       console.log('Song added to playlist:', { playlistId: newPlaylist.id, songId });
-      setHasSongs(true);
       setSearchTerm('');
       setSearchResults([]);
     } catch (error) {
@@ -160,7 +137,7 @@ const CreatePlaylist = ({ playlist }) => {
     try {
       await deletePlaylist(newPlaylist.id, token);
       console.log('Playlist deleted successfully');
-      window.dispatchEvent(new Event('playlistUpdated')); // Gửi sự kiện
+      window.dispatchEvent(new Event('playlistUpdated'));
       navigate('/home');
     } catch (error) {
       console.error('Failed to delete playlist:', error);
@@ -232,51 +209,51 @@ const CreatePlaylist = ({ playlist }) => {
         )}
       </div>
 
-      {hasSongs ? (
-        <PlaylistSong playlist={newPlaylist} token={token} />
-      ) : (
-        <div className="mt-6">
-          <p className="text-xl font-bold">Hãy cùng tìm nội dung cho danh sách phát của bạn</p>
-          <div className="mt-4 flex items-center bg-[#3F4040] p-2 rounded">
-            <FaSearch className="text-gray-300" />
-            <input
-              type="text"
-              placeholder="Tìm bài hát"
-              className="bg-[#3F4040] text-gray-200 ml-2 w-full focus:outline-none"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          {searchResults.length > 0 && (
-            <div className="mt-4">
-              {searchResults.map((song) => (
-                <div
-                  key={song.id}
-                  className="flex items-center justify-between py-2 px-4 hover:bg-neutral-800 rounded"
-                >
-                  <div className="flex items-center">
-                    <img
-                      src={song.image || '/img/null.png'}
-                      alt={song.name}
-                      className="w-12 h-12 rounded mr-4"
-                    />
-                    <div>
-                      <p className="text-white font-medium">{song.name}</p>
-                      <p className="text-gray-400 text-sm">{song.artist || 'Không rõ'}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleAddSong(song.id)}
-                    className="bg-transparent text-gray-300 border border-gray-300 px-4 py-1 rounded hover:bg-gray-300 hover:text-black"
-                  >
-                    Thêm
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+      {/* Hiển thị danh sách bài hát trong playlist */}
+      <PlaylistSong playlist={newPlaylist} token={token} />
+
+      {/* Phần tìm kiếm bài hát để thêm vào playlist */}
+      <div className="mt-8">
+        <p className="text-xl font-bold text-white mb-8">Tìm bài hát</p>
+        <div className="mt-4 flex items-center bg-[#3F4040] p-2 rounded">
+          <FaSearch className="text-gray-300" />
+          <input
+            type="text"
+            placeholder="Tìm bài hát"
+            className="bg-[#3F4040] text-gray-200 ml-2 w-full focus:outline-none"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-      )}
+        {searchResults.length > 0 && (
+          <div className="mt-4">
+            {searchResults.map((song) => (
+              <div
+                key={song.id}
+                className="flex items-center justify-between py-2 px-4 hover:bg-neutral-800 rounded"
+              >
+                <div className="flex items-center">
+                  <img
+                    src={song.image || '/img/null.png'}
+                    alt={song.name}
+                    className="w-12 h-12 rounded mr-4"
+                  />
+                  <div>
+                    <p className="text-white font-medium">{song.name}</p>
+                    <p className="text-gray-400 text-sm">{song.artist || 'Không rõ'}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleAddSong(song.id)}
+                  className="bg-transparent text-gray-300 border border-gray-300 px-4 py-1 rounded hover:scale-105 hover:text-[#7cb0ff] transition duration-200"
+                >
+                  Thêm
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <ModalChangePlaylist
         isModalOpen={isModalOpen}
@@ -295,4 +272,4 @@ const CreatePlaylist = ({ playlist }) => {
   );
 };
 
-export default CreatePlaylist;
+export default PlaylistDetail;

@@ -44,11 +44,11 @@ function MainSearch({ searchQuery }) {
         }
 
         // Tìm kiếm bài hát
-        const songResponse = await axios.get(`/api/users/songs/songs/?search=${searchQuery}`); 
+        const songResponse = await axios.get(`/api/users/songs/songs/?search=${searchQuery}`);
         console.log("Dữ liệu bài hát từ API:", songResponse.data);
         if (Array.isArray(songResponse.data)) {
           setSongs(songResponse.data);
-          console.log("songs state:", songResponse.data); 
+          console.log("songs state:", songResponse.data);
         } else {
           console.error("Dữ liệu bài hát từ API không phải là mảng:", songResponse.data);
           setSongs([]);
@@ -82,7 +82,7 @@ function MainSearch({ searchQuery }) {
     <div className="w-3/5 flex-1 p-4 overflow-y-auto">
 
 
-<div className="mb-8">
+      <div className="mb-8">
         <h2 className="text-2xl mb-4">Bài hát</h2>
         {loading ? (
           <p>Đang tải...</p>
@@ -98,7 +98,7 @@ function MainSearch({ searchQuery }) {
                 <img
                   alt={song.name}
                   className="rounded-lg absolute bottom-0 right-0"
-                  src={song.image || "./img/default-avatar.png"} 
+                  src={song.image || "./img/default-avatar.png"}
                   style={{ height: "140px", width: "125px !important" }}
                 />
               </div>
@@ -164,7 +164,7 @@ function MainSearch({ searchQuery }) {
         )}
       </div>
 
-      
+
 
 
       <div className="mb-8">
@@ -177,7 +177,7 @@ function MainSearch({ searchQuery }) {
               <div
                 key={album.id}
                 className="bg-green-600 p-4 rounded-lg relative min-h-[180px] cursor-pointer"
-                onClick={() => navigate(`/AlbumDetail`)}
+                onClick={() => navigate(`/AlbumDetail/${album.id}`)}
               >
                 <span>{album.name}</span>
                 <img
