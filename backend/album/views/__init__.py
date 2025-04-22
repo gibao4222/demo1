@@ -1,1 +1,1 @@
-from .views import AlbumViewSet, AlbumSongViewSet, SingerAlbumViewSet
+from .views import AlbumViewSet, AlbumSongViewSet

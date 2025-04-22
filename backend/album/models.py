@@ -6,6 +6,8 @@ class Album(models.Model):
     is_active = models.BooleanField()
     name = models.CharField(max_length=255)
     popularity = models.IntegerField()
+    release_date = models.DateField(null=True, blank=True)
+    id_singer = models.ForeignKey('singer.Singer', on_delete=models.CASCADE, related_name='albums', default=1)
 
     class Meta:
         db_table = 'album_album'
@@ -13,7 +15,7 @@ class Album(models.Model):
     def __str__(self):
         return self.name
 
-class AlbumSong(models.Model):  # Cho Spotify clone album song
+class AlbumSong(models.Model):
     id = models.BigAutoField(primary_key=True)
     id_album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name='album_songs')
     id_song = models.ForeignKey('song.Song', on_delete=models.CASCADE, related_name='song_albums')
@@ -23,14 +25,3 @@ class AlbumSong(models.Model):  # Cho Spotify clone album song
 
     def __str__(self):
         return f"AlbumSong: {self.id_album} - {self.id_song}"
-
-class SingerAlbum(models.Model):  # Cho Spotify clone singer_album
-    id = models.BigAutoField(primary_key=True)
-    id_singer = models.ForeignKey('singer.Singer', on_delete=models.CASCADE, related_name='singer_albums')
-    id_album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name='album_singers')
-
-    class Meta:
-        db_table = 'album_singeralbum'
-
-    def __str__(self):
-        return f"SingerAlbum: {self.id_singer} - {self.id_album}"
