@@ -1,11 +1,10 @@
-// Chat.js
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from '../axios';
 import imageCompression from 'browser-image-compression';
 
-const Chat = ({ userId, targetId, token }) => {
+const Chat = ({ userId, targetId, token, targetUsername }) => {
     const [messages, setMessages] = useState([]);
     const [pendingMessages, setPendingMessages] = useState([]);
     const [input, setInput] = useState('');
@@ -25,7 +24,6 @@ const Chat = ({ userId, targetId, token }) => {
 
         const roomName = `${Math.min(Number(userId), Number(targetId))}_${Math.max(Number(userId), Number(targetId))}`;
         console.log('roomName:', roomName);
-
         const ws = new WebSocket(`wss://localhost/ws/chat/${roomName}/?token=${token}`);
 
         ws.onopen = () => {
@@ -228,97 +226,222 @@ const Chat = ({ userId, targetId, token }) => {
     };
 
     return (
-        <div className="chat-container p-4 bg-gray-100 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">Chat với người dùng {targetId}</h2>
-            <div className="pending-messages mb-4">
-                <h3 className="text-lg font-semibold">Tin nhắn chờ xác nhận</h3>
+        <div className="chat-container flex flex-col w-full h-full bg-neutral-800 text-white rounded-t-lg">
+            <div className="chat-header p-1 bg-blue-700 rounded-t-lg border-b border-gray-700 flex justify-between items-center">
+                <h2 className="text-lg font-semibold">{targetUsername}</h2>
+            </div>
+
+            <div className="pending-messages p-4 border-b border-gray-700">
+                <h3 className="text-base font-semibold mb-2">Tin nhắn chờ xác nhận</h3>
                 {pendingMessages.length === 0 ? (
-                    <p className="text-gray-500">Không có tin nhắn chờ xác nhận.</p>
+                    <p className="text-gray-400 text-sm">Không có tin nhắn chờ xác nhận.</p>
                 ) : (
                     pendingMessages.map((msg) => (
-                        <div key={msg.id} className={`message p-2 mb-2 rounded-lg ${String(msg.sender_id) === String(userId) ? 'bg-blue-100 ml-auto' : 'bg-gray-200 mr-auto'} max-w-xs`}>
-                            {msg.is_recalled ? (
-                                <span className="text-gray-500 italic">Tin nhắn đã bị thu hồi</span>
-                            ) : msg.is_deleted ? (
-                                <span className="text-gray-500 italic">Tin nhắn đã bị xóa</span>
-                            ) : (
-                                <>
-                                    <strong>{msg.sender || 'Người dùng không xác định'}:</strong>
-                                    {msg.content && <p>{msg.content}</p>}
-                                    {msg.image && <img src={msg.image} alt="Message Image" className="max-w-full mt-2 rounded" />}
-                                    {String(msg.sender_id) === String(userId) && (
-                                        <div className="mt-1">
-                                            <button onClick={() => deleteMessage(msg.id)} className="text-red-500 text-sm mr-2">Xóa</button>
-                                            <button onClick={() => recallMessage(msg.id)} className="text-blue-500 text-sm">Thu hồi</button>
-                                        </div>
-                                    )}
-                                    {String(msg.sender_id) !== String(userId) && msg.is_seen && (
-                                        <span className="text-green-500 text-xs block mt-1">Đã xem</span>
-                                    )}
-                                </>
-                            )}
+                        <div
+                            key={msg.id}
+                            className={`flex mb-3 ${
+                                String(msg.sender_id) === String(userId)
+                                    ? "justify-end"
+                                    : "justify-start"
+                            }`}
+                        >
+                            <div
+                                className={`message p-2 rounded-lg ${
+                                    String(msg.sender_id) === String(userId)
+                                        ? "bg-blue-600"
+                                        : "bg-gray-700"
+                                } max-w-[50%] break-words text-sm`}
+                            >
+                                {msg.is_recalled ? (
+                                    <span className="text-gray-400 italic">
+                                        Tin nhắn đã bị thu hồi
+                                    </span>
+                                ) : msg.is_deleted ? (
+                                    <span className="text-gray-400 italic">
+                                        Tin nhắn đã bị xóa
+                                    </span>
+                                ) : (
+                                    <>
+                                        <strong className="block text-xs mb-1">
+                                            {msg.sender || "Người dùng không xác định"}:
+                                        </strong>
+                                        {msg.content && <p className="text-sm">{msg.content}</p>}
+                                        {msg.image && (
+                                            <img
+                                                src={msg.image}
+                                                alt="Message Image"
+                                                className="max-w-[150px] mt-2 rounded"
+                                            />
+                                        )}
+                                        {String(msg.sender_id) === String(userId) && (
+                                            <div className="mt-2 flex gap-3">
+                                                <button
+                                                    onClick={() => deleteMessage(msg.id)}
+                                                    className="text-red-400 text-xs hover:text-red-300"
+                                                >
+                                                    Xóa
+                                                </button>
+                                                <button
+                                                    onClick={() => recallMessage(msg.id)}
+                                                    className="text-blue-400 text-xs hover:text-blue-300"
+                                                >
+                                                    Thu hồi
+                                                </button>
+                                            </div>
+                                        )}
+                                        {String(msg.sender_id) !== String(userId) &&
+                                            msg.is_seen && (
+                                                <span className="text-green-400 text-xs block mt-1">
+                                                    Đã xem
+                                                </span>
+                                            )}
+                                    </>
+                                )}
+                            </div>
                         </div>
                     ))
                 )}
             </div>
-            <div className="chat-box mb-4 max-h-96 overflow-y-auto" ref={chatBoxRef}>
-                <h3 className="text-lg font-semibold">Hộp thoại</h3>
+
+            <div className="chat-box flex-1 p-4 overflow-y-auto" ref={chatBoxRef}>
                 {nextPage && (
                     <button
                         onClick={loadMoreMessages}
                         disabled={loading}
-                        className="bg-blue-500 text-white p-2 rounded mb-2"
+                        className="bg-blue-600 text-white px-4 py-1 rounded mb-3 text-sm hover:bg-blue-700 w-full"
                     >
-                        {loading ? 'Đang tải...' : 'Tải thêm tin nhắn'}
+                        {loading ? "Đang tải..." : "Tải thêm tin nhắn"}
                     </button>
                 )}
                 {messages.length === 0 ? (
-                    <p className="text-gray-500">Chưa có tin nhắn nào.</p>
+                    <p className="text-gray-400 text-sm">Chưa có tin nhắn nào.</p>
                 ) : (
                     messages.map((msg) => (
-                        <div key={msg.id} className={`message p-2 mb-2 rounded-lg ${String(msg.sender_id) === String(userId) ? 'bg-blue-100 ml-auto' : 'bg-gray-200 mr-auto'} max-w-xs`}>
-                            {msg.is_recalled ? (
-                                <span className="text-gray-500 italic">Tin nhắn đã bị thu hồi</span>
-                            ) : msg.is_deleted ? (
-                                <span className="text-gray-500 italic">Tin nhắn đã bị xóa</span>
-                            ) : (
-                                <>
-                                    <strong>{msg.sender || 'Người dùng không xác định'}:</strong>
-                                    {msg.content && <p>{msg.content}</p>}
-                                    {msg.image && <img src={msg.image} alt="Message Image" className="max-w-full mt-2 rounded" />}
-                                    {String(msg.sender_id) === String(userId) && (
-                                        <div className="mt-1">
-                                            <button onClick={() => deleteMessage(msg.id)} className="text-red-500 text-sm mr-2">Xóa</button>
-                                            <button onClick={() => recallMessage(msg.id)} className="text-blue-500 text-sm">Thu hồi</button>
-                                        </div>
-                                    )}
-                                    {String(msg.sender_id) !== String(userId) && msg.is_seen && (
-                                        <span className="text-green-500 text-xs block mt-1">Đã xem</span>
-                                    )}
-                                </>
-                            )}
+                        <div
+                            key={msg.id}
+                            className={`flex mb-3 ${
+                                String(msg.sender_id) === String(userId)
+                                    ? "justify-end"
+                                    : "justify-start"
+                            }`}
+                        >
+                            <div
+                                className={`message p-2 rounded-lg ${
+                                    String(msg.sender_id) === String(userId)
+                                        ? "bg-blue-600"
+                                        : "bg-gray-700"
+                                } max-w-[75%] break-words text-sm`}
+                            >
+                                {msg.is_recalled ? (
+                                    <span className="text-gray-400 italic">
+                                        Tin nhắn đã bị thu hồi
+                                    </span>
+                                ) : msg.is_deleted ? (
+                                    <span className="text-gray-400 italic">
+                                        Tin nhắn đã bị xóa
+                                    </span>
+                                ) : (
+                                    <>
+                                        <strong className="block text-xs mb-1">
+                                            {msg.sender || "Người dùng không xác định"}:
+                                        </strong>
+                                        {msg.content && <p className="text-sm">{msg.content}</p>}
+                                        {msg.image && (
+                                            <img
+                                                src={msg.image}
+                                                alt="Message Image"
+                                                className="max-w-[150px] mt-2 rounded"
+                                            />
+                                        )}
+                                        <span className="text-gray-400 text-xs mt-1">
+                                            {new Date(msg.created_at).toLocaleTimeString("vi-VN", {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </span>
+                                        {String(msg.sender_id) === String(userId) && (
+                                            <div className="mt-2 flex gap-3">
+                                                <button
+                                                    onClick={() => deleteMessage(msg.id)}
+                                                    className="text-red-400 text-xs hover:text-red-300"
+                                                >
+                                                    Xóa
+                                                </button>
+                                                <button
+                                                    onClick={() => recallMessage(msg.id)}
+                                                    className="text-blue-400 text-xs hover:text-blue-300"
+                                                >
+                                                    Thu hồi
+                                                </button>
+                                            </div>
+                                        )}
+                                        {String(msg.sender_id) !== String(userId) &&
+                                            msg.is_seen && (
+                                                <span className="text-green-400 text-xs block mt-1">
+                                                    Đã xem
+                                                </span>
+                                            )}
+                                    </>
+                                )}
+                            </div>
                         </div>
                     ))
                 )}
             </div>
-            <div className="input-box flex items-center">
-                <input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                    className="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập tin nhắn..."
-                />
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="ml-2"
-                />
-                <button onClick={sendMessage} className="bg-blue-500 text-white p-2 rounded ml-2">Gửi</button>
-                <button onClick={requestChat} className="bg-green-500 text-white p-2 rounded ml-2">Gửi yêu cầu trò chuyện</button>
+
+            <div className="input-box p-4 border-t border-gray-700 flex flex-col gap-2">
+                {image && (
+                    <div className="relative bg-gray-700 p-2 rounded">
+                        <img
+                            src={URL.createObjectURL(image)}
+                            alt="Selected Image"
+                            className="max-w-[150px] rounded"
+                        />
+                        <button
+                            onClick={() => setImage(null)}
+                            className="absolute top-1 right-1 text-gray-400 hover:text-white"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                )}
+                <div className="flex items-center gap-2">
+                    <input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                        className="flex-1 bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm min-w-0"
+                        placeholder="Nhập tin nhắn..."
+                    />
+                    <label className="cursor-pointer flex-shrink-0">
+                        <img
+                            src="/icon/sendImage.png"
+                            alt="Send Image"
+                            className="w-6 h-6"
+                        />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                        />
+                    </label>
+                    <button
+                        onClick={sendMessage}
+                        className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 flex-shrink-0"
+                    >
+                        Gửi
+                    </button>
+                    <button
+                        onClick={requestChat}
+                        className="bg-green-600 text-white px-4 py-1 rounded text-sm hover:bg-green-700 flex-shrink-0"
+                    >
+                        Yêu cầu
+                    </button>
+                </div>
             </div>
         </div>
+
     );
 };
 
