@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import BottomPlayer_ex from './BottomPlayer_ex';
 import { useNavigate } from 'react-router-dom';
-
+import { useAuth } from "../context/AuthContext";
 function SongList() {
   const [songs, setSongs] = useState([]);
   const [currentSong, setCurrentSong] = useState(null);
@@ -10,6 +10,7 @@ function SongList() {
   const [hoveredSongId, setHoveredSongId] = useState(null);
   const audioRef = useRef(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     axios.get('https://localhost/api/songs/songs/')
@@ -43,6 +44,9 @@ function SongList() {
       }
     }
   }, [currentSong, isPlaying]);
+  if (!user) {
+    return <div>Loading user...</div>;
+}
 
   return (
     <div className="p-4">
