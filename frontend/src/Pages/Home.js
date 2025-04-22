@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect,useState } from "react";
 import SideBar from "../Components/SideBar";
 import MainContent from "../Components/MainContent";
 import FriendActivity from "../Components/FriendActivity";
@@ -11,14 +11,9 @@ const Home = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-        }
-    }, [user, navigate]); // Chạy lại khi user hoặc navigate thay đổi
 
     if (!user) {
-        return null; // Trả về null trong khi chờ điều hướng
+        return null; 
     }
 
     const handleLogout = async () => {
@@ -26,13 +21,17 @@ const Home = () => {
         navigate('/login');
     };
 
-
+    const handleSearch = (query) => {
+        if (query.trim()) { 
+            navigate(`/Search?query=${encodeURIComponent(query)}`);
+        }
+    };
 
     return (
         <>
             <div className="min-h-screen bg-black text-white flex flex-col">
                 {/* NavBar - Full width and sticky */}
-                <NavBar user={user} onLogout={handleLogout}/>
+                <NavBar user={user} onLogout={handleLogout} onSearch={handleSearch}/>
 
                 {/* Main Content Area - Flex container for Sidebar, MainContent, and FriendActivity */}
                 <div className="flex flex-1">

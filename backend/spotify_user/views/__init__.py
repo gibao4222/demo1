@@ -7,6 +7,10 @@ from song.models import Song
 from rest_framework import generics
 from unidecode import unidecode
 from django.contrib.auth.models import User
+from playlist.models import Playlist
+from album.models import Album
+from playlist.serializers import PlaylistSerializer
+from album.serializers import AlbumSerializer
 
 from ..serializers import SpotifyUserSerializer, UserAlbumSerializer, UserSingerSerializer, UserSongSerializer, UserFollowingSerializer
 from ..models import SpotifyUser, UserAlbum, UserSinger, UserSong, UserFollowing
@@ -86,10 +90,29 @@ class LikeSongView(APIView):
         except UserSong.DoesNotExist:
             return Response({"lỗi": "Bạn chưa thích bài hát này"}, status=status.HTTP_404_NOT_FOUND)
 
+# Tìm kiếm danh sách phát
+class PlaylistSearchView(generics.ListAPIView):
+    serializer_class = PlaylistSerializer
 
+    def get_queryset(self):
+        search_term = self.request.query_params.get('search', None)
+        if not search_term:
+            return Playlist.objects.none()
 
+        search_term_no_diacritics = unidecode(search_term).lower().replace(" ", "")
+        return Playlist.objects.filter(name__icontains=search_term_no_diacritics)
 
+# Tìm kiếm album
+class AlbumSearchView(generics.ListAPIView):
+    serializer_class = AlbumSerializer
 
+    def get_queryset(self):
+        search_term = self.request.query_params.get('search', None)
+        if not search_term:
+            return Album.objects.none()
+
+        search_term_no_diacritics = unidecode(search_term).lower().replace(" ", "")
+        return Album.objects.filter(name__icontains=search_term_no_diacritics)
 
 
 # Tìm kiếm bài hát
@@ -101,18 +124,8 @@ class SongSearchView(generics.ListAPIView):
         if not search_term:
             return Song.objects.none()
 
-       
         search_term_no_diacritics = unidecode(search_term).lower().replace(" ", "")
-
-        all_songs = Song.objects.all()
-
-       
-        filtered_songs = [
-            song for song in all_songs
-            if search_term_no_diacritics in unidecode(song.name).lower().replace(" ", "")
-        ]
-
-        return filtered_songs
+        return Song.objects.filter(name__icontains=search_term_no_diacritics)
     
 
 
