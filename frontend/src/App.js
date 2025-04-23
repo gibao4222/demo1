@@ -42,7 +42,7 @@ const App = () => {
           <Route path="/FollowSinger/:id" element={<FollowSinger />} />
           <Route path="/FollowUser/:id" element={<FollowUser />} />
           <Route path="/SongDetail/:id" element={<LikeSong />} />
-          <Route path="/AlbumDetail" element={<AlbumPage />} />
+          <Route path="/AlbumDetail/:id" element={<AlbumPage />} />
           <Route path="/PlaylistDetail/:id" element={<PlaylistPage />} />
 
 
