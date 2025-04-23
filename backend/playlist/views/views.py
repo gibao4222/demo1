@@ -5,6 +5,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from ..serializers import PlaylistSerializer, PlaylistSongSerializer
 from ..models import Playlist, PlaylistSong
+import os
+import uuid
+from django.conf import settings
 
 class PlaylistViewSet(viewsets.ModelViewSet):
     queryset = Playlist.objects.all()
@@ -13,7 +16,38 @@ class PlaylistViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['PUT'], url_path='change_playlists')
     def change_playlists(self, request, pk=None):
         playlist = self.get_object()
-        serializer = self.get_serializer(playlist, data=request.data, partial=True)
+        
+        data = request.data.copy()
+        
+        image_file = request.FILES.get('image')
+        if image_file:
+            # Kiểm tra định dạng file
+            if not image_file.name.lower().endswith(('.png', '.jpg', '.jpeg')):
+                return Response({'error': 'Only PNG, JPG, JPEG files are allowed.'}, status=400)
+            
+            # Kiểm tra kích thước file (tối đa 5MB)
+            if image_file.size > 5 * 1024 * 1024:
+                return Response({'error': 'File size exceeds 5MB limit.'}, status=400)
+
+            # Tạo tên file duy nhất để tránh trùng lặp
+            file_extension = os.path.splitext(image_file.name)[1]
+            file_name = f"{uuid.uuid4()}{file_extension}"
+            file_path = os.path.join(settings.MEDIA_ROOT, 'image_playlist', file_name)
+
+            
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            with open(file_path, 'wb+') as destination:
+                for chunk in image_file.chunks():
+                    destination.write(chunk)
+
+            # Lưu đường dẫn vào trường image
+            data['image'] = f"{settings.MEDIA_URL}image_playlist/{file_name}"
+        else:
+            # Nếu không có file mới, giữ giá trị image hiện tại
+            if 'image' not in data:
+                data['image'] = playlist.image
+                
+        serializer = self.get_serializer(playlist, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaPlay } from 'react-icons/fa';
+import { FiClock } from "react-icons/fi";
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { getSongPlaylist, getSongById, deleteSongFromPlaylist } from '../../Services/PlaylistService';
 
@@ -110,11 +111,15 @@ const PlaylistSong = ({ playlist, token }) => {
                     <thead>
                         <tr className="text-gray-400 border-b border-neutral-700 bg-transparent">
                             <th className="py-2 px-2 text-left w-[5%] bg-transparent">#</th>
-                            <th className="py-2 px-2 text-left w-[25%] bg-transparent">Tiêu đề</th>
+                            <th className="py-2 px-2 text-left w-[35%] bg-transparent">Tiêu đề</th>
                             <th className="py-2 px-2 text-left w-[25%] bg-transparent">Album</th>
-                            <th className="py-2 px-2 text-left w-[20%] bg-transparent">Ngày thêm</th>
-                            <th className="py-2 px-2 text-right w-[10%] bg-transparent">⏱</th>
-                            <th className="py-2 px-2 text-center w-[5%] bg-transparent"></th>
+                            <th className="py-2 px-2 text-left w-[15%] bg-transparent">Ngày thêm</th>
+                            <th className="py-2 px-2 text-right w-[10%] bg-transparent">
+                                <div className="flex justify-end">
+                                    <FiClock />
+                                </div>
+                            </th>
+                            <th className="py-2 px-2 text-center w-[10%] bg-transparent"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -147,12 +152,14 @@ const PlaylistSong = ({ playlist, token }) => {
                                 <td className="py-3 px-2">{song.dateAdded}</td>
                                 <td className="py-3 px-2 text-right">{song.duration}</td>
                                 <td className="py-3 px-2 text-center">
-                                    {hoveredSongId === song.id && (
-                                        <RiDeleteBin6Line
-                                            className="text-gray-200 cursor-pointer"
-                                            onClick={() => handleDeleteSong(song.playlistSongId)}
-                                        />
-                                    )}
+                                    <div className="flex justify-center items-center h-full">
+                                        {hoveredSongId === song.id && (
+                                            <RiDeleteBin6Line
+                                                className="text-gray-200 cursor-pointer"
+                                                onClick={() => handleDeleteSong(song.playlistSongId)}
+                                            />
+                                        )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}
