@@ -51,12 +51,18 @@ const Login = () => {
             
             localStorage.setItem('access_token', apiResponse.data.access);
             localStorage.setItem('refresh_token', apiResponse.data.refresh);
+            // Gọi API kiểm tra VIP
+    const vipResponse = await axios.get('/api/users/check-vip/', {
+        headers: {
+          Authorization: `Bearer ${apiResponse.data.access}`,
+        },
+      });
 
             login(
                 {
                     username: apiResponse.data.username,
                     role: apiResponse.data.role,
-                    vip: apiResponse.data.vip,
+                    vip: vipResponse.data.vip,
                 },
                 apiResponse.data.access,
                 apiResponse.data.refresh

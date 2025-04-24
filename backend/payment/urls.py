@@ -1,4 +1,6 @@
 from django.urls import path
+
+
 from . import views
 
 urlpatterns = [
@@ -7,4 +9,5 @@ urlpatterns = [
  
     path('vnpay/query/', views.QueryView.as_view(), name='payment_query'),
     path('vnpay/refund/', views.RefundView.as_view(), name='payment_refund'),
+
 ]
