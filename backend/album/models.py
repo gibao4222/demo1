@@ -8,6 +8,7 @@ class Album(models.Model):
     popularity = models.IntegerField()
     release_date = models.DateField(null=True, blank=True)
     id_singer = models.ForeignKey('singer.Singer', on_delete=models.CASCADE, related_name='albums', default=1)
+    isInLibrary = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'album_album'
@@ -22,6 +23,8 @@ class AlbumSong(models.Model):
 
     class Meta:
         db_table = 'album_albumsong'
+        # Thêm ràng buộc unique để đảm bảo mỗi bài hát chỉ thuộc một album
+        unique_together = [['id_song']]  # Mỗi id_song chỉ xuất hiện một lần
 
     def __str__(self):
         return f"AlbumSong: {self.id_album} - {self.id_song}"

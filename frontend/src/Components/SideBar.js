@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPlaylists, createPlaylist } from '../Services/PlaylistService';
+import { getLibraryAlbums } from '../Services/AlbumService';
 import { useAuth } from '../context/AuthContext';
 import PlaylistItem from './Playlist/PlaylistItem';
 import NavItem from './Item/NavItem';
@@ -9,6 +10,7 @@ function SideBar({ onToggleExpand, isExpanded }) {
   const navigate = useNavigate();
   const { token, user } = useAuth();
   const [playlists, setPlaylists] = useState([]);
+  const [libraryAlbums, setLibraryAlbums] = useState([]);
   const [activeTab, setActiveTab] = useState('Danh sách phát');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
@@ -22,22 +24,37 @@ function SideBar({ onToggleExpand, isExpanded }) {
       setPlaylists([...data]);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách phát:', error);
+      alert('Không thể tải danh sách phát. Vui lòng thử lại.');
+    }
+  }, [token]);
+
+  const fetchLibraryAlbums = useCallback(async () => {
+    try {
+      const data = await getLibraryAlbums(token);
+      console.log('Library albums from API:', data);
+      setLibraryAlbums(data);
+    } catch (error) {
+      console.error('Lỗi khi lấy danh sách album trong thư viện:', error);
+      alert('Không thể tải danh sách album trong thư viện.');
     }
   }, [token]);
 
   useEffect(() => {
     if (token) {
       fetchPlaylists();
+      fetchLibraryAlbums();
     } else {
       navigate('/login');
     }
 
     window.addEventListener('playlistUpdated', fetchPlaylists);
+    window.addEventListener('libraryUpdated', fetchLibraryAlbums);
 
     return () => {
       window.removeEventListener('playlistUpdated', fetchPlaylists);
+      window.removeEventListener('libraryUpdated', fetchLibraryAlbums);
     };
-  }, [token, fetchPlaylists, navigate]);
+  }, [token, fetchPlaylists, fetchLibraryAlbums, navigate]);
 
   useEffect(() => {
     if (isModalOpen && createButtonRef.current) {
@@ -53,6 +70,7 @@ function SideBar({ onToggleExpand, isExpanded }) {
     try {
       if (!user || !user.user_id) {
         console.error('Thiếu thông tin người dùng:', user);
+        alert('Vui lòng đăng nhập để tạo playlist.');
         navigate('/login');
         return;
       }
@@ -73,11 +91,13 @@ function SideBar({ onToggleExpand, isExpanded }) {
 
       const newPlaylist = await createPlaylist(playlistData, token);
       setPlaylists([...playlists, newPlaylist]);
+      alert('Đã tạo playlist thành công!');
       navigate(`/PlaylistDetail/${newPlaylist.id}`, {
         state: { playlist: newPlaylist },
       });
     } catch (error) {
       console.error('Lỗi khi tạo danh sách phát:', error.response?.data || error.message);
+      alert(error.response?.data?.error || 'Không thể tạo playlist. Vui lòng thử lại.');
     }
   };
 
@@ -86,13 +106,16 @@ function SideBar({ onToggleExpand, isExpanded }) {
     setIsModalOpen(false);
   };
 
+  const handleAlbumClick = (albumId) => {
+    navigate(`/AlbumDetail/${albumId}`);
+  };
+
   return (
     <div
       className={`bg-neutral-900 px-3.5 py-3 rounded-lg flex flex-col `}
       style={{ height: 'calc(100vh - 136px)' }}
     >
-      {/* Header - Cố định ở đầu */}
-      <div className="shadow-xl sticky top-0 z-10 bg-neutral-900 pb-2 ">
+      <div className="shadow-xl sticky top-0 z-10 bg-neutral-900 pb-2">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-white text-lg font-bold">Thư viện</h2>
           <div className="flex space-x-2 relative">
@@ -188,6 +211,13 @@ function SideBar({ onToggleExpand, isExpanded }) {
             className="py-1 flex-shrink-0"
           />
           <NavItem
+            text="Album"
+            active={activeTab === 'Album'}
+            activeStyle="default"
+            onClick={() => setActiveTab('Album')}
+            className="py-1 flex-shrink-0"
+          />
+          <NavItem
             text="Nghệ sĩ"
             active={activeTab === 'Nghệ sĩ'}
             activeStyle="default"
@@ -219,6 +249,28 @@ function SideBar({ onToggleExpand, isExpanded }) {
               ))
             ) : (
               <p className="text-neutral-400">Chưa có danh sách phát nào.</p>
+            )}
+          </ul>
+        )}
+        {activeTab === 'Album' && (
+          <ul className="mt-4">
+            {Array.isArray(libraryAlbums) && libraryAlbums.length > 0 ? (
+              libraryAlbums.map((album) => (
+                <li
+                  key={album.id}
+                  className="flex items-center p-2 hover:bg-neutral-700 cursor-pointer rounded"
+                  onClick={() => handleAlbumClick(album.id)}
+                >
+                  <img
+                    src={album.image || '/img/null.png'}
+                    alt={album.name}
+                    className="w-10 h-10 rounded mr-3"
+                  />
+                  <span className="text-white">{album.name}</span>
+                </li>
+              ))
+            ) : (
+              <p className="text-neutral-400">Chưa có album nào trong thư viện.</p>
             )}
           </ul>
         )}

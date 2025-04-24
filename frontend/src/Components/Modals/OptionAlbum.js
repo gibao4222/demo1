@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { FaPlus, FaChevronRight } from "react-icons/fa";
+import { FaPlus, FaChevronRight, FaCheckCircle } from "react-icons/fa"; // Thêm FaCheckCircle
 import { useAuth } from '../../context/AuthContext';
-import { getPlaylists, createPlaylist } from '../../Services/PlaylistService';
+import { getPlaylists, createPlaylist, addSongToPlaylist } from '../../Services/PlaylistService';
+import { updateAlbumLibraryStatus } from '../../Services/AlbumService';
 
-const OptionAlbum = ({ onClose, position }) => {
+const OptionAlbum = ({ onClose, position, tracks, albumData }) => {
     const { token, user } = useAuth();
     const [isOpen, setIsOpen] = useState(true);
     const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
@@ -25,7 +26,10 @@ const OptionAlbum = ({ onClose, position }) => {
             setLoading(true);
             try {
                 const data = await getPlaylists(token);
-                setPlaylists(data.map(playlist => playlist.name));
+                const validPlaylists = Array.isArray(data)
+                    ? data.filter(p => p && p.name && typeof p.name === 'string')
+                    : [];
+                setPlaylists(validPlaylists);
             } catch (err) {
                 setError("Không thể tải danh sách phát");
             } finally {
@@ -56,7 +60,7 @@ const OptionAlbum = ({ onClose, position }) => {
             };
 
             const newPlaylist = await createPlaylist(playlistData, token);
-            setPlaylists([...playlists, newPlaylist.name]);
+            setPlaylists([...playlists, newPlaylist]);
             window.dispatchEvent(new Event('playlistUpdated'));
             setIsPlaylistOpen(false);
             setIsOpen(false);
@@ -67,8 +71,57 @@ const OptionAlbum = ({ onClose, position }) => {
         }
     };
 
+    const handleAddSongsToPlaylist = async (playlistId) => {
+        if (!tracks || tracks.length === 0) {
+            setError("Không có bài hát nào để thêm");
+            alert("Không có bài hát nào để thêm");
+            return;
+        }
+
+        try {
+            for (const track of tracks) {
+                await addSongToPlaylist(playlistId, track.id_song.id, token);
+            }
+            alert(`Đã thêm ${tracks.length} bài hát vào danh sách phát`);
+            window.dispatchEvent(new Event('songsUpdated'));
+            setIsPlaylistOpen(false);
+            setIsOpen(false);
+            onClose();
+        } catch (error) {
+            setError("Không thể thêm bài hát vào danh sách phát");
+            alert("Không thể thêm bài hát vào danh sách phát");
+            console.error('Lỗi khi thêm bài hát:', error.response?.data || error.message);
+        }
+    };
+
+    const handleAddToLibrary = async () => {
+        try {
+            await updateAlbumLibraryStatus(token, albumData.id, true);
+            alert(`Đã thêm album ${albumData.name} vào Thư viện`);
+            window.dispatchEvent(new Event('libraryUpdated'));
+            setIsOpen(false);
+            onClose();
+        } catch (error) {
+            alert("Không thể thêm album vào thư viện");
+            console.error('Lỗi khi thêm album vào thư viện:', error);
+        }
+    };
+
+    const handleRemoveFromLibrary = async () => {
+        try {
+            await updateAlbumLibraryStatus(token, albumData.id, false);
+            alert(`Đã xóa album ${albumData.name} khỏi Thư viện`);
+            window.dispatchEvent(new Event('libraryUpdated'));
+            setIsOpen(false);
+            onClose();
+        } catch (error) {
+            alert("Không thể xóa album khỏi thư viện");
+            console.error('Lỗi khi xóa album khỏi thư viện:', error);
+        }
+    };
+
     const filteredPlaylists = playlists.filter((p) =>
-        p.toLowerCase().includes(search.toLowerCase())
+        (p.name || '').toLowerCase().includes(search.toLowerCase())
     );
 
     // Đóng toàn bộ menu khi click ra ngoài
@@ -126,9 +179,16 @@ const OptionAlbum = ({ onClose, position }) => {
                     >
                         <ul className="space-y-1">
                             <li>
-                                <button className="w-full text-left px-3 py-2 text-sm hover:bg-[#3e3e3e] rounded flex items-center gap-2">
-                                    <FaPlus className="text-xs" />
-                                    <span>Thêm vào Thư viện</span>
+                                <button
+                                    onClick={albumData.isInLibrary ? handleRemoveFromLibrary : handleAddToLibrary}
+                                    className="w-full text-left px-3 py-2 text-sm hover:bg-[#3e3e3e] rounded flex items-center gap-2"
+                                >
+                                    {albumData.isInLibrary ? (
+                                        <FaCheckCircle className="text-base text-green-500" />
+                                    ) : (
+                                        <FaPlus className="text-xs" />
+                                    )}
+                                    <span>{albumData.isInLibrary ? "Xóa khỏi Thư viện" : "Thêm vào Thư viện"}</span>
                                 </button>
                             </li>
                             <li>
@@ -182,12 +242,13 @@ const OptionAlbum = ({ onClose, position }) => {
                                                         >
                                                             <FaPlus className="text-xs" /> Danh sách phát mới
                                                         </li>
-                                                        {filteredPlaylists.map((playlist, index) => (
+                                                        {filteredPlaylists.map((playlist) => (
                                                             <li
-                                                                key={index}
+                                                                key={playlist.id}
+                                                                onClick={() => handleAddSongsToPlaylist(playlist.id)}
                                                                 className="p-2 hover:bg-[#3e3e3e] cursor-pointer text-sm"
                                                             >
-                                                                {playlist}
+                                                                {playlist.name}
                                                             </li>
                                                         ))}
                                                     </>
