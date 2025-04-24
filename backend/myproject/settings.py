@@ -136,7 +136,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'demo1_db',
 	    'USER': 'user1',
-	    'PASSWORD': '3120410057',
+	    'PASSWORD': '123456',
 	    'HOST': 'localhost',
 	    'PORT': '3306',
     }
@@ -305,17 +305,8 @@ CHANNEL_LAYERS = {
     },
 }
 
-# VNPAY_CONFIG = {
-#     'VNP_TMN_CODE': 'OFVZ0WRT',
-#     'VNP_HASH_SECRET': 'NS1S7SYJ5HJQ0J3B1Z1HQKHUCXP46SCS',
-#     'VNP_URL': 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
-#     'VNP_API_URL': 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction',
-#     'VNP_RETURN_URL': 'https://localhost:3000/payment/result',
-    
-# }
 
-# settings.py
-BACKEND_DOMAIN = "https://localhost"  # Dùng ngrok nếu chạy cục bộ
+BACKEND_DOMAIN = "https://localhost"  
 FRONTEND_DOMAIN = "https://localhost:3000"
 
 VNPAY_CONFIG = {
