@@ -18,11 +18,17 @@ const LoginStep2 = ({ qrCodeUrl, userId }) => {
       });
       localStorage.setItem('access_token', response.data.access);
       localStorage.setItem('refresh_token', response.data.refresh);
+      // Gọi API kiểm tra VIP
+    const vipResponse = await axios.get('/api/users/check-vip/', {
+      headers: {
+        Authorization: `Bearer ${response.data.access}`,
+      },
+    });
       login(
         {
           username: response.data.username,
           role: response.data.role,
-          vip: response.data.vip,
+          vip: vipResponse.data.vip,
         },
         response.data.access,
         response.data.refresh

@@ -51,26 +51,28 @@ class CreatePaymentView(APIView):
                 {"error": "SpotifyUser not found for this user"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-
-    
-
-        current_time = timezone.now()
-        if spotify_user.vip and spotify_user.vip_start_date:
-            time_elapsed = current_time - spotify_user.vip_start_date
-            if time_elapsed <= timedelta(days=30):  # Nếu còn trong 30 ngày
-                logger.info(f"User {spotify_user.username} is still within VIP period.")
+        
+        if spotify_user.vip:
+            logger.info(f"User {spotify_user.username} is VIP, checking vip_start_date...")
+            if spotify_user.vip_start_date:
+                current_time = timezone.now()
+                time_elapsed = current_time - spotify_user.vip_start_date
+                if time_elapsed <= timedelta(days=30):
+                    logger.info(f"User {spotify_user.username} is still within VIP period.")
+                    return Response(
+                        {"error": "Bạn đã là thành viên VIP. Hệ thống sẽ cho phép gia hạn khi gói hiện tại kết thúc."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            else:
+                logger.warning(f"User {spotify_user.username} is marked as VIP but has no vip_start_date.")
                 return Response(
-                    {"error": "Bạn đã là thành viên VIP. Hệ thống sẽ cho phép gia hạn khi gói hiện tại kết thúc."},
+                    {"error": "Thông tin VIP không hợp lệ. Vui lòng liên hệ hỗ trợ."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
 
-        if spotify_user.vip:
-            logger.info(f"User {spotify_user.username} is already a VIP.")
-            return Response(
-                {"error": "Bạn đã là thành viên VIP. Không cần thanh toán thêm."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+
+   
 
         order_id = "ORDER_" + datetime.now().strftime("%Y%m%d%H%M%S")
         amount = request.POST.get("amount", "10000")

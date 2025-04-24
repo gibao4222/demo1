@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import NavItem from './Item/NavItem';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -9,6 +9,7 @@ const NavBar = ({ user, onLogout, onSearch }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const location = useLocation();
+    const searchInputRef = useRef(null);
     const handleItemClick = (item) => {
         setActiveItem((prev) => (prev === item ? null : item));
     };
@@ -17,7 +18,11 @@ const NavBar = ({ user, onLogout, onSearch }) => {
         const searchParams = new URLSearchParams(location.search);
         const query = searchParams.get('query') || '';
         setSearchQuery(query);
+        if (searchInputRef.current) {
+            searchInputRef.current.focus();
+          }
     }, [location.search]);
+    
 
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
@@ -53,6 +58,7 @@ const NavBar = ({ user, onLogout, onSearch }) => {
                         className="bg-gray-800 text-white placeholder-gray-400 rounded-full py-2.5 pl-10 pr-12 w-[500px] focus:outline-none focus:ring-2 focus:ring-white"
                         value={searchQuery}
                         onChange={handleSearchChange}
+                        ref={searchInputRef}
                     />
                     <img
                         src="/icon/Search_S.png"
@@ -72,13 +78,14 @@ const NavBar = ({ user, onLogout, onSearch }) => {
             </div>
 
             <div className="flex items-center space-x-6 ml-6">
-                {/* Premium Button */}
-                <button className="bg-white text-black rounded-full px-4 py-2 text-sm font-semibold hover:bg-gray-500 truncate"
-                    onClick={() => navigate("/payment")}>
-
-                    Khám phá Premium
-
-                </button>
+            {!user?.vip && (
+                    <button
+                        className="bg-white text-black rounded-full px-4 py-2 text-sm font-semibold hover:bg-gray-500 truncate"
+                        onClick={() => navigate("/payment")}
+                    >
+                        Khám phá Premium
+                    </button>
+                )}
                 <div className="relative flex items-center space-x-4">
                     {/* Notification Bell Icon */}
                     <button className="text-neutral-400 hover:text-white">

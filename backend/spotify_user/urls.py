@@ -1,5 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
+from .views.reset_vip import CheckVIPStatusView
 from .views import  CurrentUserView, FollowArtistView, SingerSearchView, SongSearchView, SpotifyUserViewSet, UserAlbumViewSet, UserSearchView, UserSingerViewSet, PlaylistSearchView, AlbumSearchView
 from .views.auth_views import LoginStep1View,LoginStep2View, RegisterView, LogoutView
 from .views.facebook_login import FacebookLoginView
@@ -31,6 +33,7 @@ urlpatterns = [
     path('singers/search/', SingerSearchView.as_view(), name='singer-search'),
     path('playlists/playlists/', PlaylistSearchView.as_view(), name='playlist-search'),
     path('albums/search/', AlbumSearchView.as_view(), name='album-search'),
+    path('check-vip/', CheckVIPStatusView.as_view(), name='check-vip'),
 
 
 ]
