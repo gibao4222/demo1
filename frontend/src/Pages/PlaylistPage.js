@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import SideBar from "../Components/SideBar";
+import FriendActivity from "../Components/FriendActivity";
 import BottomPlayer from "../Components/BottomPlayer";
 import PlaylistDetail from '../Components/Playlist/PlaylistDetail';
 import { useAuth } from '../context/AuthContext';
@@ -27,18 +28,38 @@ const PlaylistPage = () => {
     };
 
     return (
-        <div className="min-h-screen overflow-hidden bg-gray-900 text-white flex flex-col">
+        <div className="min-h-screen bg-black text-white flex flex-col">
             {/* NavBar - Full width and sticky */}
             <NavBar user={user} onLogout={handleLogout} />
 
             {/* Main Content Area - Flex container for Sidebar and CreatePlaylist */}
             <div className="flex flex-1 ">
-                <SideBar />
-                <PlaylistDetail playlist={location.state?.playlist} /> {/* Truyền playlist từ state */}
+                <div className="fixed top-[64px] h-[calc(100vh-136px)] w-1/5 z-10">
+                    <SideBar />
+                </div>
+                <div className="w-1/5"></div>
+
+                <div className="w-px bg-black cursor-col-resize resize-x min-w-[4px] px-1"></div>
+
+                <div className="fixed top-[64px] left-[calc(20%+6px)] h-[calc(100vh-136px)] w-[calc(60%-12px)] z-0 ">
+                    <PlaylistDetail playlist={location.state?.playlist} /> {/* Truyền playlist từ state */}
+                </div>
+
+                <div className="flex-1"></div>
+
+                <div className="w-px bg-black cursor-col-resize resize-x min-w-[4px] px-1"></div>
+
+                <div className="fixed top-[64px] right-0 h-[calc(100vh-136px)] w-1/5 z-10">
+                    <FriendActivity />
+                </div>
+
+                
             </div>
 
             {/* Bottom Player - Fixed at the bottom */}
-            <BottomPlayer />
+            <div className="z-10">
+                <BottomPlayer />
+            </div>
         </div>
     );
 };
