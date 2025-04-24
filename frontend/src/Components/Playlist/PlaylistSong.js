@@ -4,7 +4,7 @@ import { FiClock } from "react-icons/fi";
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { getSongPlaylist, getSongById, deleteSongFromPlaylist } from '../../Services/PlaylistService';
 
-const PlaylistSong = ({ playlist, token }) => {
+const PlaylistSong = ({ playlist, token, refreshSongs }) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -21,7 +21,7 @@ const PlaylistSong = ({ playlist, token }) => {
         setError(null);
         try {
             const playlistSongs = await getSongPlaylist(playlist.id, token);
-            console.log('Danh sách bài hát:', playlistSongs);
+            console.log('Danh sách bài hát từ API:', playlistSongs);
 
             if (!Array.isArray(playlistSongs)) {
                 console.error('Dữ liệu bài hát không phải mảng:', playlistSongs);
@@ -37,7 +37,6 @@ const PlaylistSong = ({ playlist, token }) => {
                 return;
             }
 
-            // Loại bỏ bản ghi trùng lặp dựa trên id_song
             const uniqueSongs = Array.from(new Map(playlistSongs.map(item => [item.id_song, item])).values());
 
             const songDetailsPromises = uniqueSongs.map(async (item) => {
@@ -45,7 +44,7 @@ const PlaylistSong = ({ playlist, token }) => {
                     const song = await getSongById(item.id_song, token);
                     console.log(`Lấy thông tin bài hát id_song ${item.id_song}:`, song);
                     return {
-                        playlistSongId: item.id, // ID của PlaylistSong
+                        playlistSongId: item.id,
                         id: song.id,
                         title: song.name || 'Không rõ',
                         album: song.album || 'Không rõ',
@@ -76,8 +75,9 @@ const PlaylistSong = ({ playlist, token }) => {
     };
 
     useEffect(() => {
+        console.log('PlaylistSong useEffect - playlist.id:', playlist?.id, 'refreshSongs:', refreshSongs);
         fetchSongs();
-    }, [playlist?.id, token]);
+    }, [playlist?.id, token, refreshSongs]);
 
     const handleDeleteSong = async (playlistSongId) => {
         if (!playlistSongId || !token) {
@@ -89,7 +89,6 @@ const PlaylistSong = ({ playlist, token }) => {
         try {
             await deleteSongFromPlaylist(playlistSongId, token);
             console.log(`Xóa bài hát với playlistSongId ${playlistSongId} thành công`);
-            // Làm mới danh sách bài hát
             await fetchSongs();
         } catch (error) {
             console.error(`Lỗi khi xóa bài hát với playlistSongId ${playlistSongId}:`, error);
@@ -98,8 +97,7 @@ const PlaylistSong = ({ playlist, token }) => {
     };
 
     return (
-        <div className="mt-8">
-            <p className="text-xl font-bold text-white mb-8">Danh sách bài hát</p>
+        <div className="mt-8 pl-6 pr-6">
             {loading ? (
                 <p className="text-gray-400">Đang tải...</p>
             ) : error ? (

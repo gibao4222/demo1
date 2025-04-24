@@ -1,13 +1,15 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import PlaylistViewSet, PlaylistSongViewSet
-
+from . import color_extraction
 # Tạo router cho các endpoint mặc định
 router = DefaultRouter()
 router.register(r'playlists', PlaylistViewSet, basename='playlists')
 router.register(r'playlist-songs', PlaylistSongViewSet, basename='playlist-songs')
 
 urlpatterns = [
+    path('get-dominant-color/', color_extraction.get_dominant_color, name='get_dominant_color'),
+    
     # Các URL mặc định từ router
     path('', include(router.urls)),
 

@@ -23,18 +23,21 @@ const ModalChangePlaylist = ({
   const [tempImageSrc, setTempImageSrc] = useState(imageSrc);
   const [tempName, setTempName] = useState(name);
   const [tempDescription, setTempDescription] = useState(description);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
     if (isModalOpen) {
       setTempImageSrc(imageSrc);
       setTempName(name);
       setTempDescription(description);
+      setSelectedFile(null);
     }
   }, [isModalOpen, imageSrc, name, description]);
 
   const handleTempImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = () => {
         setTempImageSrc(reader.result);
@@ -45,13 +48,14 @@ const ModalChangePlaylist = ({
 
   const handleSave = async () => {
     try {
-      const playlistData = {
-        name: tempName,
-        description: tempDescription,
-        image: tempImageSrc,
-      };
+      const formData = new FormData();
+      formData.append('name', tempName);
+      formData.append('description', tempDescription);
+      if (selectedFile) {
+        formData.append('image', selectedFile); // Gửi file gốc
+      }
 
-      const updatedPlaylist = await updatePlaylist(playlistId, playlistData, token);
+      const updatedPlaylist = await updatePlaylist(playlistId, formData, token);
       console.log('Playlist updated successfully:', updatedPlaylist);
 
       setImageSrc(updatedPlaylist.image);
@@ -63,13 +67,14 @@ const ModalChangePlaylist = ({
 
       closeModal();
     } catch (error) {
-      console.error('Failed to update playlist:', error);
-      alert('Có lỗi xảy ra khi cập nhật playlist. Vui lòng thử lại.');
+      console.error('Failed to update playlist:', error.response?.data || error.message);
+      alert('Có lỗi xảy ra khi cập nhật playlist: ' + JSON.stringify(error.response?.data || error.message));
     }
   };
 
   const handleRemoveTempImage = () => {
     setTempImageSrc('/img/null.png');
+    setSelectedFile(null);
   };
 
   const renderInputField = (value, setValue, isEditing, setIsEditing, label, customClass = '') => (
@@ -160,7 +165,7 @@ const ModalChangePlaylist = ({
 
               <input
                 type="file"
-                accept="image/*"
+                accept="image/png,image/jpeg,image/jpg"
                 className="hidden"
                 ref={fileInputRef}
                 onChange={handleTempImageChange}

@@ -48,12 +48,12 @@ export const updatePlaylist = async (id, playlistData, token) => {
         const response = await axios.put(`/api/playlists/change_playlist/${id}/`, playlistData, {
             headers: {
                 Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
+                // 'Content-Type': 'application/json',
             },
         });
         return response.data;
     } catch (error) {
-        console.error(`Error updating playlist with id ${id}:`, error);
+        console.error(`Error updating playlist with id ${id}:`, error.response?.data || error.message);
         throw error;
     }
 };
