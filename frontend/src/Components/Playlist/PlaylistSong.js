@@ -9,6 +9,67 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [hoveredSongId, setHoveredSongId] = useState(null);
+    const [durations, setDurations] = useState({});
+
+    // Hàm định dạng thời gian
+    const formatTime = (time) => {
+        if (!time) return 'N/A';
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    };
+
+    // Hàm tính khoảng thời gian tương đối
+    const formatRelativeTime = (dateString) => {
+        if (!dateString) return 'Không rõ';
+
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'Không rõ'; // Kiểm tra ngày không hợp lệ
+
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000); // Khoảng cách tính bằng giây
+
+            // Nếu thời gian âm (tương lai), trả về "Vừa xong"
+            if (diffInSeconds < 0) return 'Vừa xong';
+
+            // Dưới 60 giây: hiển thị giây (0-59 giây)
+            if (diffInSeconds < 60) {
+                return diffInSeconds === 0 ? 'Vừa xong' : `${diffInSeconds} giây trước`;
+            }
+
+            // Dưới 60 phút: hiển thị phút (1-59 phút)
+            const diffInMinutes = Math.floor(diffInSeconds / 60);
+            if (diffInMinutes < 60) {
+                return `${diffInMinutes} phút trước`;
+            }
+
+            // Dưới 24 giờ: hiển thị giờ (1-23 giờ)
+            const diffInHours = Math.floor(diffInMinutes / 60);
+            if (diffInHours < 24) {
+                return `${diffInHours} giờ trước`;
+            }
+
+            // Từ 24 giờ trở lên: hiển thị số ngày
+            const diffInDays = Math.floor(diffInHours / 24);
+            if (diffInDays < 30) {
+                return `${diffInDays} ngày trước`;
+            }
+
+            // Dưới 12 tháng: hiển thị số tháng
+            const diffInMonths = Math.floor(diffInDays / 30);
+            if (diffInMonths < 12) {
+                return `${diffInMonths} tháng trước`;
+            }
+
+            // Từ 12 tháng trở lên: hiển thị số năm
+            const diffInYears = Math.floor(diffInMonths / 12);
+            return `${diffInYears} năm trước`;
+        } catch (error) {
+            console.error(`Lỗi định dạng thời gian ${dateString}:`, error);
+            return 'Không rõ';
+        }
+    };
 
     const fetchSongs = async () => {
         if (!playlist?.id || !token) {
@@ -47,11 +108,12 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
                         playlistSongId: item.id,
                         id: song.id,
                         title: song.name || 'Không rõ',
-                        album: song.album || 'Không rõ',
+                        album: song.album?.name || 'Không rõ',
                         artist: song.artist || 'Không rõ',
                         duration: song.duration || '--:--',
                         image: song.image || '/img/null.png',
-                        dateAdded: item.date_added || 'Không rõ',
+                        dateAdded: formatRelativeTime(item.date_added),
+                        file_audio: song.file_audio,
                     };
                 } catch (songError) {
                     console.error(`Lỗi khi lấy thông tin bài hát id_song ${item.id_song}:`, songError);
@@ -66,6 +128,33 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
             if (fullSongs.length === 0) {
                 setError('Không thể tải chi tiết bài hát. Vui lòng thử lại.');
             }
+
+            const durationMap = {};
+            for (const song of fullSongs) {
+                if (song.file_audio) {
+                    try {
+                        const audio = new Audio(song.file_audio);
+                        await new Promise((resolve) => {
+                            audio.addEventListener('loadedmetadata', () => {
+                                durationMap[song.id] = audio.duration;
+                                resolve();
+                            });
+                            audio.addEventListener('error', () => {
+                                console.error(`Lỗi tải metadata cho bài hát ${song.id}`);
+                                durationMap[song.id] = null;
+                                resolve();
+                            });
+                        });
+                    } catch (error) {
+                        console.error(`Lỗi tải audio cho bài hát ${song.id}:`, error);
+                        durationMap[song.id] = null;
+                    }
+                } else {
+                    durationMap[song.id] = null;
+                }
+            }
+            setDurations(durationMap);
+
         } catch (error) {
             console.error('Lỗi khi tải danh sách bài hát:', error);
             setError('Không thể tải danh sách bài hát. Vui lòng thử lại.');
@@ -79,20 +168,35 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
         fetchSongs();
     }, [playlist?.id, token, refreshSongs]);
 
+    useEffect(() => {
+        const handleSongsUpdated = () => {
+            fetchSongs();
+        };
+
+        window.addEventListener('songsUpdated', handleSongsUpdated);
+
+        return () => {
+            window.removeEventListener('songsUpdated', handleSongsUpdated);
+        };
+    }, []);
+
     const handleDeleteSong = async (playlistSongId) => {
         if (!playlistSongId || !token) {
             console.error('Thiếu playlistSongId hoặc token:', { playlistSongId, token });
             setError('Không thể xóa bài hát: thiếu thông tin.');
+            alert('Không thể xóa bài hát: thiếu thông tin.');
             return;
         }
 
         try {
             await deleteSongFromPlaylist(playlistSongId, token);
             console.log(`Xóa bài hát với playlistSongId ${playlistSongId} thành công`);
+            alert('Đã xóa bài hát khỏi playlist!');
             await fetchSongs();
         } catch (error) {
             console.error(`Lỗi khi xóa bài hát với playlistSongId ${playlistSongId}:`, error);
             setError('Không thể xóa bài hát. Vui lòng thử lại.');
+            alert('Không thể xóa bài hát. Vui lòng thử lại.');
         }
     };
 
@@ -148,7 +252,11 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
                                 </td>
                                 <td className="py-3 px-2">{song.album}</td>
                                 <td className="py-3 px-2">{song.dateAdded}</td>
-                                <td className="py-3 px-2 text-right">{song.duration}</td>
+                                <td className="py-3 px-2 text-right">
+                                    <span className="text-white font-semibold select-none">
+                                        {durations[song.id] ? formatTime(durations[song.id]) : 'N/A'}
+                                    </span>
+                                </td>
                                 <td className="py-3 px-2 text-center">
                                     <div className="flex justify-center items-center h-full">
                                         {hoveredSongId === song.id && (

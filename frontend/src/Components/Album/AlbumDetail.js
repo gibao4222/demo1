@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { FaPlay } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getAlbumById, getAlbumSongById } from '../../Services/AlbumService';
 import AlbumHeader from './AlbumHeader';
 import SongTable from './AlbumSong';
+import axios from '../../axios';
 
 const AlbumDetail = () => {
     const navigate = useNavigate();
@@ -28,52 +29,113 @@ const AlbumDetail = () => {
     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
     const [hoveredTrackId, setHoveredTrackId] = useState(null);
     const [totalDuration, setTotalDuration] = useState(0);
+    const [dominantColor, setDominantColor] = useState('#434343');
+    const [isLoadingColor, setIsLoadingColor] = useState(true);
 
-    // Lấy dữ liệu từ API
+    const BACKEND_DOMAIN = 'https://localhost';
+
+    const fetchData = useCallback(async () => {
+        if (!token || !id) {
+            setError('Thiếu token hoặc albumId');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const albumResponse = await getAlbumById(token, id);
+            console.log('Dữ liệu album từ API:', albumResponse);
+            setAlbumData(albumResponse);
+
+            const albumSongsResponse = await getAlbumSongById(token, id);
+            console.log('Dữ liệu bài hát từ API:', albumSongsResponse);
+
+            if (albumSongsResponse && Array.isArray(albumSongsResponse)) {
+                setTracks(albumSongsResponse);
+            } else {
+                setTracks([]);
+            }
+
+            setLoading(false);
+        } catch (err) {
+            console.error('Lỗi khi lấy dữ liệu:', err);
+            setError('Không thể lấy dữ liệu album');
+            setLoading(false);
+        }
+    }, [token, id]);
+
     useEffect(() => {
-        const fetchData = async () => {
-            if (!token || !id) {
-                setError('Thiếu token hoặc albumId');
-                setLoading(false);
+        fetchData();
+    }, [fetchData]);
+
+    // Lắng nghe sự kiện libraryUpdated để làm mới albumData
+    useEffect(() => {
+        window.addEventListener('libraryUpdated', fetchData);
+        return () => {
+            window.removeEventListener('libraryUpdated', fetchData);
+        };
+    }, [fetchData]);
+
+    // Hàm chuyển đổi hex sang RGB
+    const hexToRgb = (hex) => {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return { r, g, b };
+    };
+
+    // Hàm tạo màu RGBA từ hex và opacity
+    const getRgbaColor = (hex, opacity) => {
+        const { r, g, b } = hexToRgb(hex);
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    };
+
+    // Lấy mã màu chủ đạo từ ảnh bìa album
+    useEffect(() => {
+        const fetchDominantColor = async () => {
+            setIsLoadingColor(true);
+            if (imageError || !albumData?.image || albumData.image === '/img/null.png') {
+                setDominantColor('#434343');
+                setIsLoadingColor(false);
                 return;
             }
 
+            const apiImageUrl = albumData.image.startsWith('http')
+                ? albumData.image
+                : `${BACKEND_DOMAIN}${albumData.image}`;
+
             try {
-                // Lấy thông tin album
-                const albumResponse = await getAlbumById(token, id);
-                console.log('Dữ liệu album từ API:', albumResponse);
-                setAlbumData(albumResponse);
+                const response = await axios.get(`${BACKEND_DOMAIN}/api/playlists/get-dominant-color/`, {
+                    params: { image_url: apiImageUrl },
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
-                // Lấy danh sách bài hát của album
-                const albumSongsResponse = await getAlbumSongById(token, id);
-                console.log('Dữ liệu bài hát từ API:', albumSongsResponse);
-
-                // Kiểm tra và gán dữ liệu tracks
-                if (albumSongsResponse && Array.isArray(albumSongsResponse)) {
-                    setTracks(albumSongsResponse);
-                } else {
-                    setTracks([]);
+                if (response.data.dominant_color) {
+                    setDominantColor(response.data.dominant_color);
+                } else if (response.data.error) {
+                    console.error('Error fetching dominant color:', response.data.error);
+                    setDominantColor('#434343');
                 }
-
-                setLoading(false);
-            } catch (err) {
-                console.error('Lỗi khi lấy dữ liệu:', err);
-                setError('Không thể lấy dữ liệu album');
-                setLoading(false);
+            } catch (error) {
+                console.error('Failed to fetch dominant color:', error.response?.data?.error || error.message);
+                setDominantColor('#434343');
+            } finally {
+                setIsLoadingColor(false);
             }
         };
 
-        fetchData();
-    }, [id, token]);
+        if (albumData?.image) {
+            fetchDominantColor();
+        }
+    }, [albumData?.image, imageError, token]);
 
-    // Hàm formatTime
     const formatTime = (time) => {
         const minutes = Math.floor(time / 60);
         const seconds = Math.floor(time % 60);
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     };
 
-    // Xử lý khi durations thay đổi
     const handleDurationsChange = (durations) => {
         const total = Object.values(durations).reduce((sum, duration) => {
             return sum + (duration || 0);
@@ -86,7 +148,7 @@ const AlbumDetail = () => {
         const handleScroll = () => {
             if (controlsRef.current) {
                 const controlsPosition = controlsRef.current.getBoundingClientRect();
-                setIsSticky(controlsPosition.top < 0);
+                setIsSticky(controlsPosition.top <= 64); // Điều chỉnh theo chiều cao NavBar (64px)
             }
         };
 
@@ -94,7 +156,6 @@ const AlbumDetail = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Kiểm tra xác thực
     useEffect(() => {
         if (!user) {
             console.error('Người dùng chưa đăng nhập, chuyển hướng đến trang đăng nhập');
@@ -102,13 +163,11 @@ const AlbumDetail = () => {
         }
     }, [user, navigate]);
 
-    // Xử lý lỗi hình ảnh
     const handleImageError = () => {
         console.error('Không thể tải hình ảnh:', albumData?.image);
         setImageError(true);
     };
 
-    // Component modal ảnh lớn sử dụng Portal
     const ImageModal = () => {
         return createPortal(
             <div
@@ -128,67 +187,75 @@ const AlbumDetail = () => {
         );
     };
 
-    // Nếu đang tải dữ liệu
     if (loading) {
         return <div className="text-white">Đang tải...</div>;
     }
 
-    // Nếu có lỗi
     if (error) {
         return <div className="text-red-500">{error}</div>;
     }
 
-    // Nếu không có dữ liệu
     if (!albumData || !tracks) {
         return <div className="text-white">Không tìm thấy dữ liệu album</div>;
     }
 
     return (
-        <div className="z-0 bg-neutral-900 rounded-lg flex flex-col h-[calc(100vh-136px)]">
-            <div className="w-full p-6 bg-gradient-to-b from-[#2A2A2A] to-black text-white min-h-[calc(100vh-300px)] overflow-y-auto scrollbar scrollbar-thumb-transparent scrollbar-track-transparent hover:scrollbar-thumb-gray-600">
-                {/* Thanh tiêu đề sticky */}
-                {isSticky && (
-                    <div className="fixed top-0 left-[28.57%] right-0 w-5/7 bg-[#2A2A2A] z-50 border-b border-[#3A3A3A] px-6 py-3 flex items-center justify-start gap-4">
-                        <button
-                            aria-label="Phát nhạc"
-                            className="w-10 h-10 rounded-full bg-[#1ed760] flex items-center justify-center hover:bg-[#1db954] transition"
-                        >
-                            <FaPlay className="text-black text-sm" />
-                        </button>
-                        <h2 className="text-lg font-bold text-white">{albumData.name}</h2>
+        <div className="z-0 bg-neutral-900 rounded-lg flex flex-col h-[calc(100vh-136px)] overflow-hidden">
+            <div className="overflow-y-auto overlay-scroll">
+                <div
+                    className="p-6 h-auto" // Xóa h-96 để chiều cao tự động
+                    style={{
+                        background: `linear-gradient(to bottom, ${getRgbaColor(dominantColor, 1)}, ${getRgbaColor(dominantColor, 0)})`,
+                    }}
+                >
+                    {isLoadingColor ? (
+                        <p className="text-white text-xl">Đang tải album...</p>
+                    ) : (
+                        <AlbumHeader
+                            tracks={tracks}
+                            albumData={albumData}
+                            imageError={imageError}
+                            setImageError={setImageError}
+                            isHovered={isHovered}
+                            setIsHovered={setIsHovered}
+                            isOptionOpen={isOptionOpen}
+                            setIsOptionOpen={setIsOptionOpen}
+                            modalPosition={modalPosition}
+                            setModalPosition={setModalPosition}
+                            isImageModalOpen={isImageModalOpen}
+                            setIsImageModalOpen={setIsImageModalOpen}
+                            controlsRef={controlsRef}
+                            totalDuration={totalDuration}
+                            formatTime={formatTime}
+                            dominantColor={dominantColor}
+                        />
+                    )}
+                </div>
+                <div className="relative z-10 bg-gradient-to-b from-neutral-900/35 to-neutral-900/100">
+                    {isSticky && (
+                        <div className="fixed top-[64px] left-[calc(20%+6px)] w-[calc(60%-12px)] bg-[#2A2A2A] z-50 border-b border-[#3A3A3A] px-6 py-3 flex items-center justify-start gap-4">
+                            <button
+                                aria-label="Phát nhạc"
+                                className="w-10 h-10 rounded-full bg-[#1ed760] flex items-center justify-center hover:bg-[#1db954] transition"
+                            >
+                                <FaPlay className="text-black text-sm" />
+                            </button>
+                            <h2 className="text-lg font-bold text-white">{albumData.name}</h2>
+                        </div>
+                    )}
+
+                    {isImageModalOpen && <ImageModal />}
+
+                    <div className="mt-4 px-6">
+                        <SongTable
+                            tracks={tracks}
+                            albumData={albumData}
+                            hoveredTrackId={hoveredTrackId}
+                            setHoveredTrackId={setHoveredTrackId}
+                            onDurationsChange={handleDurationsChange}
+                        />
                     </div>
-                )}
-
-                {/* Phần đầu album và nút điều khiển */}
-                <AlbumHeader
-                    tracks={tracks}
-                    albumData={albumData}
-                    imageError={imageError}
-                    setImageError={setImageError}
-                    isHovered={isHovered}
-                    setIsHovered={setIsHovered}
-                    isOptionOpen={isOptionOpen}
-                    setIsOptionOpen={setIsOptionOpen}
-                    modalPosition={modalPosition}
-                    setModalPosition={setModalPosition}
-                    isImageModalOpen={isImageModalOpen}
-                    setIsImageModalOpen={setIsImageModalOpen}
-                    controlsRef={controlsRef}
-                    totalDuration={totalDuration}
-                    formatTime={formatTime}
-                />
-
-                {/* Hiển thị modal ảnh lớn bằng Portal */}
-                {isImageModalOpen && <ImageModal />}
-
-                {/* Bảng danh sách bài hát */}
-                <SongTable
-                    tracks={tracks}
-                    albumData={albumData}
-                    hoveredTrackId={hoveredTrackId}
-                    setHoveredTrackId={setHoveredTrackId}
-                    onDurationsChange={handleDurationsChange}
-                />
+                </div>
             </div>
         </div>
     );
