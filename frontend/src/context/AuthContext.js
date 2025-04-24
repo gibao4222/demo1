@@ -82,9 +82,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
   const refreshUser = async () => {
-    if (!user || !token) return;
+    if (!user || !token) {
+        console.error('Không thể làm mới user: user hoặc token không tồn tại');
+        return false;
+    }
     try {
         const response = await axios.get('/api/users/users/', {
             headers: { Authorization: `Bearer ${token}` }
@@ -92,9 +94,13 @@ export const AuthProvider = ({ children }) => {
         const currentUser = response.data.find(u => u.username === user.username);
         if (currentUser) {
             setUser({ ...user, ...currentUser });
+            return true;
+        } else {
+            console.error('Không tìm thấy user trong dữ liệu API:', user.username);
+            return false;
         }
     } catch (err) {
-        console.error('Lỗi khi làm mới người dùng:', err);
+        console.error('Lỗi khi làm mới user:', err.message);
         if (err.response?.status === 401) {
             const newToken = await refreshToken();
             if (newToken) {
@@ -105,21 +111,26 @@ export const AuthProvider = ({ children }) => {
                     const currentUser = response.data.find(u => u.username === user.username);
                     if (currentUser) {
                         setUser({ ...user, ...currentUser });
+                        return true;
+                    } else {
+                        console.error('Không tìm thấy user sau khi làm mới token:', user.username);
+                        return false;
                     }
                 } catch (retryErr) {
-                    console.error('Lỗi khi thử lại:', retryErr);
+                    console.error('Lỗi khi thử lại với token mới:', retryErr.message);
+                    return false;
                 }
             }
         }
+        return false;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, refreshToken }}>
+    <AuthContext.Provider value={{ user, token, login, logout, refreshToken, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
-

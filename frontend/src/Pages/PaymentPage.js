@@ -36,42 +36,41 @@ const PaymentPage = () => {
         setSuccess('');
         setLoading(true);
 
-        try {
-            const response = await axios.post(
-                'api/payment/vnpay/create/',
-                formData,
-                {
-                    headers: {
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                }
-            );
 
-            if (response.data.payment_url) {
-                setSuccess('Đang chuyển hướng đến cổng thanh toán VNPay...');
-                setTimeout(() => {
-                    window.location.href = response.data.payment_url;
-                }, 1000);
-            } else {
-                setError('Không thể tạo URL thanh toán. Vui lòng thử lại.');
+    try {
+        const response = await axios.post(
+            'api/payment/vnpay/create/',
+            formData,
+            {
+                headers: {
+                    'Authorization': `Token ${token}`,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
             }
-        } catch (err) {
-            if (err.response?.status === 401) {
-                logout();
-                navigate('/login');
-            } else {
-                const errorMessage = err.response?.data?.error || 'Lỗi khi tạo thanh toán';
-                if (errorMessage === 'Bạn đã là thành viên VIP. Không cần thanh toán thêm.') {
-                    setSuccess(errorMessage);
-                } else {
-                    setError(errorMessage);
-                }
-            }
-        } finally {
-            setLoading(false);
+        );
+
+        if (response.data.payment_url) {
+            setSuccess('Đang chuyển hướng đến cổng thanh toán VNPay...');
+            setTimeout(() => {
+                window.location.href = response.data.payment_url;
+            }, 1000);
+        } else {
+            setError('Không thể tạo URL thanh toán. Vui lòng thử lại.');
         }
-    };
+    } catch (err) {
+        if (err.response?.status === 401) {
+            logout();
+            navigate('/login');
+        } else if (err.response?.data?.error) {
+            // Hiển thị thông báo lỗi từ backend (ví dụ: "Thông tin VIP không hợp lệ...")
+            setError(err.response.data.error);
+        } else {
+            setError('Có lỗi xảy ra. Vui lòng thử lại.');
+        }
+    } finally {
+        setLoading(false);
+    }
+};
 
     if (!token || !user) return null;
 
