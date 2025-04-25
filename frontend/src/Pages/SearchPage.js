@@ -49,14 +49,33 @@ function SearchPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+        <div className="min-h-screen bg-black text-white flex flex-col">
             <NavBar user={user} onLogout={handleLogout} onSearch={handleSearch} />
+
             <div className="flex flex-1">
-                <SideBar />
-                <MainSearch searchQuery={searchQuery} />
-                <FriendActivity />
+
+                <div className="fixed top-[64px] h-[calc(100vh-136px)] w-1/5 z-10">
+                    <SideBar />
+                </div>
+
+                <div className="w-1/5"></div>
+                <div className="w-px bg-black cursor-col-resize resize-x min-w-[4px] px-1"></div>
+
+                <div className="fixed top-[64px] left-[calc(20%+6px)] h-[calc(100vh-136px)] w-[calc(60%-12px)] z-0 ">
+                    <MainSearch searchQuery={searchQuery} />
+                </div>
+
+                <div className="flex-1"></div>
+
+                <div className="w-px bg-black cursor-col-resize resize-x min-w-[4px] px-1"></div>
+
+                <div className="fixed top-[64px] right-0 h-[calc(100vh-136px)] w-1/5 z-10">
+                    <FriendActivity />
+                </div>
             </div>
-            <BottomPlayer />
+            <div className="z-10">
+                <BottomPlayer />
+            </div>
         </div>
     );
 }
