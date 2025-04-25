@@ -18,4 +18,5 @@ urlpatterns = [
     path('create-album/', AlbumViewSet.as_view({'post': 'create_album'}), name='album-create'),
     path('change-album/<int:pk>/', AlbumViewSet.as_view({'put': 'change_album'}), name='album-change'),
     path('delete-album/<int:pk>/', AlbumViewSet.as_view({'delete': 'delete_album'}), name='album-delete'),
+    path('albums/<int:pk>/update-library-status/', AlbumViewSet.as_view({'put': 'update_library_status'}), name='album-update-library-status'),
 ]

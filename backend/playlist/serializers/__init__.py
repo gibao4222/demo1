@@ -12,11 +12,11 @@ class PlaylistSongSerializer(serializers.ModelSerializer):
     id_playlist = serializers.PrimaryKeyRelatedField(queryset=Playlist.objects.all())
     id_song = serializers.PrimaryKeyRelatedField(queryset=Song.objects.all())
 
+    # class Meta:
+    #     model = PlaylistSong
+    #     fields = ['id', 'id_playlist', 'id_song', 'date_added']
+
+class PlaylistSongSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaylistSong
-        fields = ['id', 'id_playlist', 'id_song']
-
-# class PlaylistSongSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = PlaylistSong
-#         fields = '__all__'
+        fields = '__all__'
