@@ -1,12 +1,18 @@
 import React, { useState } from "react";
-import SideBar from '/var/www/demo1/frontend/src/Components/SideBar';
+// import SideBar from '/var/www/demo1/frontend/src/Components/SideBar';
 import MainContentPLChill from '../Components/MainContentPLChill';
-import FriendActivity from '/var/www/demo1/frontend/src/Components/FriendActivity';
-import BottomPlayer from '/var/www/demo1/frontend/src/Components/BottomPlayer';
-import MainSearch from '/var/www/demo1/frontend/src/Components/MainSearch';
-import MainFollowSinger from '/var/www/demo1/frontend/src/Components/MainFollowSinger';
+// import FriendActivity from '/var/www/demo1/frontend/src/Components/FriendActivity';
+// import BottomPlayer from '/var/www/demo1/frontend/src/Components/BottomPlayer';
+// import MainSearch from '/var/www/demo1/frontend/src/Components/MainSearch';
+// import MainFollowSinger from '/var/www/demo1/frontend/src/Components/MainFollowSinger';
 import MainContent from '../Components/MainContent';
-import MainSinger from '/var/www/demo1/frontend/src/Components/MainSinger';
+// import MainSinger from '/var/www/demo1/frontend/src/Components/MainSinger';
+import SideBar from "../Components/SideBar";
+import FriendActivity from "../Components/FriendActivity";
+import BottomPlayer from "../Components/BottomPlayer";
+import MainSearch from "../Components/MainSearch";
+import MainFollowSinger from "../Components/MainFollowSinger";
+import MainSinger from "../Components/MainSinger";
 function FollowSinger() {
 
     return (
