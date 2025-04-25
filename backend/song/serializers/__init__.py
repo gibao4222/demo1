@@ -8,8 +8,10 @@ class SingerSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 class SongSerializer(serializers.ModelSerializer):
-<<<<<<< HEAD
+
     singers = serializers.SerializerMethodField()
+    # Thêm trường album để lấy thông tin album từ mối quan hệ song_albums
+    album = serializers.SerializerMethodField()
     
     class Meta:
         model = Song
@@ -20,14 +22,7 @@ class SongSerializer(serializers.ModelSerializer):
         singer_songs = obj.song_singers.all()  # Sử dụng related_name='song_singers'
         singers = [singer_song.id_singer for singer_song in singer_songs]
         return SingerSerializer(singers, many=True).data
-=======
-    # Thêm trường album để lấy thông tin album từ mối quan hệ song_albums
-    album = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Song
-        fields = '__all__' 
-
+    
     def get_album(self, obj):
         try:
             # Lấy bản ghi AlbumSong liên quan đến bài hát này
@@ -47,4 +42,4 @@ class SongSerializer(serializers.ModelSerializer):
         except Exception as e:
             print(f"Error fetching album for song {obj.id}: {e}")
             return None
->>>>>>> myduyen
+
