@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import SideBar from "../Components/SideBar";
 import AlbumDetail from "../Components/Album/AlbumDetail";
 import FriendActivity from "../Components/FriendActivity";
@@ -7,10 +7,9 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import NavBar from "../Components/NavBar";
 
-const Home = () => {
+const AlbumPage = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-
 
     if (!user) {
         return null;
@@ -35,7 +34,6 @@ const Home = () => {
 
                 {/* Main Content Area - Flex container for Sidebar, MainContent, and FriendActivity */}
                 <div className="flex flex-1">
-
                     <div className="fixed top-[64px] h-[calc(100vh-136px)] w-1/5 z-10">
                         <SideBar />
                     </div>
@@ -44,7 +42,7 @@ const Home = () => {
 
                     <div className="w-px bg-black cursor-col-resize resize-x min-w-[4px] px-1"></div>
 
-                    <div className="fixed top-[64px] left-[calc(20%+6px)] h-[calc(100vh-136px)] w-[calc(60%-12px)] z-0 ">
+                    <div className="fixed top-[64px] left-[calc(20%+6px)] h-[calc(100vh-136px)] w-[calc(60%-12px)] z-0">
                         <AlbumDetail />
                     </div>
 
@@ -60,10 +58,10 @@ const Home = () => {
                 {/* Bottom Player - Fixed at the bottom */}
                 <div className="z-10">
                     <BottomPlayer />
-
                 </div>
             </div>
         </>
     );
-}
-export default Home;
+};
+
+export default AlbumPage;

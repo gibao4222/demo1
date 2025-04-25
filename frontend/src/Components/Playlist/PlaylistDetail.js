@@ -7,12 +7,13 @@ import OptionPlaylist from '../Modals/OptionPlaylist';
 import { getPlaylists, deletePlaylist, addSongToPlaylist, getPlaylistDetail } from '../../Services/PlaylistService';
 import PlaylistSong from './PlaylistSong';
 import { useAuth } from '../../context/AuthContext';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from '../../axios';
 
 const PlaylistDetail = ({ playlist }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { id } = useParams();
   const { user, token } = useAuth();
   const fileInputRef = useRef(null);
   const optionsButtonRef = useRef(null);
@@ -49,6 +50,29 @@ const PlaylistDetail = ({ playlist }) => {
   const [dominantColor, setDominantColor] = useState('#434343');
   const [isLoadingColor, setIsLoadingColor] = useState(true);
   const [refreshSongs, setRefreshSongs] = useState(false); // State để làm mới PlaylistSong
+
+  // Cập nhật currentPlaylist khi playlist từ props hoặc location.state thay đổi
+  useEffect(() => {
+    const selectedPlaylist = playlist || location.state?.playlist || { id: null };
+    if (selectedPlaylist.id) {
+      setCurrentPlaylist(selectedPlaylist);
+    } else if (id) {
+      // Nếu không có playlist từ props hoặc state, lấy từ API bằng id
+      const fetchPlaylist = async () => {
+        try {
+          const playlistData = await getPlaylistDetail(id, token);
+          setCurrentPlaylist(playlistData);
+        } catch (error) {
+          console.error('Lỗi khi lấy playlist:', error);
+          alert('Không thể tải playlist. Vui lòng thử lại.');
+          navigate('/home');
+        }
+      };
+      fetchPlaylist();
+    } else {
+      navigate('/home');
+    }
+  }, [playlist, location.state, id, token, navigate]);
 
   const hexToRgb = (hex) => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -216,7 +240,11 @@ const PlaylistDetail = ({ playlist }) => {
       setIsSearchModalOpen(false);
     } catch (error) {
       console.error('Failed to add song to playlist:', error);
-      alert('Có lỗi xảy ra khi thêm bài hát. Vui lòng thử lại.');
+      if (error.response?.data?.error) {
+        alert(error.response.data.error);
+      } else {
+        alert('Có lỗi xảy ra khi thêm bài hát. Vui lòng thử lại.');
+      }
     }
   };
 
@@ -335,13 +363,13 @@ const PlaylistDetail = ({ playlist }) => {
         <div className="relative z-10 bg-gradient-to-b from-neutral-900/35 to-neutral-900/100 -mt-32">
           <div className="flex items-center pl-5 pt-3">
             <button className="mr-3">
-              <img alt="" src="/icon/Play_GreemHover.png" height="72" width="72"/>
+              <img alt="" src="/icon/Play_GreemHover.png" height="72" width="72" />
             </button>
             {/* <button className="mr-3">
               <img alt="" src="/icon/Heart_XS.png" height="38" width="38"/>
             </button> */}
             <button className="mr-3">
-              <img alt="" src="/icon/Download_XS.png" height="38" width="38"/>
+              <img alt="" src="/icon/Download_XS.png" height="38" width="38" />
             </button>
             <button className="mr-3">
               <SlOptions
