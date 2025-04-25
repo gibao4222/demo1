@@ -21,21 +21,40 @@ function SideBar({ onToggleExpand, isExpanded }) {
   const fetchPlaylists = useCallback(async () => {
     try {
       const data = await getPlaylists(token);
+
+      // Kiểm tra nếu danh sách phát rỗng
+      if (!Array.isArray(data) || data.length === 0) {
+        setPlaylists([]);
+        console.error('Không có danh sách phát nào.');
+        return;
+      }
+      // Nếu có dữ liệu, cập nhật state
       setPlaylists([...data]);
+
     } catch (error) {
       console.error('Lỗi khi lấy danh sách phát:', error);
-      alert('Không thể tải danh sách phát. Vui lòng thử lại.');
+      alert('Không thể tải danh sách phát. Vui lòng thử lại sau.');
+      setPlaylists([]);
     }
   }, [token]);
 
   const fetchLibraryAlbums = useCallback(async () => {
     try {
       const data = await getLibraryAlbums(token);
-      console.log('Library albums from API:', data);
+
+      // Kiểm tra nếu danh sách album rỗng
+      if (!Array.isArray(data) || data.length === 0) {
+        setLibraryAlbums([]);
+        console.error('Không có album nào trong thư viện.');
+        return;
+      }
+
+      // Nếu có dữ liệu, cập nhật state
       setLibraryAlbums(data);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách album trong thư viện:', error);
-      alert('Không thể tải danh sách album trong thư viện.');
+      alert('Không thể tải danh sách album trong thư viện. Vui lòng thử lại sau.');
+      setLibraryAlbums([]);
     }
   }, [token]);
 
