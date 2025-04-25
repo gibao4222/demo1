@@ -101,3 +101,38 @@ def upload_video_file(file,folder="video/"):
                 file.close()
             except Exception as e:
                 print(f"Lỗi khi đóng file: {e}")
+def upload_lyric_file(file,folder="lyric/"):
+    try:
+        if isinstance(file,str):
+            if not file.lower().endswith(".srt"):
+                raise ValueError("File không hợp lệ. Chỉ chấp nhận file .srt")
+            with open(file,"rb") as file_obj:
+                return upload_lyric_file(file_obj,folder)
+        if not hasattr(file,"name") or not file.name.lower().endswith(".srt"):
+            raise ValueError("File không hợp lệ, chỉ chấp nhận file .srt")
+        file_name=f"{uuid.uuid4()}.srt"
+        s3_path=f"{folder}{file_name}"
+        s3=boto3.client(
+            "s3",
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME
+        )
+        s3.upload_fileobj(file, settings.AWS_STORAGE_BUCKET_NAME, s3_path, ExtraArgs={"ContentType": "application/x-subrip"})   
+        file_url = f"{settings.AWS_S3_CUSTOM_DOMAIN}/{s3_path}"
+        print(file_url)
+        return file_url    
+    except FileNotFoundError:
+        print("Lỗi: Không tìm thấy file")
+    except NoCredentialsError:
+        print("Lỗi: Không có thông tin đăng nhập AWS")
+    except Exception as e:
+        print(f"Lỗi không xác định: {e}")
+
+    finally:
+        # Đóng file nếu cần
+        if file and hasattr(file, "close"):
+            try:
+                file.close()
+            except Exception as e:
+                print(f"Lỗi khi đóng file: {e}")
