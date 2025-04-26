@@ -3,6 +3,8 @@ import axios from "../axios";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { createPortal } from 'react-dom';
+import OptionSongAlbum from "./Modals/OptionSongAlbum";
 
 function MainFollowSinger() {
   const { id: singerId } = useParams();
@@ -16,6 +18,10 @@ function MainFollowSinger() {
   const { token } = useAuth();
   const optionRef = useRef(null);
   const scrollRef = useRef(null); // Thêm ref cho phần tử có thanh cuộn
+  const [isOptionOpen, setIsOptionOpen] = useState(false);
+  const [optionPosition, setOptionPosition] = useState({ top: 0, left: 0 });
+  const [selectedSongId, setSelectedSongId] = useState(null);
+  const optionButtonRefs = useRef({});
 
   // Lấy thông tin chi tiết nghệ sĩ
   useEffect(() => {
@@ -52,28 +58,28 @@ function MainFollowSinger() {
   useEffect(() => {
     const calculateDurations = async () => {
       const durations = {};
-        for (const song of songs) {
-          if (song.url_song) {
-            try {
-              const duration = await getAudioDuration(song.url_song);
-              durations[song.id] = duration;
-            } catch (error) {
-              console.error(`Lỗi khi tính thời lượng bài hát ${song.name}:`, error);
-              durations[song.id] = "0:00";
-            }
-          } else {
+      for (const song of songs) {
+        if (song.url_song) {
+          try {
+            const duration = await getAudioDuration(song.url_song);
+            durations[song.id] = duration;
+          } catch (error) {
+            console.error(`Lỗi khi tính thời lượng bài hát ${song.name}:`, error);
             durations[song.id] = "0:00";
           }
+        } else {
+          durations[song.id] = "0:00";
         }
-        setSongDurations(durations);
-      };
-  
-      if (songs.length > 0) {
-        calculateDurations();
       }
-    }, [songs]);
+      setSongDurations(durations);
+    };
 
-    // Hàm lấy thời lượng bài hát từ url_song
+    if (songs.length > 0) {
+      calculateDurations();
+    }
+  }, [songs]);
+
+  // Hàm lấy thời lượng bài hát từ url_song
   const getAudioDuration = (url) => {
     return new Promise((resolve, reject) => {
       const audio = new Audio(url);
@@ -198,6 +204,39 @@ function MainFollowSinger() {
     }
   };
 
+  const handleOpenOptionModal = (songId, event) => {
+    event.stopPropagation();
+    const ref = optionButtonRefs.current[songId];
+    if (ref) {
+      const rect = ref.getBoundingClientRect();
+      const modalWidth = 250;
+      const windowWidth = window.innerWidth;
+      const friendActivityWidth = 300;
+      const availableWidth = windowWidth - friendActivityWidth;
+
+      let leftPosition = rect.left + window.scrollX;
+
+      if (leftPosition + modalWidth > availableWidth) {
+        leftPosition = availableWidth - modalWidth - 10;
+      }
+      if (leftPosition < 0) {
+        leftPosition = 10;
+      }
+
+      setOptionPosition({
+        top: rect.bottom + window.scrollY - 100,
+        left: leftPosition,
+      });
+    }
+    setSelectedSongId(songId);
+    setIsOptionOpen(true);
+  };
+
+  const handleCloseOptionModal = () => {
+    setIsOptionOpen(false);
+    setSelectedSongId(null);
+  };
+
   const toggleShowAllSongs = () => {
     setShowAllSongs(!showAllSongs);
   };
@@ -292,7 +331,7 @@ function MainFollowSinger() {
               {displayedSongs.map((song, index) => (
                 <div key={song.id} className="flex items-center justify-between py-2.5 hover:bg-neutral-800 group">
                   <div className="flex items-center">
-                  <div className="w-8 flex items-center justify-center ml-4 mr-2">
+                    <div className="w-8 flex items-center justify-center ml-4 mr-2">
                       <span className="text-gray-400 group-hover:hidden">{index + 1}</span>
                       <img
                         src="/icon/PlayWhite.png"
@@ -306,18 +345,25 @@ function MainFollowSinger() {
                           ? song.image
                           : `/media/${song.image}`
                         : "https://storage.googleapis.com/a1aa/image/_CJYsizjY3hL_rf2L0alx_iaUDz0EXttAkg_pl1vBNE.jpg"
-                      }
-                      className="w-9 h-9 rounded-sm"/>
+                    }
+                      className="w-9 h-9 rounded-sm" />
                     <p className="ml-4">{song.name}</p>
                   </div>
                   <div className="flex items-center">
                     <p className="text-gray-400 mr-[145px]">{song.popularity.toLocaleString()}</p>
                     <p className="text-gray-400">{songDurations[song.id] || "0:00"}</p>
-                    <img
-                      src="/icon/Options_XS.png"
-                      className="w-5 h-5 ml-6 mr-5"
-                      alt="Options icon"
-                    />
+                    <div className="relative group ml-6 mr-5">
+                      <img
+                        ref={(el) => (optionButtonRefs.current[song.id] = el)}
+                        src="/icon/Options_XS.png"
+                        className="w-5 h-5 cursor-pointer"
+                        alt="Options icon"
+                        onClick={(event) => handleOpenOptionModal(song.id, event)}
+                      />
+                      <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block bg-[#3c3c3c] text-white text-sm rounded py-1 px-2 whitespace-nowrap">
+                        Tùy chọn khác
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -333,6 +379,21 @@ function MainFollowSinger() {
           </div>
         </div>
       </div>
+
+      {isOptionOpen &&
+        createPortal(
+          <OptionSongAlbum
+            onClose={handleCloseOptionModal}
+            position={optionPosition}
+            trackId={selectedSongId}
+            albumData={{
+              id_singer: { name: artist.name },
+              name: artist.name,
+              image: artist.image,
+            }}
+          />,
+          document.body
+        )}
     </div>
   );
 }
