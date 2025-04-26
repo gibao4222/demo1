@@ -57,7 +57,7 @@ function MainSearch({ searchQuery }) {
         }
         
         //Tìm kiếm Playlist
-        const playlistResponse = await axios.get(`/api/playlists/playlists/?search=${searchQuery}`);
+        const playlistResponse = await axios.get(`/api/users/playlists/playlists/?search=${searchQuery}`);
         console.log("Dữ liệu playlist từ API:", playlistResponse.data);
         if (Array.isArray(playlistResponse.data)) {
           setPlaylists(playlistResponse.data);

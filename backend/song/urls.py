@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views.views import SongViewSet, SongRelatedSinger
+from .views.views import SongViewSet, SongRelatedSinger, SingerSongListView
 from .views import SongListView, StreamSongView
 
 router = DefaultRouter()
@@ -15,8 +15,8 @@ urlpatterns = [
     path('delete-song/<int:pk>/', SongViewSet.as_view({'delete': 'delete_song'}), name='song-delete'),
     path("songs/", SongListView.as_view(), name="song-list"),
     path("stream/<int:song_id>/", StreamSongView.as_view(), name="stream-song"),
-    path("related-songs/<int:pk>", SongRelatedSinger.as_view(),name='related-songs')
-
+    path("related-songs/<int:pk>", SongRelatedSinger.as_view(),name='related-songs'),
+    path('singers/<int:singer_id>/songs/', SingerSongListView.as_view(), name='singer-songs'),
 
 ]
 
