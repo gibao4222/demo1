@@ -1,14 +1,19 @@
 from rest_framework import serializers
 from ..models import Song
+from singer.serializers import SingerSerializer
 
 class SongSerializer(serializers.ModelSerializer):
+
     # Thêm trường album để lấy thông tin album từ mối quan hệ song_albums
     album = serializers.SerializerMethodField()
-
+    artists = serializers.SerializerMethodField()
+    
+    
     class Meta:
         model = Song
-        fields = '__all__' 
-
+        fields ='__all__'
+        
+    
     def get_album(self, obj):
         try:
             # Lấy bản ghi AlbumSong liên quan đến bài hát này
@@ -28,3 +33,14 @@ class SongSerializer(serializers.ModelSerializer):
         except Exception as e:
             print(f"Error fetching album for song {obj.id}: {e}")
             return None
+        
+    def get_artists(self, obj):
+        return [
+            {
+                'id': ss.id_singer.id,
+                'name': ss.id_singer.name
+            }
+            for ss in getattr(obj, 'singer_song', [])
+        ]
+
+
