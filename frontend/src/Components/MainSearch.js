@@ -46,7 +46,7 @@ function MainSearch({ searchQuery }) {
         }
 
         // Tìm kiếm bài hát
-        const songResponse = await axios.get(`/api/users/songs/songs/?search=${searchQuery}`);
+        const songResponse = await axios.get(`/api/songs/songs/?search=${searchQuery}`);
         console.log("Dữ liệu bài hát từ API:", songResponse.data);
         if (Array.isArray(songResponse.data)) {
           setSongs(songResponse.data);
@@ -57,7 +57,7 @@ function MainSearch({ searchQuery }) {
         }
         
         //Tìm kiếm Playlist
-        const playlistResponse = await axios.get(`/api/users/playlists/playlists/?search=${searchQuery}`);
+        const playlistResponse = await axios.get(`/api/playlists/playlists/?search=${searchQuery}`);
         console.log("Dữ liệu playlist từ API:", playlistResponse.data);
         if (Array.isArray(playlistResponse.data)) {
           setPlaylists(playlistResponse.data);
@@ -126,8 +126,8 @@ function MainSearch({ searchQuery }) {
                 </div>
                 <div className="truncate">
                 <p className="text-sm text-gray-400">
-                  {song.singers && song.singers.length > 0
-                    ? song.singers.map(singer => singer.name).join(", ") // Nối tên nghệ sĩ bằng dấu phẩy
+                  {song.artists && song.artists.length > 0
+                    ? song.artists.map(artist => artist.name).join(", ")
                     : "Không có nghệ sĩ"}
                 </p>
                 </div>

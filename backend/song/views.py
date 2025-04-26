@@ -24,3 +24,4 @@ class StreamSongView(APIView):
             return FileResponse(song.file.open(), content_type="audio/mpeg")
         except Song.DoesNotExist:
             return Response({"error": "Song not found"}, status=404)
+

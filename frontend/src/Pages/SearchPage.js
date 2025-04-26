@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import SideBar from '/var/www/demo1/frontend/src/Components/SideBar';
-import FriendActivity from '/var/www/demo1/frontend/src/Components/FriendActivity';
-import BottomPlayer from '/var/www/demo1/frontend/src/Components/BottomPlayer';
-import MainSearch from '/var/www/demo1/frontend/src/Components/MainSearch';
+// import SideBar from '/var/www/demo1/frontend/src/Components/SideBar';
+// import FriendActivity from '/var/www/demo1/frontend/src/Components/FriendActivity';
+// import BottomPlayer from '/var/www/demo1/frontend/src/Components/BottomPlayer';
+// import MainSearch from '/var/www/demo1/frontend/src/Components/MainSearch';
 import NavBar from "../Components/NavBar";
 import { useAuth } from '../context/AuthContext';
+
+import SideBar from "../Components/SideBar";
+import FriendActivity from "../Components/FriendActivity";
+import BottomPlayer from "../Components/BottomPlayer";
+import MainSearch from "../Components/MainSearch";
 
 function SearchPage() {
     const { user, logout } = useAuth();
