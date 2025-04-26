@@ -4,7 +4,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from ..serializers import SongSerializer
 from ..models import Song
-from singer.models import SingerSong
+
+from singer.models import SingerSong, Singer
 import requests
 from django.http import StreamingHttpResponse
 from rest_framework.views import APIView
@@ -93,3 +94,23 @@ class SongRelatedSinger (APIView):
         
         except Song.DoesNotExist:
             return Response({"error": "Song not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        
+#Lấy danh sách bài hát theo ca sĩ
+class SingerSongListView(APIView):
+    def get(self, request, singer_id):
+        try:
+            singer_songs = SingerSong.objects.filter(id_singer=singer_id)
+            song_ids = singer_songs.values_list('id_song', flat=True)
+            songs = Song.objects.filter(id__in=song_ids).prefetch_related(
+                Prefetch(
+                    'song_singer',
+                    queryset=SingerSong.objects.select_related('id_singer'),
+                    to_attr='singer_song'
+                )
+            )
+            serializer = SongSerializer(songs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
