@@ -240,7 +240,7 @@ function MainFollowSinger() {
                   artist.image
                     ? artist.image.startsWith("http")
                       ? artist.image
-                      : `/media/${artist.image}`
+                      : `https://localhost:3000${artist.image}`
                     : "https://storage.googleapis.com/a1aa/image/_CJYsizjY3hL_rf2L0alx_iaUDz0EXttAkg_pl1vBNE.jpg"
                 }
                 width="800"
