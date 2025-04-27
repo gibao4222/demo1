@@ -11,7 +11,7 @@ from playlist.models import Playlist
 from album.models import Album
 from playlist.serializers import PlaylistSerializer
 from album.serializers import AlbumSerializer
-
+from django.db.models import Q
 from ..serializers import SpotifyUserSerializer, UserAlbumSerializer, UserSingerSerializer, UserSongSerializer, UserFollowingSerializer
 from ..models import SpotifyUser, UserAlbum, UserSinger, UserSong, UserFollowing
 from rest_framework.views import APIView
@@ -125,7 +125,10 @@ class SongSearchView(generics.ListAPIView):
             return Song.objects.none()
 
         search_term_no_diacritics = unidecode(search_term).lower().replace(" ", "")
-        return Song.objects.filter(name__icontains=search_term_no_diacritics)
+        return Song.objects.filter(
+            Q(name__icontains=search_term_no_diacritics) |
+            Q(song_singers__id_singer__name__icontains=search_term_no_diacritics)
+        ).prefetch_related('song_singers__id_singer').distinct()
     
 
 

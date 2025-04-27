@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HiOutlinePencil } from 'react-icons/hi2';
 import { RiDeleteBin7Line } from 'react-icons/ri';
 import { IoMusicalNotesOutline } from 'react-icons/io5';
-import { updatePlaylist } from '../../Services/PlaylistService';
+import { updatePlaylist, getPlaylists } from '../../Services/PlaylistService';
 
 const ModalChangePlaylist = ({
   isModalOpen,
@@ -23,18 +23,38 @@ const ModalChangePlaylist = ({
   const [tempImageSrc, setTempImageSrc] = useState(imageSrc);
   const [tempName, setTempName] = useState(name);
   const [tempDescription, setTempDescription] = useState(description);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [playlists, setPlaylists] = useState([]);
 
+  // Lấy danh sách playlist khi modal mở
   useEffect(() => {
+    const fetchPlaylists = async () => {
+      if (!token) {
+        alert("Thiếu token xác thực");
+        return;
+      }
+
+      try {
+        const data = await getPlaylists(token);
+        setPlaylists(data);
+      } catch (err) {
+        alert("Không thể tải danh sách phát");
+      }
+    };
+
     if (isModalOpen) {
+      fetchPlaylists();
       setTempImageSrc(imageSrc);
       setTempName(name);
       setTempDescription(description);
+      setSelectedFile(null);
     }
-  }, [isModalOpen, imageSrc, name, description]);
+  }, [isModalOpen, imageSrc, name, description, token]);
 
   const handleTempImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = () => {
         setTempImageSrc(reader.result);
@@ -45,13 +65,29 @@ const ModalChangePlaylist = ({
 
   const handleSave = async () => {
     try {
+      const formData = new FormData();
+      formData.append('name', tempName);
+      formData.append('description', tempDescription);
+      if (selectedFile) {
+        formData.append('image', selectedFile); // Gửi file gốc
+      }
+      // Kiểm tra tên playlist trùng lặp (ngoại trừ playlist hiện tại)
+      const isDuplicateName = playlists.some(
+        (playlist) => playlist.id !== playlistId && playlist.name === tempName
+      );
+
+      if (isDuplicateName) {
+        alert("Tên playlist đã tồn tại. Vui lòng chọn tên khác.");
+        return;
+      }
+
       const playlistData = {
         name: tempName,
         description: tempDescription,
         image: tempImageSrc,
       };
 
-      const updatedPlaylist = await updatePlaylist(playlistId, playlistData, token);
+      const updatedPlaylist = await updatePlaylist(playlistId, formData, token);
       console.log('Playlist updated successfully:', updatedPlaylist);
 
       setImageSrc(updatedPlaylist.image);
@@ -61,15 +97,17 @@ const ModalChangePlaylist = ({
       // Gửi sự kiện playlistUpdated
       window.dispatchEvent(new Event('playlistUpdated'));
 
+      alert("Cập nhật playlist thành công!");
       closeModal();
     } catch (error) {
-      console.error('Failed to update playlist:', error);
-      alert('Có lỗi xảy ra khi cập nhật playlist. Vui lòng thử lại.');
+      console.error('Failed to update playlist:', error.response?.data || error.message);
+      alert('Có lỗi xảy ra khi cập nhật playlist: ' + JSON.stringify(error.response?.data || error.message));
     }
   };
 
   const handleRemoveTempImage = () => {
     setTempImageSrc('/img/null.png');
+    setSelectedFile(null);
   };
 
   const renderInputField = (value, setValue, isEditing, setIsEditing, label, customClass = '') => (
@@ -160,7 +198,7 @@ const ModalChangePlaylist = ({
 
               <input
                 type="file"
-                accept="image/*"
+                accept="image/png,image/jpeg,image/jpg"
                 className="hidden"
                 ref={fileInputRef}
                 onChange={handleTempImageChange}

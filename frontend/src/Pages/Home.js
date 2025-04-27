@@ -59,7 +59,7 @@ const Home = () => {
 
                 {/* Bottom Player - Fixed at the bottom */}
                 <div className="z-10">
-                <BottomPlayer />
+                    <BottomPlayer />
 
                 </div>
             </div>

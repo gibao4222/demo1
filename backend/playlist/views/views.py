@@ -40,7 +40,6 @@ class PlaylistViewSet(viewsets.ModelViewSet):
             file_name = f"{uuid.uuid4()}{file_extension}"
             file_path = os.path.join(settings.MEDIA_ROOT, 'image_playlist', file_name)
 
-            
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, 'wb+') as destination:
                 for chunk in image_file.chunks():
@@ -61,6 +60,14 @@ class PlaylistViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path='create_playlist')
     def create_playlist(self, request):
         with transaction.atomic():
+            # Kiểm tra xem tên playlist đã tồn tại chưa
+            playlist_name = request.data.get('name')
+            if Playlist.objects.filter(name=playlist_name).exists():
+                return Response(
+                    {'error': 'Tên playlist đã tồn tại. Vui lòng chọn tên khác.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             with connection.cursor() as cursor:
                 if Playlist.objects.exists():
                     max_id = Playlist.objects.aggregate(Max('id'))['id__max']
@@ -68,6 +75,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
                     cursor.execute(f"ALTER TABLE playlist_playlist AUTO_INCREMENT = {next_id};")
                 else:
                     cursor.execute("ALTER TABLE playlist_playlist AUTO_INCREMENT = 1;")
+            
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -207,12 +215,28 @@ class PlaylistSongViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path='create-playlist-song')
     def create_playlist_song(self, request):
-        if not PlaylistSong.objects.exists():
+        with transaction.atomic():
+            # Kiểm tra xem bài hát đã tồn tại trong playlist chưa
+            id_playlist = request.data.get('id_playlist')
+            id_song = request.data.get('id_song')
+            
+            if PlaylistSong.objects.filter(id_playlist=id_playlist, id_song=id_song).exists():
+                return Response(
+                    {'error': 'Bài hát đã tồn tại trong playlist.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             with connection.cursor() as cursor:
-                cursor.execute("ALTER TABLE playlist_playlistsong AUTO_INCREMENT = 1;")
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+                if PlaylistSong.objects.exists():
+                    max_id = PlaylistSong.objects.aggregate(Max('id'))['id__max']
+                    next_id = max_id + 1 if max_id is not None else 1
+                    cursor.execute(f"ALTER TABLE playlist_playlistsong AUTO_INCREMENT = {next_id};")
+                else:
+                    cursor.execute("ALTER TABLE playlist_playlistsong AUTO_INCREMENT = 1;")
+            
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['PUT'], url_path='change-playlist-song')
