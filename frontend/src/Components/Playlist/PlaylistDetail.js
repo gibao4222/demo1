@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { SlOptions } from 'react-icons/sl';
 import { HiOutlinePencil } from 'react-icons/hi2';
