@@ -136,10 +136,6 @@ function MainFollowSinger() {
         const optionTopRelativeToScroll = optionRect.top - scrollContainerRect.top + scrollTop;
         const optionHeight = optionRef.current.offsetHeight;
 
-        // Debug: In ra các giá trị để kiểm tra
-        console.log("scrollTop:", scrollTop);
-        console.log("optionTopRelativeToScroll:", optionTopRelativeToScroll);
-        console.log("optionHeight:", optionHeight);
 
         // Hiển thị header khi cuộn đến cuối phần option
         const isOptionFullyOutOfView = scrollTop > optionTopRelativeToScroll + optionHeight;
@@ -285,47 +281,47 @@ function MainFollowSinger() {
                 width="800"
               />
               <div className="absolute inset-0 bg-black bg-opacity-10"></div>
-              <div className="absolute bottom-7 left-5 space-y-3">
-                <div className="flex items-center">
-                  <img src="/icon/Verification.png" className="w-7 h-7 mr-1" />
-                  <p className="drop-shadow-xl">Nghệ sĩ được xác minh</p>
+                <div className="absolute bottom-7 left-5 space-y-3">
+                  <div className="flex items-center">
+                    <img src="/icon/Verification.png" className="w-7 h-7 mr-1" />
+                    <p className="drop-shadow-xl">Nghệ sĩ được xác minh</p>
+                  </div>
+                  <h1 className="text-6xl font-bold drop-shadow-xl tracking-wider">
+                    {artist.name}
+                  </h1>
+                  <p className="drop-shadow-xl pt-2">
+                    <span className="tracking-wider">{artist.followers}</span>{" "}
+                    người nghe hàng tháng
+                  </p>
                 </div>
-                <h1 className="text-6xl font-bold drop-shadow-xl tracking-wider">
-                  {artist.name}
-                </h1>
-                <p className="drop-shadow-xl pt-2">
-                  <span className="tracking-wider">{artist.followers}</span>{" "}
-                  người nghe hàng tháng
-                </p>
               </div>
-            </div>
-            <div className="bg-gradient-to-b from-[#072447] to-neutral-900 relative">
-              {/* Phần option */}
-              <div ref={optionRef} className="flex items-center px-2 py-2">
-                <button className="">
-                  <img
-                    className="w-20 h-20 hover:brightness-75 transition-all duration-200"
-                    src="/icon/Play_GreemHover.png"
-                    alt="Play button"
-                  />
-                </button>
-                <button className="px-2">
-                  <img
-                    className="w-10 h-10 hover:brightness-75 transition-all duration-200"
-                    src="/icon/Shuffle.png"
-                    alt="Shuffle button"
-                  />
-                </button>
-                <button
-                  onClick={handleFollowToggle}
-                  className={`text-white px-6 py-2 rounded-full bg-opacity-0 bg-nuetral-900 border-[1px] border-neutral-500 hover:border-[1.5px] hover:border-white`}
-                >
-                  {isFollowing ? "Đang theo dõi" : "Theo dõi"}
-                </button>
-              </div>
+              <div className="bg-gradient-to-b from-[#072447] to-neutral-900 relative">
+                {/* Phần option */}
+                <div ref={optionRef} className="flex items-center px-2 py-2">
+                  <button className="">
+                    <img
+                      className="w-20 h-20 hover:brightness-75 transition-all duration-200"
+                      src="/icon/Play_GreemHover.png"
+                      alt="Play button"
+                    />
+                  </button>
+                  <button className="px-2">
+                    <img
+                      className="w-10 h-10 hover:brightness-75 transition-all duration-200"
+                      src="/icon/Shuffle.png"
+                      alt="Shuffle button"
+                    />
+                  </button>
+                  <button
+                    onClick={handleFollowToggle}
+                    className={`text-white px-6 py-2 ml-2 rounded-full bg-opacity-0 bg-nuetral-900 border-[1px] border-neutral-500 hover:border-[1.5px] hover:border-white`}
+                  >
+                    {isFollowing ? "Đang theo dõi" : "Theo dõi"}
+                  </button>
+                </div>
 
-              <h2 className="text-2xl font-bold px-6 pt-2 pb-2">Phổ biến</h2>
-            </div>
+                <h2 className="text-2xl font-bold px-6 pt-2 pb-2">Phổ biến</h2>
+              </div>
 
             <div className="mt-4 px-8">
               {displayedSongs.map((song, index) => (

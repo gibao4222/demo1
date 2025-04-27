@@ -1,5 +1,6 @@
 from django.db import models
 from song.models import Song
+from spotify_user.models import SpotifyUser
 
 # Create your models here.
 class Playlist(models.Model):
@@ -7,7 +8,11 @@ class Playlist(models.Model):
     create_date = models.DateField()
     is_active = models.BooleanField()
     name = models.CharField(max_length=255, unique=True)
-    id_user = models.BigIntegerField()
+    id_user = models.ForeignKey(
+        SpotifyUser,  
+        on_delete=models.CASCADE,  
+        related_name='playlists'  
+    )
     image = models.CharField(max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
 
