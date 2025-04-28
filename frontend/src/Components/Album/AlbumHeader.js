@@ -108,43 +108,40 @@ const AlbumHeader = ({
     const releaseYear = albumData.release_date ? albumData.release_date.split('-')[0] : 'N/A';
 
     return (
-        <div className="max-w-7xl mx-auto rounded-lg select-none">
+        <>
+        <div className="flex justify-start items-start gap-4 pt-3 pb-1">
+            
             <div
-                className="flex flex-col md:flex-row md:items-center gap-6 md:gap-8 rounded-lg p-6 md:p-8"
-                style={{
-                    background: `linear-gradient(to bottom, ${getRgbaColor(dominantColor, 1)}, ${getRgbaColor(dominantColor, 0)})`,
-                }}
+                className="relative w-48 h-48 shadow-2xl shadow-black rounded overflow-hidden transform transition-transform duration-300 hover:scale-105 cursor-pointer"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                onClick={handleImageClick}
             >
-                <div
-                    className="relative w-48 h-48 shadow-2xl shadow-black rounded overflow-hidden transform transition-transform duration-300 hover:scale-105 cursor-pointer"
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
-                    onClick={handleImageClick}
-                >
-                    <img
-                        src={imageError ? '/img/null.png' : albumData.image}
-                        alt="Ảnh bìa album"
-                        className="w-full h-full object-cover rounded"
-                        onError={handleImageError}
-                        width={200}
-                        height={200}
-                    />
-                </div>
-                <div className="flex flex-col flex-grow">
-                    <span className="text-base font-semibold mb-1">Album</span>
-                    <h1 className="font-extrabold text-3xl md:text-4xl leading-tight">{albumData.name}</h1>
-                    <div className="flex items-center gap-2 mt-2 text-base text-[#d9d9d9] font-semibold">
-                        <span>{albumData.id_singer?.name || "Không có thông tin ca sĩ"}</span>
-                        <span> • {releaseYear}</span>
-                        <span> • {tracks.length || 0} bài hát</span>
-                        <span> • {totalDuration ? formatTime(totalDuration) : '0:00'}</span>
-                    </div>
+                <img
+                    src={imageError ? '/img/null.png' : albumData.image}
+                    alt="Ảnh bìa album"
+                    className="w-full h-full object-cover rounded"
+                    onError={handleImageError}
+                    width={200}
+                    height={200}
+                />
+            </div>
+            <div className="flex flex-col justify-between h-48 text-left">
+                <span className="text-base text-gray-300 pt-6">Album</span>
+                <h1 className="font-bold text-6xl md:text-6xl leading-tight">{albumData.name}</h1>
+                <div className="flex items-center gap-2 mt-2 text-base text-[#d9d9d9]">
+                    <span>{albumData.id_singer?.name || "Không có thông tin ca sĩ"}</span>
+                    <span> • {releaseYear}</span>
+                    <span> • {tracks.length || 0} bài hát</span>
+                    <span> • {totalDuration ? formatTime(totalDuration) : '0:00'}</span>
                 </div>
             </div>
+        </div>
 
-            <div ref={controlsRef} className="flex items-center gap-4 mt-6">
-                <button className="bg-green-500 text-black font-semibold px-6 py-2 rounded-full hover:bg-green-400">
-                    Play
+        <div ref={controlsRef} className="flex items-center gap-4 mt-6 bg-opacity-35 bg-neutral-900 w-[calc(100%+3rem)] -ml-6">
+            <div className="flex items-center pl-6 pt-3">
+                <button className="">
+                <img alt="" src="/icon/Play_GreemHover.png" height="72" width="72" />
                 </button>
                 <div className="relative group">
                     <button
@@ -171,18 +168,20 @@ const AlbumHeader = ({
                     <FaEllipsisH className="text-white text-2xl transition group-hover:text-gray-100 group-hover:scale-110" />
                 </button>
             </div>
-
-            {isOptionOpen &&
-                createPortal(
-                    <OptionAlbum
-                        onClose={() => setIsOptionOpen(false)}
-                        position={modalPosition}
-                        tracks={tracks}
-                        albumData={albumData}
-                    />,
-                    document.body
-                )}
+            
         </div>
+
+        {isOptionOpen &&
+            createPortal(
+                <OptionAlbum
+                    onClose={() => setIsOptionOpen(false)}
+                    position={modalPosition}
+                    tracks={tracks}
+                    albumData={albumData}
+                />,
+                document.body
+            )}
+        </>
     );
 };
 
