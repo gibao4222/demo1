@@ -1,4 +1,3 @@
-# chat/consumers.py
 import redis
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -6,7 +5,7 @@ from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
 from spotify_user.models import SpotifyUser
 from .models import Message, ChatPermission
-from .utils import can_chat_directly, can_send_message
+from .utils import can_chat_directly, can_send_message_with_limit
 
 redis_client = redis.Redis(host='localhost', port=6379, db=0)
 
@@ -71,16 +70,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }))
             return
         
-        
-        can_chat = await self.can_send_message(sender, receiver)
-        is_pending = not can_chat
+        # Kiểm tra quyền gửi tin nhắn
+        can_send, is_pending, create_permission = await self.can_send_message(sender, receiver)
+        if not can_send:
+            await self.send(text_data=json.dumps({
+                'error': 'Bạn đã gửi một tin nhắn yêu cầu. Vui lòng chờ chấp nhận.'
+            }))
+            return
+
+        # Tạo ChatPermission nếu cần
+        if create_permission:
+            await self.create_chat_permission(sender, receiver)
 
         message = await self.save_message(sender, receiver, content, image, music_link, is_pending)
         
         if not is_pending:
             # Đánh dấu tin nhắn là đã xem nếu người nhận đang trong phòng chat
             await self.mark_message_as_seen(message)
-
         
         await self.store_message_in_redis(message)
 
@@ -123,6 +129,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message_id': event['message_id'],
         }))
 
+    async def messages_updated(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'messages_updated',
+            'message_ids': event['message_ids'],
+            'permission_id': event.get('permission_id'),
+            'is_accepted': event.get('is_accepted'),
+        }))
+
     @database_sync_to_async
     def get_spotify_user(self, user_id):
         try:
@@ -133,17 +147,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def can_send_message(self, sender, receiver):
         try:
-            if can_chat_directly(sender, receiver):
-                return True
-            permission = ChatPermission.objects.filter(requester=sender, target=receiver).first()
-            if permission and permission.is_accepted:
-                return True
-            if not permission:
-                ChatPermission.objects.create(requester=sender, target=receiver)
-            return False
+            return can_send_message_with_limit(sender, receiver)
         except Exception as e:
             print(f"Error in can_send_message: {e}")
-            return False  # Nếu có lỗi, không cho phép gửi tin nhắn trực tiếp
+            return False, True, False
+
+    @database_sync_to_async
+    def create_chat_permission(self, requester, target):
+        try:
+            ChatPermission.objects.create(requester=requester, target=target)
+        except Exception as e:
+            print(f"Error in create_chat_permission: {e}")
 
     @database_sync_to_async
     def save_message(self, sender, receiver, content, image, music_link, is_pending):
@@ -151,7 +165,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender=sender,
             receiver=receiver,
             content=content,
-            image=None,
+            image=None,  # Cần xử lý tải lên hình ảnh nếu hỗ trợ
             music_link=music_link,
             is_pending=is_pending,
             is_seen=False
@@ -160,13 +174,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def store_message_in_redis(self, message):
         try:
-            print(f"Storing message in Redis: sender_id={message.sender.user.id}, sender_username={message.sender.username}")
             room_key = f"chat:{min(message.sender.user.id, message.receiver.user.id)}_{max(message.sender.user.id, message.receiver.user.id)}"
             message_data = {
                 'id': message.id,
-                'sender_id': message.sender.user.id,  # Sử dụng id của auth_user
+                'sender_id': message.sender.user.id,
                 'sender': message.sender.username if message.sender and message.sender.username else 'Người dùng không xác định',
-                'receiver_id': message.receiver.user.id,  # Sử dụng id của auth_user
+                'receiver_id': message.receiver.user.id,
                 'content': message.content,
                 'image': message.image.url if message.image else '',
                 'music_link': message.music_link,
@@ -177,7 +190,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'created_at': message.created_at.isoformat(),
             }
             redis_client.rpush(room_key, json.dumps(message_data))
-            redis_client.expire(room_key, 24 * 60 * 60)  # Hết hạn sau 24 giờ
+            redis_client.expire(room_key, 24 * 60 * 60)
         except Exception as e:
             print(f"Error in store_message_in_redis: {e}")
         
@@ -189,15 +202,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             other_user_id = int(room_parts[0]) if int(room_parts[0]) != user_id else int(room_parts[1])
             receiver = SpotifyUser.objects.get(user__id=user_id)
             sender = SpotifyUser.objects.get(user__id=other_user_id)
-
             messages = Message.objects.filter(sender=sender, receiver=receiver, is_seen=False)
             for message in messages:
                 message.is_seen = True
                 message.save()
         except Exception as e:
             print(f"Error in mark_unseen_messages: {e}")
-            # Không raise lỗi để tránh ngắt WebSocket
-            
             
     @database_sync_to_async
     def mark_message_as_seen(self, message):

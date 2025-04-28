@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "../axios";
+import { useNavigate } from "react-router-dom";
+
 
 const MainContent = () => {
     const [playlists, setPlaylists] = useState([]);
     const [currentPlaylist, setCurrentPlaylist] = useState(null);
     const [error, setError] = useState(null);
     const [isHeaderStuck, setIsHeaderStuck] = useState(false);
-
+    const navigate = useNavigate();
     const scrollContainerRef = useRef(null);
     const headerRef = useRef(null)
 
@@ -182,7 +184,11 @@ const MainContent = () => {
                     {playlists.length > 0 ? (
                         <div className="flex flex-row overflow-x-auto space-x-4 no-scrollbar [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                             {playlists.map((playlist, index) => (
-                                <div key={index} className="p-2.5 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group">
+                                <div key={index} className="p-2.5 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group"
+                                    onClick={() => {
+                                        navigate(`/PlaylistDetail/${playlist.id}`, { state: { playlist } });
+                                    }}
+                                >
                                     <div className="relative">
                                         <img
                                             alt={playlist.name}

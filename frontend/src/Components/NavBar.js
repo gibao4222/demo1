@@ -6,7 +6,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const NavBar = ({ user, onLogout, onSearch }) => {
     const navigate = useNavigate();
     const [activeItem, setActiveItem] = useState('null');
-    const [searchQuery, setSearchQuery] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const location = useLocation();
     const searchInputRef = useRef(null);
@@ -19,12 +18,9 @@ const NavBar = ({ user, onLogout, onSearch }) => {
     };
 
     useEffect(() => {
-        const searchParams = new URLSearchParams(location.search);
-        const query = searchParams.get('query') || '';
-        setSearchQuery(query);
         if (searchInputRef.current) {
             searchInputRef.current.focus();
-          }
+        }
     }, [location.search]);
     
 
@@ -33,7 +29,6 @@ const NavBar = ({ user, onLogout, onSearch }) => {
     };
     const handleSearchChange = (e) => {
         const query = e.target.value;
-        setSearchQuery(query);
         if (typeof onSearch === 'function') {
             onSearch(query);
         }
@@ -92,7 +87,6 @@ const NavBar = ({ user, onLogout, onSearch }) => {
                         placeholder="Bạn muốn phát nội dung gì?"
 
                         className="bg-gray-800 text-white placeholder-neutral-400 rounded-full py-2.5 pl-10 pr-12 w-[500px] focus:outline-none focus:ring-2 focus:ring-white"
-                        value={searchQuery}
                         onChange={handleSearchChange}
                         ref={searchInputRef}
                     />
