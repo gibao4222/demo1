@@ -12,7 +12,15 @@ import uuid
 import zmq
 from django.conf import settings
 from django.utils import timezone
+import random
 
+APPLE_MUSIC_STYLE_IMAGES = [
+"https://i.pinimg.com/736x/93/a6/19/93a61965a5b5de881ce78b62f1ea8364.jpg"
+"https://i.pinimg.com/736x/26/4c/3b/264c3b4fbc20fdfb7d313fd42c1f7e77.jpg"
+"https://i.pinimg.com/736x/72/4d/c3/724dc3be91f562881f0ee8a38fb04b8e.jpg"
+"https://i.pinimg.com/736x/3c/c4/50/3cc450726b9aa4b99a1a902cc710340c.jpg"
+"https://i.pinimg.com/736x/14/64/20/1464201164e8b32a8347645e859fc95f.jpg"
+]
 
 
 class PlaylistViewSet(viewsets.ModelViewSet):
@@ -88,10 +96,121 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 
+    # @action(detail=False, methods=['POST'], url_path='create-recommended-playlist')
+    # def create_recommended_playlist(self, request):
+    #     """Tạo playlist gợi ý dựa trên lịch sử nghe của người dùng."""
+    #     # Lấy user_id từ request
+    #     user_id = request.data.get('user_id')
+    #     if not user_id:
+    #         return Response(
+    #             {'error': 'user_id là bắt buộc'},
+    #             status=status.HTTP_400_BAD_REQUEST
+    #         )
+
+    #     # Gửi yêu cầu đến mcp_server
+    #     context = zmq.Context()
+    #     socket = context.socket(zmq.REQ)
+    #     socket.setsockopt(zmq.RCVTIMEO, 20000)  
+    #     socket.connect("tcp://localhost:5555")
+    #     socket.send_json({'user_id': user_id, 'action': 'get_recommendations'})
+
+    #     # Nhận phản hồi từ mcp_server
+    #     try:
+    #         recommendations = socket.recv_json()
+    #     except zmq.error.Again:
+    #         socket.close()
+    #         return Response(
+    #             {'error': 'Hết thời gian chờ phản hồi từ mcp_server'},
+    #             status=status.HTTP_504_GATEWAY_TIMEOUT
+    #         )
+    #     finally:
+    #         socket.close()
+
+    #     # Kiểm tra lỗi trong phản hồi
+    #     if 'error' in recommendations:
+    #         return Response(
+    #             recommendations,
+    #             status=status.HTTP_500_INTERNAL_SERVER_ERROR
+    #         )
+
+    #     # Lấy danh sách tên bài hát được gợi ý và chuẩn hóa
+    #     recommended_song_names = [name.encode('utf-8').decode('utf-8').replace('\xa0', ' ').strip().lower() for name in recommendations.get('recommended_song_names', [])]
+    #     print(f"Bài hát được gợi ý từ mcp_server: {recommended_song_names}")
+    #     print(f"Bài hát (dạng thô): {[repr(name) for name in recommended_song_names]}")
+    #     if not recommended_song_names:
+    #         return Response(
+    #             {'error': 'Không nhận được bài hát gợi ý nào'},
+    #             status=status.HTTP_400_BAD_REQUEST
+    #         )
+
+    #     # Sử dụng Q objects để tìm kiếm không phân biệt hoa thường
+    #     query = Q()
+    #     for song_name in recommended_song_names:
+    #         query |= Q(name__iexact=song_name)
+
+    #     recommended_songs = Song.objects.filter(query)
+    #     print(f"Các bài hát được tìm thấy: {list(recommended_songs.values('name'))}")
+    #     song_ids = list(recommended_songs.values_list('id', flat=True))
+    #     print(f"ID bài hát: {song_ids}")
+
+    #     # Kiểm tra nếu không tìm thấy bài hát trong cơ sở dữ liệu
+    #     if not song_ids:
+    #         return Response(
+    #             {
+    #                 'error': 'Không tìm thấy bài hát gợi ý nào trong cơ sở dữ liệu',
+    #                 'recommended_songs': recommended_song_names
+    #             },
+    #             status=status.HTTP_404_NOT_FOUND
+    #         )
+
+    #     # Tạo playlist mới
+    #     playlist_data = {
+    #         'name': f"Danh sách gợi ý - {timezone.now().strftime('%Y-%m-%d')}",
+    #         'create_date': timezone.now().date(),
+    #         'is_active': False,
+    #         'id_user': user_id,
+    #     }
+    #     playlist_serializer = PlaylistSerializer(data=playlist_data)
+    #     playlist_serializer.is_valid(raise_exception=True)
+    #     playlist = playlist_serializer.save()
+    #     print(f"Đã tạo playlist: {playlist_serializer.data}")
+
+    #     # Thêm các bài hát được gợi ý vào playlist
+    #     songs_added_count = 0
+    #     for song_id in song_ids:
+    #         playlist_song_data = {
+    #             'id_playlist': playlist.id,
+    #             'id_song': song_id,
+    #         }
+    #         playlist_song_serializer = PlaylistSongSerializer(data=playlist_song_data)
+    #         if playlist_song_serializer.is_valid():
+    #             playlist_song_serializer.save()
+    #             songs_added_count += 1
+    #             print(f"Đã thêm bài hát ID {song_id} vào playlist")
+    #         else:
+    #             print(f"Lỗi xác thực cho song_id {song_id}: {playlist_song_serializer.errors}")
+    #             return Response(
+    #                 {
+    #                     'error': f'Không thể thêm song_id {song_id} vào playlist',
+    #                     'validation_errors': playlist_song_serializer.errors
+    #                 },
+    #                 status=status.HTTP_400_BAD_REQUEST
+    #             )
+
+    #     # Trả về phản hồi
+    #     return Response(
+    #         {
+    #             'playlist': playlist_serializer.data,
+    #             'songs_added': songs_added_count,
+    #         },
+    #         status=status.HTTP_201_CREATED
+    #     )
+                 
+           
+
     @action(detail=False, methods=['POST'], url_path='create-recommended-playlist')
     def create_recommended_playlist(self, request):
         """Tạo playlist gợi ý dựa trên lịch sử nghe của người dùng."""
-        # Lấy user_id từ request
         user_id = request.data.get('user_id')
         if not user_id:
             return Response(
@@ -99,14 +218,12 @@ class PlaylistViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Gửi yêu cầu đến mcp_server
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
-        socket.setsockopt(zmq.RCVTIMEO, 20000)  
+        socket.setsockopt(zmq.RCVTIMEO, 20000)
         socket.connect("tcp://localhost:5555")
         socket.send_json({'user_id': user_id, 'action': 'get_recommendations'})
 
-        # Nhận phản hồi từ mcp_server
         try:
             recommendations = socket.recv_json()
         except zmq.error.Again:
@@ -118,14 +235,12 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         finally:
             socket.close()
 
-        # Kiểm tra lỗi trong phản hồi
         if 'error' in recommendations:
             return Response(
                 recommendations,
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        # Lấy danh sách tên bài hát được gợi ý và chuẩn hóa
         recommended_song_names = [name.encode('utf-8').decode('utf-8').replace('\xa0', ' ').strip().lower() for name in recommendations.get('recommended_song_names', [])]
         print(f"Bài hát được gợi ý từ mcp_server: {recommended_song_names}")
         print(f"Bài hát (dạng thô): {[repr(name) for name in recommended_song_names]}")
@@ -135,7 +250,6 @@ class PlaylistViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Sử dụng Q objects để tìm kiếm không phân biệt hoa thường
         query = Q()
         for song_name in recommended_song_names:
             query |= Q(name__iexact=song_name)
@@ -145,7 +259,6 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         song_ids = list(recommended_songs.values_list('id', flat=True))
         print(f"ID bài hát: {song_ids}")
 
-        # Kiểm tra nếu không tìm thấy bài hát trong cơ sở dữ liệu
         if not song_ids:
             return Response(
                 {
@@ -155,19 +268,22 @@ class PlaylistViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+        # Chọn ngẫu nhiên một hình ảnh theo phong cách Apple Music
+        random_image = random.choice(APPLE_MUSIC_STYLE_IMAGES)
+
         # Tạo playlist mới
         playlist_data = {
             'name': f"Danh sách gợi ý - {timezone.now().strftime('%Y-%m-%d')}",
             'create_date': timezone.now().date(),
-            'is_active': True,
+            'is_active': False,
             'id_user': user_id,
+            'image': random_image,  # Sử dụng hình ảnh ngẫu nhiên giống phong cách Apple Music
         }
         playlist_serializer = PlaylistSerializer(data=playlist_data)
         playlist_serializer.is_valid(raise_exception=True)
         playlist = playlist_serializer.save()
         print(f"Đã tạo playlist: {playlist_serializer.data}")
 
-        # Thêm các bài hát được gợi ý vào playlist
         songs_added_count = 0
         for song_id in song_ids:
             playlist_song_data = {
@@ -189,7 +305,6 @@ class PlaylistViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-        # Trả về phản hồi
         return Response(
             {
                 'playlist': playlist_serializer.data,
@@ -197,10 +312,6 @@ class PlaylistViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_201_CREATED
         )
-                 
-           
-
-
 
     
 
