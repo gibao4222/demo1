@@ -105,7 +105,7 @@ function MainSearch({ searchQuery }) {
               <div
                 key={song.id}
                 className="px-2.5 pt-2.5 pb-3 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group cursor-pointer "
-                onClick={() => navigate(`/SongDetail/{song.id}`)}
+                onClick={() => navigate(`/song/${song.id}`)}
               >
                 <div className="relative">
                   <img
@@ -237,7 +237,7 @@ function MainSearch({ searchQuery }) {
               <div
                 key={playlist.id}
                 className="px-2.5 pt-2.5 pb-3 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group cursor-pointer"
-                onClick={() => navigate(`/PlaylistDetail/${playlist.id}`)}
+                onClick={() => navigate(`/PlaylistDetail/${playlist.id}`, { state: { playlist } })}
               >
                 <div className="relative">
                   <img
