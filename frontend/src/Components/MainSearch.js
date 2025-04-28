@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "../axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 
-function MainSearch({ searchQuery }) {
+function MainSearch() {
+  const { searchQuery } = useOutletContext();
   const [users, setUsers] = useState([]);
   const [artists, setArtists] = useState([]);
   const [songs, setSongs] = useState([]);
@@ -91,6 +92,16 @@ function MainSearch({ searchQuery }) {
 
     fetchSearchResults();
   }, [searchQuery]);
+
+  if (!searchQuery) {
+    return (
+        <div className="z-0 bg-neutral-900 rounded-lg flex flex-col h-[calc(100vh-136px)] overflow-hidden">
+            <div className="flex-1 p-4 overflow-y-auto overlay-scroll">
+                <p className="text-white">Vui lòng nhập từ khóa để tìm kiếm</p>
+            </div>
+        </div>
+    );
+}
 
   return (
     <div className="z-0 bg-neutral-900 rounded-lg flex flex-col h-[calc(100vh-136px)] overflow-hidden">

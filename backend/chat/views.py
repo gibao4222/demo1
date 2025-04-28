@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 from .models import ChatPermission, Message
-from .utils import can_chat_directly, can_send_message
+from .utils import can_chat_directly, can_send_message_with_limit,convert_pending_messages
 from spotify_user.models import SpotifyUser
 from django.contrib.auth.models import User
 
@@ -46,7 +46,6 @@ redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 #         logger.error(f"Lỗi khi lưu tin nhắn vào Redis: {str(e)}")
 
 
-# views.py
 def store_message_in_redis(message):
     # Kiểm tra message.sender và message.receiver
     if not message.sender or not message.receiver:
@@ -94,8 +93,20 @@ class ChatPermissionView(APIView):
         except SpotifyUser.DoesNotExist:
             return Response({"lỗi": "Không tìm thấy SpotifyUser cho người dùng này"}, status=status.HTTP_404_NOT_FOUND)
 
-        requests = ChatPermission.objects.filter(target=target, is_accepted=False)
-        serializer = ChatPermissionSerializer(requests, many=True)
+        requests = ChatPermission.objects.filter(
+            target=target,
+            is_accepted=False
+        ).prefetch_related('requester')
+        serializer_data = []
+        for req in requests:
+            pending_messages = Message.objects.filter(
+                sender=req.requester,
+                receiver=target,
+                is_pending=True
+            ).exists()
+            if pending_messages:
+                serializer = ChatPermissionSerializer(req)
+                serializer_data.append(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -142,11 +153,33 @@ class ChatPermissionView(APIView):
         if action == 'accept':
             permission.is_accepted = True
             permission.save()
-            Message.objects.filter(sender=permission.requester, receiver=target, is_pending=True).update(is_pending=False)
+            # Chuyển tin nhắn pending thành trực tiếp
+            updated_messages = convert_pending_messages(permission.requester, target)
+            # Cập nhật Redis
+            room_key = f"chat:{min(permission.requester.user.id, target.user.id)}_{max(permission.requester.user.id, target.user.id)}"
+            redis_client.delete(room_key)
+            messages = Message.objects.filter(
+                Q(sender=permission.requester, receiver=target) | Q(sender=target, receiver=permission.requester)
+            ).order_by('created_at')
+            for message in messages:
+                store_message_in_redis(message)
+            redis_client.expire(room_key, 24 * 60 * 60)
+            channel_layer = get_channel_layer()
+            room_name = f"{min(permission.requester.user.id, target.user.id)}_{max(permission.requester.user.id, target.user.id)}"
+            async_to_sync(channel_layer.group_send)(
+                f'chat_{room_name}',
+                {
+                    'type': 'permission_update',
+                    'permission_id': permission.id,
+                    'is_accepted': True
+                }
+            )
             return Response({"thông báo": "Đã chấp nhận yêu cầu trò chuyện"}, status=status.HTTP_200_OK)
         elif action == 'reject':
             permission.delete()
             Message.objects.filter(sender=permission.requester, receiver=target, is_pending=True).delete()
+            room_key = f"chat:{min(permission.requester.user.id, target.user.id)}_{max(permission.requester.user.id, target.user.id)}"
+            redis_client.delete(room_key)
             return Response({"thông báo": "Đã từ chối yêu cầu trò chuyện"}, status=status.HTTP_200_OK)
         else:
             return Response({"lỗi": "Hành động không hợp lệ"}, status=status.HTTP_400_BAD_REQUEST)
@@ -199,12 +232,14 @@ class MessageView(APIView):
             logger.error("Không thể gửi tin nhắn cho chính mình")
             return Response({"lỗi": "Không thể gửi tin nhắn cho chính mình"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if can_send_message(sender, receiver):
-            is_pending = False
-        else:
-            is_pending = True
-            if not ChatPermission.objects.filter(requester=sender, target=receiver).exists():
-                ChatPermission.objects.create(requester=sender, target=receiver)
+        can_send, is_pending, create_permission = can_send_message_with_limit(sender, receiver)
+        if not can_send:
+            logger.error("Đã gửi một tin nhắn yêu cầu. Vui lòng chờ chấp nhận.")
+            return Response({"lỗi": "Đã gửi một tin nhắn yêu cầu. Vui lòng chờ chấp nhận."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Tạo ChatPermission nếu cần
+        if create_permission:
+            ChatPermission.objects.create(requester=sender, target=receiver)
 
         try:
             message = Message.objects.create(
@@ -376,6 +411,21 @@ class MessageListView(APIView):
         messages = []
         if messages_in_redis:
             messages = [json.loads(msg) for msg in messages_in_redis]
+            db_messages = Message.objects.filter(
+                Q(sender=user, receiver=target) | Q(sender=target, receiver=user)
+            ).order_by('created_at')
+            db_message_ids = {msg.id for msg in db_messages}
+            redis_message_ids = {int(msg['id']) for msg in messages}
+            if db_message_ids != redis_message_ids or any(
+                msg['is_pending'] != db_messages.get(id=int(msg['id'])).is_pending for msg in messages
+            ):
+                logger.debug("Dữ liệu Redis không khớp, đồng bộ lại từ database")
+                redis_client.delete(room_key)
+                serializer = MessageSerializers(db_messages, many=True)
+                messages = serializer.data
+                for msg in messages:
+                    redis_client.rpush(room_key, json.dumps(msg))
+                redis_client.expire(room_key, 24 * 60 * 60)
         else:
             messages_query = Message.objects.filter(
                 (Q(sender=user, receiver=target) | Q(sender=target, receiver=user))
