@@ -11,9 +11,10 @@ import os
 import uuid
 import zmq
 from django.conf import settings
+
 from django.utils import timezone
 import random
-
+from rest_framework.views import APIView
 APPLE_MUSIC_STYLE_IMAGES = [
 "https://i.pinimg.com/736x/93/a6/19/93a61965a5b5de881ce78b62f1ea8364.jpg"
 "https://i.pinimg.com/736x/26/4c/3b/264c3b4fbc20fdfb7d313fd42c1f7e77.jpg"
@@ -21,6 +22,8 @@ APPLE_MUSIC_STYLE_IMAGES = [
 "https://i.pinimg.com/736x/3c/c4/50/3cc450726b9aa4b99a1a902cc710340c.jpg"
 "https://i.pinimg.com/736x/14/64/20/1464201164e8b32a8347645e859fc95f.jpg"
 ]
+
+
 
 
 class PlaylistViewSet(viewsets.ModelViewSet):
@@ -369,8 +372,19 @@ class PlaylistSongViewSet(viewsets.ModelViewSet):
                 {"detail": "Không tìm thấy bài hát trong danh sách phát."},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
 
 
-
+class UserPlaylistListView(APIView):
+    def get(self, request, user_id):
+        try:
+            playlists = Playlist.objects.filter(id_user=user_id, is_active=True)
+            if not playlists.exists():
+                return Response(
+                    {"message":"Không tìm thấy playlist công khai nào cho user này."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            serializer = PlaylistSerializer(playlists, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

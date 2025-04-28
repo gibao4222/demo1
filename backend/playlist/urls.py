@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import PlaylistViewSet, PlaylistSongViewSet
+from .views.views import UserPlaylistListView
 from . import color_extraction
 # Tạo router cho các endpoint mặc định
 router = DefaultRouter()
@@ -24,6 +25,8 @@ urlpatterns = [
     path('change-playlist-song/<int:pk>/', PlaylistSongViewSet.as_view({'put': 'change_playlist_song'}), name='playlist-song-change'),
     path('delete-playlist-song/<int:pk>/', PlaylistSongViewSet.as_view({'delete': 'delete_playlist_song'}), name='playlist-song-delete'),
 
+
     path('create-recommended-playlist/', PlaylistViewSet.as_view({'post': 'create_recommended_playlist'}), name='create-recommended-playlist'),
-    
+    path('users/<int:user_id>/playlists/', UserPlaylistListView.as_view(), name='user-playlists'),
+
 ]

@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, useRef } from "react";
+
 import axios from "../axios";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 
 function MainFollowUser() {
   const { id: userId } = useParams();
@@ -11,10 +15,16 @@ function MainFollowUser() {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentUserLoading, setCurrentUserLoading] = useState(true);
+  const [playlists, setPlaylists] = useState([]);
   const { token } = useAuth();
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const optionRef = useRef(null);
+  const scrollRef = useRef(null);
+  const navigate = useNavigate();
 
   // Lấy thông tin chi tiết của người dùng
   useEffect(() => {
+
     const fetchUserDetails = async () => {
       try {
         const response = await axios.get(`/api/users/users/${userId}/`);
@@ -28,6 +38,26 @@ function MainFollowUser() {
     };
 
     fetchUserDetails();
+  }, [userId]);
+
+  // Lấy danh sách playlist của người dùng
+  useEffect(() => {
+    const fetchPlaylists = async () => {
+      try {
+        const response = await axios.get(`/api/playlists/users/${userId}/playlists/`);
+        setPlaylists(response.data);
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách playlist:", error);
+        if (error.response && error.response.status === 404) {
+          setPlaylists([]); // Đặt playlists rỗng nếu không tìm thấy
+          toast.info("Người dùng này chưa có playlist công khai.");
+        } else {
+          toast.error("Không thể tải danh sách playlist!");
+        }
+      }
+    };
+
+    fetchPlaylists();
   }, [userId]);
 
   // Lấy thông tin người dùng hiện tại để lấy currentUserId
@@ -62,6 +92,36 @@ function MainFollowUser() {
       toast.error("Vui lòng đăng nhập để sử dụng tính năng này!");
     }
   }, [token]);
+
+  // Theo dõi vị trí cuộn để hiển thị/ẩn sticky header
+    useEffect(() => {
+      const handleScroll = () => {
+        if (scrollRef.current && optionRef.current) {
+          const scrollTop = scrollRef.current.scrollTop;
+          const scrollContainerRect = scrollRef.current.getBoundingClientRect();
+          const optionRect = optionRef.current.getBoundingClientRect();
+          const optionTopRelativeToScroll = optionRect.top - scrollContainerRect.top + scrollTop;
+          const optionHeight = optionRef.current.offsetHeight;
+  
+
+          // Hiển thị header khi cuộn đến cuối phần option
+          const isOptionFullyOutOfView = scrollTop > optionTopRelativeToScroll + optionHeight;
+          setShowStickyHeader(isOptionFullyOutOfView);
+        }
+      };
+  
+      const scrollContainer = scrollRef.current;
+      if (scrollContainer) {
+        scrollContainer.addEventListener("scroll", handleScroll);
+        handleScroll();
+      }
+  
+      return () => {
+        if (scrollContainer) {
+          scrollContainer.removeEventListener("scroll", handleScroll);
+        }
+      };
+    }, [user]);
 
   // Kiểm tra trạng thái theo dõi
   useEffect(() => {
@@ -170,79 +230,112 @@ function MainFollowUser() {
   if (!user) {
     return <div>Không tìm thấy người dùng!</div>;
   }
+  
 
   return (
-    <div className="flex-1 flex">
-      <div className="flex-1 p-8">
-        <div className="relative">
-          <img
-            alt={user.username || user.email}
-            className="w-full h-64 object-cover rounded-lg"
-            height="400"
-            src={
-              user.avatar
-                ? user.avatar.startWith('http')
-                  ? user.avatar
-                  : `/media/${user.avatar}`
-                : "https://storage.googleapis.com/a1aa/image/N5Ae48WVgHcJ7vgKi6lA3tz5FvQ3gwiFky_1XteLMpY.jpg"
-            }
-            width="800"
-          />
-          <div className="absolute bottom-4 left-4">
-            <p className="text-blue-500">Người dùng được xác minh</p>
-            <h1 className="text-6xl font-bold">{user.username || user.email}</h1>
-            <p className="text-gray-400">{user.followers || 0} người theo dõi</p>
-          </div>
-        </div>
-        <div className="flex items-center mt-4">
-          <button className="bg-green-500 text-white px-6 py-2 rounded-full text-xl mr-4">
-            <i className="fas fa-play"></i>
+    <div className="z-0 bg-neutral-900 rounded-lg flex flex-col h-[calc(100vh-136px)] overflow-hidden relative">
+      {/* Sticky Header */}
+      {showStickyHeader && (
+        <div className="absolute top-0 left-0 right-0 bg-[#072447] z-50 flex items-center px-2 py-0.5">
+          <button className="">
+            <img
+              className="w-16 h-16 hover:brightness-75 transition-all duration-200"
+              src="/icon/Play_GreemHover.png"
+              alt="Play button"
+            />
           </button>
-          <button
-            onClick={handleFollowToggle}
-            disabled={currentUserLoading || !currentUserId || isNaN(parseInt(userId))}
-            className={`${
-              isFollowing ? "bg-gray-600" : "bg-gray-800"
-            } text-white px-6 py-2 rounded-full text-xl mr-4 ${
-              currentUserLoading || !currentUserId || isNaN(parseInt(userId)) ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            {isFollowing ? "Đang theo dõi" : "Theo dõi"}
-          </button>
-          <i className="fas fa-ellipsis-h text-2xl"></i>
+          <h1 className="text-3xl font-bold text-white ml-1 tracking-wider">{user.username}</h1>
         </div>
-        <h2 className="mt-8 text-2xl font-bold">Phổ biến</h2>
-        <div className="mt-4">
-          <div className="flex items-center justify-between py-2">
-            <div className="flex items-center">
+      )}
+      <div className="overflow-y-auto overlay-scroll pb-20" ref={scrollRef}>
+        <div className="flex-1 flex">
+          <div className="flex-1">
+            <div className="relative">
               <img
-                alt="Perfect album cover"
-                className="w-10 h-10 mr-4"
-                height="40"
-                src="https://storage.googleapis.com/a1aa/image/qHjEinP2BZjVW90YIyUCD5vnA6yQCbCN6tj8Pp63Vco.jpg"
-                width="40"
+                alt={user.username || user.email}
+                className="w-full h-[300px] object-cover object-top"
+                height="400"
+                src={
+                  user.avatar
+                    ? user.avatar.startWith('http')
+                      ? user.avatar
+                      : `https://localhost:3000${user.avatar}`
+                    : "https://storage.googleapis.com/a1aa/image/N5Ae48WVgHcJ7vgKi6lA3tz5FvQ3gwiFky_1XteLMpY.jpg"
+                }
+                width="800"
               />
-              <p>Perfect</p>
+
+              <div className="absolute inset-0 bg-black bg-opacity-10"></div>
+              <div className="absolute bottom-7 left-5 space-y-3">
+                <div className="flex items-center">
+                  <img src="/icon/Verification.png" className="w-7 h-7 mr-1" />
+                  <p className="drop-shadow-xl">Người dùng được xác minh</p>
+                </div>
+                <h1 className="text-6xl font-bold drop-shadow-xl tracking-wider">{user.username || user.email}</h1>
+                <p className="drop-shadow-xl pt-2">
+                  <span className="tracking-wider">{user.followers || 0} người theo dõi</span>
+                </p>
+              </div>
             </div>
-            <div className="flex items-center">
-              <p className="text-gray-400 mr-4">3.366.654.565</p>
-              <p className="text-gray-400">4:23</p>
+            <div className="bg-gradient-to-b from-[#072447] to-neutral-900 relative">
+              <div ref={optionRef} className="flex items-center px-2 py-4">
+                {/* <button className="">
+                  <img
+                    className="w-20 h-20 hover:brightness-75 transition-all duration-200"
+                    src="/icon/Play_GreemHover.png"
+                    alt="Play button"
+                  />
+                </button> */}
+                <button
+                  onClick={handleFollowToggle}
+                  disabled={currentUserLoading || !currentUserId || isNaN(parseInt(userId))}
+                  className={`text-white px-6 py-2 ml-2 rounded-full bg-opacity-0 bg-nuetral-900 border-[1px] border-neutral-500 hover:border-[1.5px] hover:border-white`}
+                >
+                  {isFollowing ? "Đang theo dõi" : "Theo dõi"}
+                </button>
+              </div>
+              <h2 className="text-2xl font-bold px-6 pt-2 pb-2">Playlist công khai</h2>
+
             </div>
-          </div>
-          <div className="flex items-center justify-between py-2">
-            <div className="flex items-center">
-              <img
-                alt="Shape of You album cover"
-                className="w-10 h-10 mr-4"
-                height="40"
-                src="https://storage.googleapis.com/a1aa/image/wuzzoUry9JliZwrMuHMZIjIj4CTXlcVWZukIzxuvFMg.jpg"
-                width="40"
-              />
-              <p>Shape of You</p>
-            </div>
-            <div className="flex items-center">
-              <p className="text-gray-400 mr-4">4.290.554.944</p>
-              <p className="text-gray-400">3:53</p>
+            
+            <div className="mb-8 px-3">
+              {loading ? (
+                <p>Đang tải...</p>
+              ) : playlists.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {playlists.map((playlist) => (
+                    <div
+                      key={playlist.id}
+                      className="px-2.5 pt-2.5 pb-3 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group cursor-pointer"
+                      onClick={() => {
+                        navigate(`/PlaylistDetail/${playlist.id}`, { state: { playlist } });
+                      }}
+                    >
+                      <div className="relative">
+                        <img
+                          alt={playlist.name}
+                          className="mb-2 rounded-lg w-[180px] h-[180px] object-cover"
+                          src={playlist.image || "./img/default-avatar.jpg"}
+                          // style={{ height: "140px", width: "125px !important" }}
+                        />
+                        <img
+                          src="/icon/Play_GreemHover.png"
+                          alt="Play"
+                          className="absolute bottom-0.5 right-0.5 hidden group-hover:block h-16 w-16 hover:brightness-75 transition-all duration-300"
+                        />
+                      </div>
+                      <div className="truncate">
+                        <h3 className="text-base font-bold">{playlist.name}</h3>
+                      </div>
+                      
+                      <p className="text-sm text-gray-400">Playlist</p>
+
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>Không tìm thấy playlist</p>
+              )}
             </div>
           </div>
         </div>
