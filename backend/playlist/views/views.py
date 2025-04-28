@@ -8,6 +8,7 @@ from ..models import Playlist, PlaylistSong
 import os
 import uuid
 from django.conf import settings
+from rest_framework.views import APIView
 
 class PlaylistViewSet(viewsets.ModelViewSet):
     queryset = Playlist.objects.all()
@@ -135,3 +136,18 @@ class PlaylistSongViewSet(viewsets.ModelViewSet):
                 {"detail": "Không tìm thấy bài hát trong danh sách phát."},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+
+class UserPlaylistListView(APIView):
+    def get(self, request, user_id):
+        try:
+            playlists = Playlist.objects.filter(id_user=user_id, is_active=True)
+            if not playlists.exists():
+                return Response(
+                    {"message":"Không tìm thấy playlist công khai nào cho user này."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            serializer = PlaylistSerializer(playlists, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

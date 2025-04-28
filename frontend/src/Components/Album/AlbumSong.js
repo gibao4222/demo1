@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaPlay, FaEllipsisH, FaCheckCircle } from 'react-icons/fa';
+import { FaPlay, FaEllipsisH } from 'react-icons/fa';
 import { FiClock } from "react-icons/fi";
 import OptionSongAlbum from '../Modals/OptionSongAlbum';
 import { createPortal } from 'react-dom';
