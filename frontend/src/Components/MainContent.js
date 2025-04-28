@@ -81,7 +81,7 @@ const MainContent = () => {
                             </div>
                             ) : currentPlaylist ? (
                                 <div className="p-3 flex bg-gradient-to-tr from-black to-transparent rounded-sm">
-                                    <img
+                                    {/* <img
                                         src={
                                             currentPlaylist.image.startsWith("http")
                                                 ? currentPlaylist.image
@@ -89,7 +89,7 @@ const MainContent = () => {
                                         }
                                         alt="Playlist Cover"
                                         className="w-36 h-36 object-cover mr-4"
-                                    />
+                                    /> */}
                                     <div className="flex-1">
                                         <div className="flex justify-between items-start">
                                             <div>
@@ -184,7 +184,7 @@ const MainContent = () => {
                             {playlists.map((playlist, index) => (
                                 <div key={index} className="p-2.5 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group">
                                     <div className="relative">
-                                        <img
+                                        {/* <img
                                             alt={playlist.name}
                                             className="mb-2 rounded-lg w-[180px] h-[180px] object-cover"
                                             src={
@@ -192,7 +192,7 @@ const MainContent = () => {
                                                     ? playlist.image
                                                     : `https://localhost${playlist.image}`
                                             }
-                                        />
+                                        /> */}
 
                                         < img
                                             src="/icon/Play_GreemHover.png"
@@ -229,7 +229,7 @@ const MainContent = () => {
                             {playlists.map((playlist, index) => (
                                 <div key={index} className="p-2.5 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group cursor-pointer">
                                     <div className="relative">
-                                        <img
+                                        {/* <img
                                             alt={playlist.name}
                                             className="mb-2 rounded-lg w-[180px] h-[180px] object-cover"
                                             src={
@@ -237,7 +237,7 @@ const MainContent = () => {
                                                     ? playlist.image
                                                     : `https://localhost${playlist.image}`
                                             }
-                                        />
+                                        /> */}
 
                                         < img
                                             src="/icon/Play_GreemHover.png"
@@ -273,7 +273,7 @@ const MainContent = () => {
                             {playlists.map((playlist, index) => (
                                 <div key={index} className="p-2.5 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group">
                                     <div className="relative">
-                                        <img
+                                        {/* <img
                                             alt={playlist.name}
                                             className="mb-2 rounded-lg w-[180px] h-[180px] object-cover"
                                             src={
@@ -281,7 +281,7 @@ const MainContent = () => {
                                                     ? playlist.image
                                                     : `https://localhost${playlist.image}`
                                             }
-                                        />
+                                        /> */}
 
                                         < img
                                             src="/icon/Play_GreemHover.png"
@@ -317,7 +317,7 @@ const MainContent = () => {
                             {playlists.map((playlist, index) => (
                                 <div key={index} className="p-2.5 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group">
                                     <div className="relative">
-                                        <img
+                                        {/* <img
                                             alt={playlist.name}
                                             className="mb-2 rounded-lg w-[180px] h-[180px] object-cover"
                                             src={
@@ -325,7 +325,7 @@ const MainContent = () => {
                                                     ? playlist.image
                                                     : `https://localhost${playlist.image}`
                                             }
-                                        />
+                                        /> */}
 
                                         < img
                                             src="/icon/Play_GreemHover.png"
@@ -361,7 +361,7 @@ const MainContent = () => {
                             {playlists.map((playlist, index) => (
                                 <div key={index} className="p-2.5 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group">
                                     <div className="relative">
-                                        <img
+                                        {/* <img
                                             alt={playlist.name}
                                             className="mb-2 rounded-lg w-[180px] h-[180px] object-cover"
                                             src={
@@ -369,7 +369,7 @@ const MainContent = () => {
                                                     ? playlist.image
                                                     : `https://localhost${playlist.image}`
                                             }
-                                        />
+                                        /> */}
 
                                         < img
                                             src="/icon/Play_GreemHover.png"
@@ -405,7 +405,7 @@ const MainContent = () => {
                             {playlists.map((playlist, index) => (
                                 <div key={index} className="p-2.5 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group">
                                     <div className="relative">
-                                        <img
+                                        {/* <img
                                             alt={playlist.name}
                                             className="mb-2 rounded-lg w-[180px] h-[180px] object-cover"
                                             src={
@@ -413,7 +413,7 @@ const MainContent = () => {
                                                     ? playlist.image
                                                     : `https://localhost${playlist.image}`
                                             }
-                                        />
+                                        /> */}
 
                                         < img
                                             src="/icon/Play_GreemHover.png"

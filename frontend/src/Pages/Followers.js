@@ -1,12 +1,13 @@
-import NavBar from "../Components/NavBar";
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import React, { useEffect,useState } from "react";
 import SideBar from "../Components/SideBar";
+
 import FriendActivity from "../Components/FriendActivity";
 import BottomPlayer from "../Components/BottomPlayer";
-import MainFollowUser from "../Components/MainFollowUser";
-function FollowUser(){
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import NavBar from "../Components/NavBar";
+import UserFollowers from "../Components/UserFollowers";
+function Followers(){
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
@@ -25,7 +26,7 @@ function FollowUser(){
             navigate(`/Search?query=${encodeURIComponent(query)}`);
         }
     };
-
+    
     return (
         <>
             <div className="min-h-screen bg-black text-white flex flex-col">
@@ -44,7 +45,7 @@ function FollowUser(){
                     <div className="w-px bg-black cursor-col-resize resize-x min-w-[4px] px-1"></div>
 
                     <div className="fixed top-[64px] left-[calc(20%+6px)] h-[calc(100vh-136px)] w-[calc(60%-12px)] z-0 ">
-                        <MainFollowUser />
+                        <UserFollowers />
                     </div>
 
                     <div className="flex-1"></div>
@@ -65,11 +66,8 @@ function FollowUser(){
         </>
     );
 }
-export default FollowUser;
+export default Followers;
 
 
 
-
-
-
-
+   

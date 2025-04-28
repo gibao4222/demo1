@@ -21,6 +21,7 @@ import DetailSongPage from './Pages/DetailSongPage';
 import PlaylistPage from './Pages/PlaylistPage';
 import AlbumPage from './Pages/AlbumPage';
 import SearchPage from './Pages/SearchPage';
+import Followers from './Pages/Followers';  
 
 const App = () => {
   return (
@@ -44,7 +45,8 @@ const App = () => {
           <Route path="/SongDetail/:id" element={<LikeSong />} />
           <Route path="/AlbumDetail/:id" element={<AlbumPage />} />
           <Route path="/PlaylistDetail/:id" element={<PlaylistPage />} />
-
+     
+          <Route path="/FollowUser/:id/followers" element={<Followers/>} />
 
           <Route path="/song" element={<SongPage />} />
           <Route path="/song/:id" element={<DetailSongPage />} />
