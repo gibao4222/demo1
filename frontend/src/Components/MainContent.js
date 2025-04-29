@@ -233,7 +233,7 @@ const MainContent = () => {
                     {playlists.length > 0 ? (
                         <div className="flex flex-row overflow-x-auto space-x-4 no-scrollbar [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                             {playlists.map((playlist, index) => (
-                                <div key={index} className="p-2.5 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group cursor-pointer">
+                                <div key={index} className="p-2.5 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group">
                                     <div className="relative">
                                         <img
                                             alt={playlist.name}

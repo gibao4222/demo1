@@ -16,21 +16,18 @@ function SideBar({ onToggleExpand, isExpanded }) {
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
   const [isPlaylistHovered, setIsPlaylistHovered] = useState(false);
   const [isFolderHovered, setIsFolderHovered] = useState(false);
+  const [isAIPlaylistHovered, setIsAIPlaylistHovered] = useState(false);
   const createButtonRef = useRef(null);
 
   const fetchPlaylists = useCallback(async () => {
     try {
       const data = await getPlaylists(token);
-
-      // Kiểm tra nếu danh sách phát rỗng
       if (!Array.isArray(data) || data.length === 0) {
         setPlaylists([]);
         console.error('Không có danh sách phát nào.');
         return;
       }
-      // Nếu có dữ liệu, cập nhật state
       setPlaylists([...data]);
-
     } catch (error) {
       console.error('Lỗi khi lấy danh sách phát:', error);
       alert('Không thể tải danh sách phát. Vui lòng thử lại sau.');
@@ -41,15 +38,11 @@ function SideBar({ onToggleExpand, isExpanded }) {
   const fetchLibraryAlbums = useCallback(async () => {
     try {
       const data = await getLibraryAlbums(token);
-
-      // Kiểm tra nếu danh sách album rỗng
       if (!Array.isArray(data) || data.length === 0) {
         setLibraryAlbums([]);
         console.error('Không có album nào trong thư viện.');
         return;
       }
-
-      // Nếu có dữ liệu, cập nhật state
       setLibraryAlbums(data);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách album trong thư viện:', error);
@@ -117,6 +110,44 @@ function SideBar({ onToggleExpand, isExpanded }) {
     } catch (error) {
       console.error('Lỗi khi tạo danh sách phát:', error.response?.data || error.message);
       alert(error.response?.data?.error || 'Không thể tạo playlist. Vui lòng thử lại.');
+    }
+  };
+
+  const handleCreateAIPlaylist = async () => {
+    try {
+      if (!user || !user.user_id) {
+        console.error('Thiếu thông tin người dùng:', user);
+        alert('Vui lòng đăng nhập để tạo playlist AI.');
+        navigate('/login');
+        return;
+      }
+
+      setIsModalOpen(false);
+
+      const response = await fetch('https://localhost/api/playlists/create-recommended-playlist/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Assuming token is required for auth
+        },
+        body: JSON.stringify({
+          user_id: user.user_id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Lỗi khi tạo playlist AI');
+      }
+
+      const newPlaylist = await response.json();
+      setPlaylists([...playlists, newPlaylist.playlist]);
+      alert('Đã tạo playlist AI thành công!');
+      navigate(`/PlaylistDetail/${newPlaylist.playlist.id}`, {
+        state: { playlist: newPlaylist.playlist },
+      });
+    } catch (error) {
+      console.error('Lỗi khi tạo playlist AI:', error);
+      alert('Không thể tạo playlist AI. Vui lòng thử lại sau.');
     }
   };
 
@@ -189,6 +220,27 @@ function SideBar({ onToggleExpand, isExpanded }) {
                       <span className="text-base font-bold">Playlist</span>
                       <span className="text-sm text-neutral-400">
                         Tạo danh sách phát gồm bài hát hoặc tập
+                      </span>
+                    </div>
+                  </li>
+                  <li
+                    className="group px-2.5 py-2 text-white hover:bg-neutral-700 cursor-pointer rounded flex items-center m-0.5"
+                    onClick={handleCreateAIPlaylist}
+                    onMouseEnter={() => setIsAIPlaylistHovered(true)}
+                    onMouseLeave={() => setIsAIPlaylistHovered(false)}
+                  >
+                    <NavItem
+                      icon="/icon/AddPlaylist.png"
+                      hoverIcon="/icon/AddPlaylist_Green.png"
+                      activeStyle="none"
+                      hoverRotateDegree={10}
+                      isParentHovered={isAIPlaylistHovered}
+                      className="mr-2.5 bg-neutral-500 group-hover:bg-neutral-700 transition-colors duration-200"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-base font-bold">Playlist AI</span>
+                      <span className="text-sm text-neutral-400">
+                        Tạo danh sách phát thông minh với AI
                       </span>
                     </div>
                   </li>

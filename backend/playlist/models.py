@@ -13,7 +13,7 @@ class Playlist(models.Model):
         on_delete=models.CASCADE,  
         related_name='playlists'  
     )
-    image = models.CharField(max_length=255, blank=True, null=True)
+    image = models.CharField(max_length=350, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
