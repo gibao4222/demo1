@@ -161,7 +161,7 @@ function MainSearch() {
               <div
                 key={artist.id}
                 className="px-2.5 pt-2.5 pb-3 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group cursor-pointer "
-                onClick={() => navigate(`/FollowSinger/${artist.id}`)}
+                onClick={() => navigate(`/singer/${artist.id}`)}
               >
                 <div className="relative">
                   <img
@@ -288,7 +288,7 @@ function MainSearch() {
               <div
                 key={user.id}
                 className="px-2.5 pt-2.5 pb-3 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group cursor-pointer "
-                onClick={() => navigate(`/FollowUser/${user.id}`)}
+                onClick={() => navigate(`/user/${user.id}`)}
               >
                 <div className="relative">
                   <img
