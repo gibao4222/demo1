@@ -1,11 +1,17 @@
+import { LuRepeat, LuRepeat1 } from "react-icons/lu";
+import { IoShuffle } from "react-icons/io5";
 import React, { useState, useRef, useEffect } from "react";
 
-function BottomPlayer_ex({ song, isPlaying, setIsPlaying, audioRef, songList, setCurrentSong }) {
+function BottomPlayer_ex({ song, isPlaying, setIsPlaying, audioRef, songList, setCurrentSong, onFullScreenClick }) {
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(50);
     const [isVolume, setIsVolume] = useState(1);
     const [volumeTemp, setVolumeTemp] = useState(0);
+    const [repeatMode, setRepeatMode] = useState("off");
+    const [isShuffle, setIsShuffle] = useState(false);
+    const [shuffledList, setShuffledList] = useState([]);
+
 
     useEffect(() => {
         const audio = audioRef.current;
@@ -13,7 +19,22 @@ function BottomPlayer_ex({ song, isPlaying, setIsPlaying, audioRef, songList, se
 
         const handleLoadedMetadata = () => setDuration(audio.duration);
         const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-        const handleEnded = () => setIsPlaying(false);
+        const handleEnded = () => {
+            const currentIndex = (isShuffle ? shuffledList : songList).findIndex(s => s.id === song.id);
+            const nextList = isShuffle ? shuffledList : songList;
+
+            if (repeatMode === "one") {
+                audioRef.current.currentTime = 0;
+                audioRef.current.play();
+            } else if (repeatMode === "all") {
+                const nextIndex = (currentIndex + 1) % nextList.length;
+                setCurrentSong(nextList[nextIndex]);
+                setIsPlaying(true);
+            } else {
+                setIsPlaying(false);
+            }
+        };
+
 
         audio.addEventListener("loadedmetadata", handleLoadedMetadata);
         audio.addEventListener("timeupdate", handleTimeUpdate);
@@ -25,24 +46,52 @@ function BottomPlayer_ex({ song, isPlaying, setIsPlaying, audioRef, songList, se
             audio.removeEventListener("timeupdate", handleTimeUpdate);
             audio.removeEventListener("ended", handleEnded);
         };
-    }, [song, volume, setIsPlaying, audioRef]);
+    }, [song, volume, setIsPlaying, audioRef, repeatMode]);
 
     const togglePlay = () => {
         if (!audioRef.current) return;
         setIsPlaying(!isPlaying);
     };
 
+    const toggleRepeat = () => {
+        if (repeatMode === "off") {
+            setRepeatMode("one");
+        } else if (repeatMode === "one") {
+            setRepeatMode("all");
+        } else {
+            setRepeatMode("off");
+        }
+    };
+
+    const toggleShuffle = () => {
+        if (isShuffle) {
+            setIsShuffle(false);
+        } else {
+            const newList = [...songList];
+            for (let i = newList.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newList[i], newList[j]] = [newList[j], newList[i]];
+            }
+
+            setShuffledList(newList);
+            setIsShuffle(true);
+        }
+    };
+
+
     const handleNext = () => {
-        const currentIndex = songList.findIndex(s => s.id === song.id);
-        const nextIndex = (currentIndex + 1) % songList.length;
-        setCurrentSong(songList[nextIndex]);
+        const currentIndex = (isShuffle ? shuffledList : songList).findIndex(s => s.id === song.id);
+        const nextList = isShuffle ? shuffledList : songList;
+        const nextIndex = (currentIndex + 1) % nextList.length;
+        setCurrentSong(nextList[nextIndex]);
         setIsPlaying(true);
     };
 
     const handlePrev = () => {
-        const currentIndex = songList.findIndex(s => s.id === song.id);
-        const prevIndex = (currentIndex - 1 + songList.length) % songList.length;
-        setCurrentSong(songList[prevIndex]);
+        const currentIndex = (isShuffle ? shuffledList : songList).findIndex(s => s.id === song.id);
+        const nextList = isShuffle ? shuffledList : songList;
+        const prevIndex = (currentIndex - 1 + nextList.length) % nextList.length;
+        setCurrentSong(nextList[prevIndex]);
         setIsPlaying(true);
     };
 
@@ -73,6 +122,9 @@ function BottomPlayer_ex({ song, isPlaying, setIsPlaying, audioRef, songList, se
         }
     };
 
+
+
+
     const formatTime = (time) => {
         const minutes = Math.floor(time / 60);
         const seconds = Math.floor(time % 60);
@@ -94,8 +146,8 @@ function BottomPlayer_ex({ song, isPlaying, setIsPlaying, audioRef, songList, se
             {/* Middle section - Controls */}
             <div className="flex flex-col items-center" style={{ flex: 1, maxWidth: '600px' }}>
                 <div className="flex items-center">
-                    <button className="mr-4 mb-2">
-                        <img alt="Shuffle" src="/icon/Shuffle_S.png" />
+                    <button className="mr-4" onClick={toggleShuffle}>
+                        <IoShuffle className={isShuffle ? "text-green-500 w-7 h-7" : "text-gray-400 w-7 h-7"} />
                     </button>
                     <button onClick={() => handlePrev()} className="mr-4">
                         <img alt="Previous" src="/icon/Component2.png" />
@@ -109,9 +161,14 @@ function BottomPlayer_ex({ song, isPlaying, setIsPlaying, audioRef, songList, se
                     <button onClick={() => handleNext()} className="mr-4">
                         <img alt="Next" src="/icon/Component3.png" />
                     </button>
-                    <button className="mr-4">
-                        <img alt="Repeat" src="/icon/Repeat_S.png" />
+
+                    <button onClick={toggleRepeat}>
+                        {repeatMode === "off" && <LuRepeat className="text-gray-400 w-5 h-5" />}
+                        {repeatMode === "one" && <LuRepeat1 className="text-green-500 w-5 h-5" />}
+                        {repeatMode === "all" && <LuRepeat className="text-green-500 w-5 h-5" />}
                     </button>
+
+
                 </div>
                 <div className="flex items-center">
                     <span className="mr-2">{formatTime(currentTime)}</span>
@@ -151,7 +208,7 @@ function BottomPlayer_ex({ song, isPlaying, setIsPlaying, audioRef, songList, se
                     />
                 </div>
                 <div className="flex items-center">
-                    <button className="ml-1">
+                    <button className="ml-1" onClick={onFullScreenClick}>
                         <img src="/icon/FullScreen_S.png" alt="Fullscreen" />
                     </button>
                 </div>

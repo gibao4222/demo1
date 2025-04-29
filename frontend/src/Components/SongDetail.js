@@ -23,6 +23,8 @@ function SongDetail() {
     const [listSongRelated, setListSongRelated] = useState([]);
     // const [currentPlaylist, setCurrentPlaylist] = useState([]);
     const [selectedSongId, setSelectedSongId] = useState(null);
+    const [fullscreenElement, setFullscreenElement] = useState(null);
+
     useEffect(() => {
         getRelatedSongs();
         axios.get(`https://localhost/api/songs/songs/${id}/`)
@@ -43,10 +45,10 @@ function SongDetail() {
         };
     }, [id]);
 
-    useEffect(()=>{
+    useEffect(() => {
         if (song) fetchLyrics(song.url_lyric)
-    },[song])
-    
+    }, [song])
+
     // useEffect(() => {
     //     if (song && listSongRelated.length > 0) {
     //         setCurrentPlaylist([song, ...listSongRelated]);
@@ -67,10 +69,10 @@ function SongDetail() {
         setIsPlaying(true);
         setSelectedSongId(clickedSong.id);
         setPreviewEnded(false);
-       
-      fetchLyrics(clickedSong.url_lyric)
-        
-        window.scrollTo(0, 0); 
+
+        fetchLyrics(clickedSong.url_lyric)
+
+        window.scrollTo(0, 0);
     }
 
     const fetchLyrics = async (url) => {
@@ -87,12 +89,28 @@ function SongDetail() {
         navigate('/payment');
     }
 
+    const toggleFullScreen = () => {
+        // Phần tử sẽ fullscreen (video hoặc image)
+        const element = user.vip && song.url_video
+            ? document.querySelector('.video-container')
+            : document.querySelector('.image-container');
+
+        if (!document.fullscreenElement) {
+            element.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+            setFullscreenElement(element);
+        } else {
+            document.exitFullscreen();
+            setFullscreenElement(null);
+        }
+    };
     const parseLyrics = (rawLyrics) => {
         if (!rawLyrics) return [];
-        
+
         const lines = rawLyrics.split('\n');
         const result = [];
-        
+
         for (let i = 0; i < lines.length; i++) {
             const timeMatch = lines[i].match(/(\d+):(\d+):(\d+),(\d+)/);
             if (timeMatch && lines[i + 1]) {
@@ -101,7 +119,7 @@ function SongDetail() {
                 const seconds = parseInt(timeMatch[3]);
                 const milliseconds = parseInt(timeMatch[4]);
                 const totalSeconds = hours * 3600 + minutes * 60 + seconds + milliseconds / 1000;
-                
+
                 result.push({
                     time: totalSeconds,
                     text: lines[i + 1].trim()
@@ -109,7 +127,7 @@ function SongDetail() {
                 i++;
             }
         }
-        
+
         return result;
     };
 
@@ -129,14 +147,14 @@ function SongDetail() {
             if (lyrics.length > 0) {
                 const currentTime = audio.currentTime;
                 let currentLyricObj = null;
-                
+
                 for (let i = lyrics.length - 1; i >= 0; i--) {
                     if (lyrics[i].time <= currentTime) {
                         currentLyricObj = lyrics[i];
                         break;
                     }
                 }
-                
+
                 setCurrentLyric(currentLyricObj?.text || "");
             }
 
@@ -149,7 +167,7 @@ function SongDetail() {
         };
 
         audio.addEventListener('timeupdate', handleTimeUpdate);
-        
+
         return () => {
             audio.removeEventListener('timeupdate', handleTimeUpdate);
         };
@@ -175,26 +193,26 @@ function SongDetail() {
         const container = lyricsContainerRef.current;
         const containerRect = container.getBoundingClientRect();
         const elementRect = element.getBoundingClientRect();
-        
+
         const targetScrollTop = container.scrollTop + (elementRect.top - containerRect.top) - 100;
-        
+
         if (scrollAnimationRef.current) {
             cancelAnimationFrame(scrollAnimationRef.current);
         }
-        
+
         const animateScroll = () => {
             const currentScrollTop = container.scrollTop;
             const distance = targetScrollTop - currentScrollTop;
-            
+
             if (Math.abs(distance) < 1) {
                 container.scrollTop = targetScrollTop;
                 return;
             }
-            
+
             container.scrollTop = currentScrollTop + distance * 0.2;
             scrollAnimationRef.current = requestAnimationFrame(animateScroll);
         };
-        
+
         scrollAnimationRef.current = requestAnimationFrame(animateScroll);
     };
 
@@ -242,14 +260,14 @@ function SongDetail() {
 
             <div className="p-4 w-full md:w-2/3">
                 <div className="flex flex-col md:flex-row items-center p-4 md:p-6 sticky top-0 z-10 bg-gray-900/90 backdrop-blur-sm">
-                    <img 
-                        src={song.image} 
-                        alt={song.name} 
+                    <img
+                        src={song.image}
+                        alt={song.name}
                         className="h-24 w-24 md:h-32 md:w-32 object-cover rounded-md"
                     />
                     <div className="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
                         <h1 className="text-xl md:text-2xl font-bold line-clamp-1">{song.name}</h1>
-                        <p className="text-gray-400 text-sm">{song.artists.length >0 ? song.artists.map(a=>a.name).join(','):"Unknown Artist"}</p>
+                        <p className="text-gray-400 text-sm">{song.artists.length > 0 ? song.artists.map(a => a.name).join(',') : "Unknown Artist"}</p>
                         {song.is_vip && (
                             <span className="inline-block mr-6 mt-1 px-2 py-0.5 bg-yellow-500 text-yellow-900 text-xs font-bold rounded">
                                 PREMIUM
@@ -257,11 +275,10 @@ function SongDetail() {
                         )}
                         <button
                             onClick={handlePlayPause}
-                            className={`mt-3 px-6 py-1 rounded-full text-sm font-bold ${
-                                !user.vip && song.is_vip && previewEnded
-                                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                    : 'bg-green-500 hover:bg-green-600 text-white'
-                            }`}
+                            className={`mt-3 px-6 py-1 rounded-full text-sm font-bold ${!user.vip && song.is_vip && previewEnded
+                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                : 'bg-green-500 hover:bg-green-600 text-white'
+                                }`}
                             disabled={!user.vip && song.is_vip && previewEnded}
                         >
                             {isPlaying ? "PAUSE" : "PLAY"}
@@ -275,7 +292,7 @@ function SongDetail() {
                 </div>
 
                 <div className="mt-4">
-                    <div 
+                    <div
                         ref={lyricsContainerRef}
                         className="lyrics-container h-[calc(100vh-250px)] overflow-y-auto p-4"
                     >
@@ -286,11 +303,10 @@ function SongDetail() {
                                 <p
                                     key={index}
                                     ref={el => lyricElementsRef.current[index] = el}
-                                    className={`my-4 py-2 px-3 rounded transition-all duration-300 ${
-                                        currentLyric === line.text
-                                            ? 'active-lyric bg-gray-800 text-green-400 text-lg font-bold border-l-4 border-green-500'
-                                            : 'text-gray-400 hover:bg-gray-800/50'
-                                    }`}
+                                    className={`my-4 py-2 px-3 rounded transition-all duration-300 ${currentLyric === line.text
+                                        ? 'active-lyric bg-gray-800 text-green-400 text-lg font-bold border-l-4 border-green-500'
+                                        : 'text-gray-400 hover:bg-gray-800/50'
+                                        }`}
                                 >
                                     {line.text}
                                 </p>
@@ -299,53 +315,55 @@ function SongDetail() {
                     </div>
                 </div>
                 <div className="mt-8">
-    <h2 className="text-xl font-bold mb-4">Bài hát cùng ca sĩ</h2>
-    <ul>
-        {listSongRelated?.map(relatedSong => (
-            <li 
-                key={relatedSong.id} 
-                className={`flex items-center p-2 rounded-md cursor-pointer transition-colors duration-200 ${
-                    selectedSongId === relatedSong.id 
-                        ? 'bg-gray-700 text-green-400' 
-                        : 'hover:bg-gray-800'
-                }`}
-                onClick={() => handleSongClick(relatedSong)}
-            >
-                <img src={relatedSong.image} alt={relatedSong.name} className="h-10 w-10 object-cover rounded-md mr-4" />
-                <div>
-                    <h3 className={`text-lg font-semibold ${
-                        song?.id === relatedSong.id ? 'text-green-400' : 'text-white'
-                    }`}>
-                        {relatedSong.name}
-                    </h3>
+                    <h2 className="text-xl font-bold mb-4">Bài hát cùng ca sĩ</h2>
+                    <ul>
+                        {listSongRelated?.map(relatedSong => (
+                            <li
+                                key={relatedSong.id}
+                                className={`flex items-center p-2 rounded-md cursor-pointer transition-colors duration-200 ${selectedSongId === relatedSong.id
+                                    ? 'bg-gray-700 text-green-400'
+                                    : 'hover:bg-gray-800'
+                                    }`}
+                                onClick={() => handleSongClick(relatedSong)}
+                            >
+                                <img src={relatedSong.image} alt={relatedSong.name} className="h-10 w-10 object-cover rounded-md mr-4" />
+                                <div>
+                                    <h3 className={`text-lg font-semibold ${song?.id === relatedSong.id ? 'text-green-400' : 'text-white'
+                                        }`}>
+                                        {relatedSong.name}
+                                    </h3>
+                                </div>
+                                <span className={`ml-auto text-sm ${song?.id === relatedSong.id ? 'text-green-300' : 'text-gray-400'
+                                    }`}>
+                                    {relatedSong.artists.length > 0 ? relatedSong.artists.map(a => a.name).join(',') : "Unknown Artist"}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
-                <span className={`ml-auto text-sm ${
-                    song?.id === relatedSong.id ? 'text-green-300' : 'text-gray-400'
-                }`}>
-                    {relatedSong.artists.length >0 ? relatedSong.artists.map(a=>a.name).join(','):"Unknown Artist" }
-                </span>
-            </li>
-        ))}
-    </ul>
-</div>
                 <audio ref={audioRef} src={song.url_song} />
             </div>
 
             <div className="w-full md:w-1/3 p-4 sticky top-0 h-screen overflow-hidden">
                 {user.vip && song.url_video ? (
-                    <video
-                        src={song.url_video}
-                        className="w-full h-full object-cover rounded-lg"
-                        muted
-                        autoPlay
-                        loop
-                    />
+                    <div className="video-container w-full h-full">
+                        <video
+                            src={song.url_video}
+                            className="w-full h-full object-cover rounded-lg"
+                            muted
+                            autoPlay
+                            loop
+                            controls={fullscreenElement?.classList.contains('video-container')}
+                        />
+                    </div>
                 ) : (
-                    <img 
-                        src={song.image} 
-                        alt={song.name} 
-                        className="w-full h-full object-cover rounded-lg"
-                    />
+                    <div className="image-container w-full h-full">
+                        <img
+                            src={song.image}
+                            alt={song.name}
+                            className="w-full h-full object-cover rounded-lg"
+                        />
+                    </div>
                 )}
             </div>
 
@@ -357,6 +375,7 @@ function SongDetail() {
                     audioRef={audioRef}
                     songList={listSongRelated}
                     setCurrentSong={setSong}
+                    onFullScreenClick={toggleFullScreen}
                 />
             )}
         </div>
