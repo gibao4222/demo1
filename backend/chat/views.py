@@ -107,7 +107,7 @@ class ChatPermissionView(APIView):
             if pending_messages:
                 serializer = ChatPermissionSerializer(req)
                 serializer_data.append(serializer.data)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer_data, status=status.HTTP_200_OK)
 
     def post(self, request):
         try:

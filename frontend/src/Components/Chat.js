@@ -7,14 +7,27 @@ import imageCompression from 'browser-image-compression';
 const Chat = ({ userId, targetId, token, targetUsername }) => {
     const [messages, setMessages] = useState([]);
     const [pendingMessages, setPendingMessages] = useState([]);
+    const [allMessages, setAllMessages] = useState([]); // Gộp pendingMessages và messages
     const [input, setInput] = useState('');
-    const [image, setImage] = useState(null);  // State để lưu file ảnh
+    const [image, setImage] = useState(null);
     const [socket, setSocket] = useState(null);
     const [nextPage, setNextPage] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [hasPendingMessage, setHasPendingMessage] = useState(false); // Trạng thái đã gửi tin nhắn pending
+    const [pendingRequestFromTarget, setPendingRequestFromTarget] = useState(null); // Yêu cầu pending từ target
+    const [errorMessage, setErrorMessage] = useState('');
     const chatBoxRef = useRef(null);
+    const isUserScrolling = useRef(false);
     const navigate = useNavigate();
     const { logout } = useAuth();
+
+    // Hàm gộp và sắp xếp tin nhắn
+    const combineAndSortMessages = (msgs, pendingMsgs) => {
+        const combined = [...msgs, ...pendingMsgs].sort((a, b) => 
+            new Date(a.created_at) - new Date(b.created_at)
+        );
+        return combined;
+    };
 
     useEffect(() => {
         if (!userId || !targetId) {
@@ -34,12 +47,19 @@ const Chat = ({ userId, targetId, token, targetUsername }) => {
             const data = JSON.parse(event.data);
             if (data.type === 'chat_message') {
                 console.log('WebSocket message:', data.message);
-                console.log('msg.sender_id:', data.message.sender_id, 'userId:', userId, 'Kiểu dữ liệu:', typeof data.message.sender_id, typeof userId);
                 if (data.message.is_pending) {
                     setPendingMessages((prev) => [...prev, data.message]);
+                    // Nếu người gửi là userId, đánh dấu đã gửi tin nhắn pending
+                    if (String(data.message.sender_id) === String(userId)) {
+                        setHasPendingMessage(true);
+                    }
+                    // Nếu người gửi là targetId, lưu thông tin yêu cầu pending
+                    if (String(data.message.sender_id) === String(targetId)) {
+                        setPendingRequestFromTarget(data.message);
+                    }
                 } else {
                     setMessages((prev) => [...prev, data.message]);
-                    if (chatBoxRef.current) {
+                    if (!isUserScrolling.current && chatBoxRef.current) {
                         chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
                     }
                 }
@@ -51,6 +71,14 @@ const Chat = ({ userId, targetId, token, targetUsername }) => {
             } else if (data.type === 'recall_message') {
                 setMessages((prev) => prev.map(msg => msg.id === data.message_id ? { ...msg, is_recalled: true } : msg));
                 setPendingMessages((prev) => prev.map(msg => msg.id === data.message_id ? { ...msg, is_recalled: true } : msg));
+            } else if (data.type === 'messages_updated') {
+                console.log('Messages updated:', data.message_ids);
+                fetchMessages(); // Làm mới tin nhắn khi có cập nhật
+                // Reset trạng thái pending khi yêu cầu được chấp nhận
+                if (data.is_accepted) {
+                    setHasPendingMessage(false);
+                    setPendingRequestFromTarget(null);
+                }
             }
         };
 
@@ -86,6 +114,31 @@ const Chat = ({ userId, targetId, token, targetUsername }) => {
                 return allMessages.filter(msg => !msg.is_pending);
             });
             setPendingMessages(newMessages.filter(msg => msg.is_pending));
+            const userSentPending = newMessages.some(
+                msg => msg.is_pending && String(msg.sender_id) === String(userId)
+            );
+            if (userSentPending) {
+                setHasPendingMessage(true);
+            }
+            const targetSentPending = newMessages.find(
+                msg => msg.is_pending && String(msg.sender_id) === String(targetId)
+            );
+            if (targetSentPending) {
+                try {
+                    const usersResponse = await axios.get('/api/users/users');
+                    const targetSpotifyUser = usersResponse.data.find(u => u.user.id === parseInt(targetId));
+                    if (targetSpotifyUser) {
+                        setPendingRequestFromTarget({ ...targetSentPending, spotifyUserId: targetSpotifyUser.id });
+                    } else {
+                        setPendingRequestFromTarget(targetSentPending);
+                    }
+                } catch (permErr) {
+                    console.error('Lỗi khi lấy SpotifyUser:', permErr);
+                    setPendingRequestFromTarget(targetSentPending);
+                }
+            } else {
+                setPendingRequestFromTarget(null);
+            }
         } catch (err) {
             console.error('Lỗi khi lấy tin nhắn:', err);
             if (err.response?.status === 401) {
@@ -96,6 +149,35 @@ const Chat = ({ userId, targetId, token, targetUsername }) => {
             setLoading(false);
         }
     };
+
+    // Cập nhật allMessages khi messages hoặc pendingMessages thay đổi
+    useEffect(() => {
+        setAllMessages(combineAndSortMessages(messages, pendingMessages));
+    }, [messages, pendingMessages]);
+
+    // Cuộn xuống cuối khi allMessages thay đổi
+    useEffect(() => {
+        if (allMessages.length > 0 && chatBoxRef.current && !isUserScrolling.current) {
+            chatBoxRef.current.scrollTo({
+                top: chatBoxRef.current.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }, [allMessages]);
+
+    // Theo dõi hành vi cuộn của người dùng
+    useEffect(() => {
+        const chatBox = chatBoxRef.current;
+        if (!chatBox) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = chatBox;
+            isUserScrolling.current = scrollTop + clientHeight < scrollHeight - 10;
+        };
+
+        chatBox.addEventListener('scroll', handleScroll);
+        return () => chatBox.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const loadMoreMessages = () => {
         if (nextPage && !loading) {
@@ -184,21 +266,6 @@ const Chat = ({ userId, targetId, token, targetUsername }) => {
         }
     };
 
-    const requestChat = async () => {
-        try {
-            await axios.post('/api/chat/permission/', {
-                target_id: targetId,
-            });
-            alert('Yêu cầu trò chuyện đã được gửi.');
-        } catch (err) {
-            console.error('Lỗi khi gửi yêu cầu trò chuyện:', err);
-            if (err.response?.status === 401) {
-                logout();
-                navigate('/login');
-            }
-        }
-    };
-
     const deleteMessage = async (messageId) => {
         try {
             await axios.delete(`/api/chat/message/?message_id=${messageId}`);
@@ -225,82 +292,37 @@ const Chat = ({ userId, targetId, token, targetUsername }) => {
         }
     };
 
+    const handleRequestAction = async (action) => {
+        if (!pendingRequestFromTarget) {
+            setErrorMessage('Không tìm thấy yêu cầu trò chuyện để xử lý');
+            return;
+        }
+        const requesterId = pendingRequestFromTarget.spotifyUserId || pendingRequestFromTarget.sender_id;
+        console.log('Gửi yêu cầu xử lý ChatPermission:', { requester_id: requesterId, action });
+        try {
+            setErrorMessage('');
+            const response = await axios.put('/api/chat/permission/', {
+                requester_id: requesterId, // Đây là ID của SpotifyUser
+                action,
+            });
+            console.log('Phản hồi từ server:', response.data);
+            fetchMessages();
+            setPendingRequestFromTarget(null);
+        } catch (err) {
+            console.error(`Lỗi khi ${action} yêu cầu trò chuyện:`, err);
+            if (err.response?.status === 401) {
+                logout();
+                navigate('/login');
+            } else {
+                setErrorMessage(`Không thể ${action === 'accept' ? 'chấp nhận' : 'từ chối'} yêu cầu: ${err.response?.data?.lỗi || 'Lỗi không xác định'}`);
+            }
+        }
+    };
+
     return (
         <div className="chat-container flex flex-col w-full h-full bg-neutral-800 text-white rounded-t-lg">
             <div className="chat-header p-1 bg-blue-700 rounded-t-lg border-b border-gray-700 flex justify-between items-center">
                 <h2 className="text-lg font-semibold">{targetUsername}</h2>
-            </div>
-
-            <div className="pending-messages p-4 border-b border-gray-700">
-                <h3 className="text-base font-semibold mb-2">Tin nhắn chờ xác nhận</h3>
-                {pendingMessages.length === 0 ? (
-                    <p className="text-gray-400 text-sm">Không có tin nhắn chờ xác nhận.</p>
-                ) : (
-                    pendingMessages.map((msg) => (
-                        <div
-                            key={msg.id}
-                            className={`flex mb-3 ${
-                                String(msg.sender_id) === String(userId)
-                                    ? "justify-end"
-                                    : "justify-start"
-                            }`}
-                        >
-                            <div
-                                className={`message p-2 rounded-lg ${
-                                    String(msg.sender_id) === String(userId)
-                                        ? "bg-blue-600"
-                                        : "bg-gray-700"
-                                } max-w-[50%] break-words text-sm`}
-                            >
-                                {msg.is_recalled ? (
-                                    <span className="text-gray-400 italic">
-                                        Tin nhắn đã bị thu hồi
-                                    </span>
-                                ) : msg.is_deleted ? (
-                                    <span className="text-gray-400 italic">
-                                        Tin nhắn đã bị xóa
-                                    </span>
-                                ) : (
-                                    <>
-                                        <strong className="block text-xs mb-1">
-                                            {msg.sender || "Người dùng không xác định"}:
-                                        </strong>
-                                        {msg.content && <p className="text-sm">{msg.content}</p>}
-                                        {msg.image && (
-                                            <img
-                                                src={msg.image}
-                                                alt="Message Image"
-                                                className="max-w-[150px] mt-2 rounded"
-                                            />
-                                        )}
-                                        {String(msg.sender_id) === String(userId) && (
-                                            <div className="mt-2 flex gap-3">
-                                                <button
-                                                    onClick={() => deleteMessage(msg.id)}
-                                                    className="text-red-400 text-xs hover:text-red-300"
-                                                >
-                                                    Xóa
-                                                </button>
-                                                <button
-                                                    onClick={() => recallMessage(msg.id)}
-                                                    className="text-blue-400 text-xs hover:text-blue-300"
-                                                >
-                                                    Thu hồi
-                                                </button>
-                                            </div>
-                                        )}
-                                        {String(msg.sender_id) !== String(userId) &&
-                                            msg.is_seen && (
-                                                <span className="text-green-400 text-xs block mt-1">
-                                                    Đã xem
-                                                </span>
-                                            )}
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    ))
-                )}
             </div>
 
             <div className="chat-box flex-1 p-4 overflow-y-auto" ref={chatBoxRef}>
@@ -313,10 +335,10 @@ const Chat = ({ userId, targetId, token, targetUsername }) => {
                         {loading ? "Đang tải..." : "Tải thêm tin nhắn"}
                     </button>
                 )}
-                {messages.length === 0 ? (
+                {allMessages.length === 0 ? (
                     <p className="text-gray-400 text-sm">Chưa có tin nhắn nào.</p>
                 ) : (
-                    messages.map((msg) => (
+                    allMessages.map((msg) => (
                         <div
                             key={msg.id}
                             className={`flex mb-3 ${
@@ -330,8 +352,13 @@ const Chat = ({ userId, targetId, token, targetUsername }) => {
                                     String(msg.sender_id) === String(userId)
                                         ? "bg-blue-600"
                                         : "bg-gray-700"
-                                } max-w-[75%] break-words text-sm`}
+                                } max-w-[75%] break-words text-sm relative`}
                             >
+                                {msg.is_pending && (
+                                    <span className="absolute -top-5 text-yellow-400 text-xs">
+                                        Đang chờ xác nhận
+                                    </span>
+                                )}
                                 {msg.is_recalled ? (
                                     <span className="text-gray-400 italic">
                                         Tin nhắn đã bị thu hồi
@@ -390,58 +417,79 @@ const Chat = ({ userId, targetId, token, targetUsername }) => {
             </div>
 
             <div className="input-box p-4 border-t border-gray-700 flex flex-col gap-2">
-                {image && (
-                    <div className="relative bg-gray-700 p-2 rounded">
-                        <img
-                            src={URL.createObjectURL(image)}
-                            alt="Selected Image"
-                            className="max-w-[150px] rounded"
-                        />
-                        <button
-                            onClick={() => setImage(null)}
-                            className="absolute top-1 right-1 text-gray-400 hover:text-white"
-                        >
-                            ✕
-                        </button>
+                {hasPendingMessage ? (
+                    <div className="text-gray-400 text-sm text-center">
+                        <p>Đã gửi yêu cầu trò chuyện</p>
+                        <p>Bạn có thể bắt đầu cuộc trò chuyện khi người dùng này chấp nhận yêu cầu trò chuyện của bạn</p>
                     </div>
+                ) : pendingRequestFromTarget ? (
+                    <div className="text-gray-400 text-sm text-center">
+                        <p>{targetUsername} đã gửi cho bạn một tin nhắn đang chờ</p>
+                        <p>Mọi người có thể gửi cho bạn tối đa 1 tin nhắn cho đến khi bạn chấp nhận.</p>
+                        <div className="flex justify-center gap-3 mt-2">
+                            <button
+                                onClick={() => handleRequestAction('accept')}
+                                className="bg-green-500 text-white px-4 py-1 rounded text-sm hover:bg-green-600"
+                            >
+                                Chấp nhận
+                            </button>
+                            <button
+                                onClick={() => handleRequestAction('reject')}
+                                className="bg-red-500 text-white px-4 py-1 rounded text-sm hover:bg-red-600"
+                            >
+                                Từ chối
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        {image && (
+                            <div className="relative bg-gray-700 p-2 rounded">
+                                <img
+                                    src={URL.createObjectURL(image)}
+                                    alt="Selected Image"
+                                    className="max-w-[150px] rounded"
+                                />
+                                <button
+                                    onClick={() => setImage(null)}
+                                    className="absolute top-1 right-1 text-gray-400 hover:text-white"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                            <input
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                                className="flex-1 bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm min-w-0"
+                                placeholder="Nhập tin nhắn..."
+                            />
+                            <label className="cursor-pointer flex-shrink-0">
+                                <img
+                                    src="/icon/sendImage.png"
+                                    alt="Send Image"
+                                    className="w-6 h-6"
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    className="hidden"
+                                />
+                            </label>
+                            <button
+                                onClick={sendMessage}
+                                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 flex-shrink-0"
+                            >
+                                Gửi
+                            </button>
+                        </div>
+                    </>
                 )}
-                <div className="flex items-center gap-2">
-                    <input
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                        className="flex-1 bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm min-w-0"
-                        placeholder="Nhập tin nhắn..."
-                    />
-                    <label className="cursor-pointer flex-shrink-0">
-                        <img
-                            src="/icon/sendImage.png"
-                            alt="Send Image"
-                            className="w-6 h-6"
-                        />
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="hidden"
-                        />
-                    </label>
-                    <button
-                        onClick={sendMessage}
-                        className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 flex-shrink-0"
-                    >
-                        Gửi
-                    </button>
-                    <button
-                        onClick={requestChat}
-                        className="bg-green-600 text-white px-4 py-1 rounded text-sm hover:bg-green-700 flex-shrink-0"
-                    >
-                        Yêu cầu
-                    </button>
-                </div>
             </div>
         </div>
-
     );
 };
 
