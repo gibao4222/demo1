@@ -15,6 +15,9 @@ import AlbumDetail from './Components/Album/AlbumDetail';
 import PlaylistDetail from './Components/Playlist/PlaylistDetail';
 import SongList from './Components/SongList';
 import SongDetail from './Components/SongDetail';
+
+import Followers from './Pages/Followers';  
+
 const App = () => {
   return (
 
@@ -26,6 +29,7 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Login />} />
+          <Route path="/FollowUser/:id/followers" element={<Followers/>} />
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/payment/result" element={<PaymentResult />} />
 
