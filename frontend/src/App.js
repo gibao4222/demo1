@@ -2,58 +2,53 @@ import './App.css';
 import { Routes, Route } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import React from "react";
-import Home from './Pages/Home';
 import Login from './Pages/Login';
 import Register from './Pages/Register';
-
-import PlayListChill from './Pages/PlayListChill';
-import FollowSinger from './Pages/FollowSinger';
-import FollowUser from './Pages/FollowUser';
-import LikeSong from './Pages/LikeSong';
-import SongList from './Components/SongList';
-import SongPage from './Pages/SongPage';
-
-import ChatPage from './Pages/ChatPage';
 import PaymentPage from './Pages/PaymentPage';
 import PaymentResult from './Pages/PaymentResult';
+import MainContent from './Components/MainContent';
+import MainLayout from './Pages/MainLayout';
+import MainFollowSinger from './Components/MainFollowSinger';
+import MainSearch from './Components/MainSearch';
+import MainFollowUser from './Components/MainFollowUser';
+import AlbumDetail from './Components/Album/AlbumDetail';
+import PlaylistDetail from './Components/Playlist/PlaylistDetail';
+import SongList from './Components/SongList';
+import SongDetail from './Components/SongDetail';
 
-import DetailSongPage from './Pages/DetailSongPage';
-import PlaylistPage from './Pages/PlaylistPage';
-import AlbumPage from './Pages/AlbumPage';
-import SearchPage from './Pages/SearchPage';
+import Followers from './Pages/Followers';  
+import { PlayerProvider } from './context/PlayerContext';
 
 const App = () => {
   return (
 
     <GoogleOAuthProvider clientId="660579609549-kogcos0i04ldpherele2li974f9ulm01.apps.googleusercontent.com">
+    <PlayerProvider>
       <div className="App">
 
 
         <Routes>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/home" element={<Home />} />
           <Route path="/" element={<Login />} />
-          <Route path='/chat' element={<ChatPage />} />
-          <Route path="/PlaylistDetail" element={<PlaylistPage />} />
-          <Route path="/Search" element={<SearchPage />} />
-
-          <Route path="/playlist" element={<PlayListChill />} />
-          <Route path="/FollowSinger/:id" element={<FollowSinger />} />
-          <Route path="/FollowUser/:id" element={<FollowUser />} />
-          <Route path="/SongDetail/:id" element={<LikeSong />} />
-          <Route path="/AlbumDetail/:id" element={<AlbumPage />} />
-          <Route path="/PlaylistDetail/:id" element={<PlaylistPage />} />
-
-
-          <Route path="/song" element={<SongPage />} />
-          <Route path="/song/:id" element={<DetailSongPage />} />
+          <Route path="/FollowUser/:id/followers" element={<Followers/>} />
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/payment/result" element={<PaymentResult />} />
 
+          <Route element={<MainLayout />}>
+            <Route path="/home" element={<MainContent />}/>
+            <Route path="/search" element={<MainSearch/>}/>
+            <Route path="/user/:id" element={<MainFollowUser />}/>
+            <Route path="/singer/:id" element={<MainFollowSinger />}/>
+            <Route path="/PlaylistDetail/:id" element={<PlaylistDetail />}/>
+            <Route path="/AlbumDetail/:id" element={<AlbumDetail />}/>
+            <Route path="/song" element={<SongList />} />
+            <Route path="/song/:id" element={<SongDetail />} />
+          </Route>
         </Routes>
 
       </div>
+      </PlayerProvider>
     </GoogleOAuthProvider>
 
 

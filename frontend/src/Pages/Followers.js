@@ -1,13 +1,13 @@
 import React, { useEffect,useState } from "react";
 import SideBar from "../Components/SideBar";
-import MainContent from "../Components/MainContent";
+
 import FriendActivity from "../Components/FriendActivity";
 import BottomPlayer from "../Components/BottomPlayer";
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import NavBar from "../Components/NavBar";
-
-const Home = () => {
+import UserFollowers from "../Components/UserFollowers";
+function Followers(){
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
@@ -26,7 +26,7 @@ const Home = () => {
             navigate(`/Search?query=${encodeURIComponent(query)}`);
         }
     };
-
+    
     return (
         <>
             <div className="min-h-screen bg-black text-white flex flex-col">
@@ -45,7 +45,7 @@ const Home = () => {
                     <div className="w-px bg-black cursor-col-resize resize-x min-w-[4px] px-1"></div>
 
                     <div className="fixed top-[64px] left-[calc(20%+6px)] h-[calc(100vh-136px)] w-[calc(60%-12px)] z-0 ">
-                        <MainContent />
+                        <UserFollowers />
                     </div>
 
                     <div className="flex-1"></div>
@@ -66,4 +66,8 @@ const Home = () => {
         </>
     );
 }
-export default Home;
+export default Followers;
+
+
+
+   

@@ -6,21 +6,21 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const NavBar = ({ user, onLogout, onSearch }) => {
     const navigate = useNavigate();
     const [activeItem, setActiveItem] = useState('null');
-    const [searchQuery, setSearchQuery] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const location = useLocation();
     const searchInputRef = useRef(null);
+
     const handleItemClick = (item) => {
         setActiveItem((prev) => (prev === item ? null : item));
+        if (item === 'Home') {
+            navigate('/home'); // Điều hướng đến trang chủ
+        }
     };
 
     useEffect(() => {
-        const searchParams = new URLSearchParams(location.search);
-        const query = searchParams.get('query') || '';
-        setSearchQuery(query);
         if (searchInputRef.current) {
             searchInputRef.current.focus();
-          }
+        }
     }, [location.search]);
     
 
@@ -29,19 +29,50 @@ const NavBar = ({ user, onLogout, onSearch }) => {
     };
     const handleSearchChange = (e) => {
         const query = e.target.value;
-        setSearchQuery(query);
         if (typeof onSearch === 'function') {
             onSearch(query);
         }
     };
+
+    // Hàm điều hướng Back và Forward
+    const handleBack = () => {
+        navigate(-1); // Quay lại trang trước
+    };
+
+    const handleForward = () => {
+        navigate(1); // Tiến tới trang tiếp theo
+    };
+
+    const handleSpotifyClick = () => {
+        navigate('/home'); // Điều hướng đến trang chủ
+    };
     return (
-        <div className="sticky top-0 z-50 w-full flex items-center gap-96 bg-black px-4 py-2.5">
-            <div className="flex items-center space-x-3.5">
-                <img
-                    src="/icon/Spotify_BackGround_White.png"
-                    alt="Spotify Logo"
-                    className="w-10 h-10 mr-4"
-                />
+        <div className="sticky top-0 z-50 w-full bg-black px-4 py-2.5 flex items-center relative">
+            <div className="flex-shrink-0 flex items-center space-x-0.5">
+                <button onClick={handleSpotifyClick}>
+                    <img
+                        src="/icon/Spotify_BackGround_White.png"
+                        alt="Spotify Logo"
+                        className="w-10 h-10 cursor-pointer"
+                    />
+                </button>
+                <button onClick={handleBack} className="pl-3 text-neutral-400 hover:text-white">
+                    <img
+                        src="/icon/Back.png"
+                        alt="Back"
+                        className="w-8 h-8"
+                    />
+                </button>
+                <button onClick={handleForward} className="text-neutral-400 hover:text-white">
+                    <img
+                        src="/icon/Forward.png"
+                        alt="Forward"
+                        className="w-8 h-8"
+                    />
+                </button>
+            </div>
+
+            <div className='absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-3.5'>
                 <NavItem
                     icon="/icon/Home_Fill_S.png"
                     active={activeItem === 'Home'}
@@ -55,8 +86,7 @@ const NavBar = ({ user, onLogout, onSearch }) => {
                         type="text"
                         placeholder="Bạn muốn phát nội dung gì?"
 
-                        className="bg-gray-800 text-white placeholder-gray-400 rounded-full py-2.5 pl-10 pr-12 w-[500px] focus:outline-none focus:ring-2 focus:ring-white"
-                        value={searchQuery}
+                        className="bg-gray-800 text-white placeholder-neutral-400 rounded-full py-2.5 pl-10 pr-12 w-[500px] focus:outline-none focus:ring-2 focus:ring-white"
                         onChange={handleSearchChange}
                         ref={searchInputRef}
                     />
@@ -77,8 +107,8 @@ const NavBar = ({ user, onLogout, onSearch }) => {
                 </div>
             </div>
 
-            <div className="flex items-center space-x-6 ml-6">
-            {!user?.vip && (
+            <div className="ml-auto flex items-center space-x-6">
+                {!user?.vip && (
                     <button
                         className="bg-white text-black rounded-full px-4 py-2 text-sm font-semibold hover:bg-gray-500 truncate"
                         onClick={() => navigate("/payment")}

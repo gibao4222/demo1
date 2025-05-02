@@ -352,3 +352,38 @@ class CurrentUserView(APIView):
                 {"lỗi": "Không tìm thấy SpotifyUser cho người dùng này"},
                 status=status.HTTP_404_NOT_FOUND
             )
+            
+            
+            
+class FollowersInfoView(APIView):
+    def get(self, request, user_id):
+        try:
+            user = SpotifyUser.objects.get(id=user_id)
+            print(f"User found: id={user.id}, username={user.username}")
+        except SpotifyUser.DoesNotExist:
+            return Response({"lỗi": "Người dùng không tồn tại"}, status=status.HTTP_404_NOT_FOUND)
+
+        followers = UserFollowing.objects.filter(following_id=user.id)
+        followers_count = followers.count()
+        print(f"Raw followers count for following_id={user.id}: {followers_count}")
+
+        followers_data = []
+        for follow in followers:
+            try:
+                follower = SpotifyUser.objects.get(id=follow.follower_id)
+                print(f"Follower found: id={follower.id}, username={follower.username}")
+                followers_data.append({
+                    'id': follower.id,
+                    'username': follower.username,
+                    'email': follower.email,
+                    # Bỏ trường avatar vì không tồn tại
+                    # 'avatar': follower.avatar.url if follower.avatar else None,
+                })
+            except SpotifyUser.DoesNotExist:
+                print(f"Follower not found for follower_id={follow.follower_id}")
+                continue
+
+        return Response({
+            'followers_count': followers_count,
+            'followers': followers_data
+        }, status=status.HTTP_200_OK)

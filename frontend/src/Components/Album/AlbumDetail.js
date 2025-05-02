@@ -203,7 +203,7 @@ const AlbumDetail = () => {
         <div className="z-0 bg-neutral-900 rounded-lg flex flex-col h-[calc(100vh-136px)] overflow-hidden">
             <div className="overflow-y-auto overlay-scroll">
                 <div
-                    className="p-6 h-auto" // Xóa h-96 để chiều cao tự động
+                    className="p-6 pb-0 h-auto h-96" // Xóa h-96 để chiều cao tự động
                     style={{
                         background: `linear-gradient(to bottom, ${getRgbaColor(dominantColor, 1)}, ${getRgbaColor(dominantColor, 0)})`,
                     }}
@@ -232,6 +232,8 @@ const AlbumDetail = () => {
                     )}
                 </div>
                 <div className="relative z-10 bg-gradient-to-b from-neutral-900/35 to-neutral-900/100">
+                    
+                        
                     {isSticky && (
                         <div className="fixed top-[64px] left-[calc(20%+6px)] w-[calc(60%-12px)] bg-[#2A2A2A] z-50 border-b border-[#3A3A3A] px-6 py-3 flex items-center justify-start gap-4">
                             <button
@@ -243,6 +245,9 @@ const AlbumDetail = () => {
                             <h2 className="text-lg font-bold text-white">{albumData.name}</h2>
                         </div>
                     )}
+                    
+                    
+                    
 
                     {isImageModalOpen && <ImageModal />}
 

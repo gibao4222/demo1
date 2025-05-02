@@ -51,7 +51,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://127.0.0.1:8000",
+  "proxy": "https://localhost",
   "devDependencies": {
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.1.2"

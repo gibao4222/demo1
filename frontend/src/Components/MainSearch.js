@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "../axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 
-function MainSearch({ searchQuery }) {
+function MainSearch() {
+  const { searchQuery } = useOutletContext();
   const [users, setUsers] = useState([]);
   const [artists, setArtists] = useState([]);
   const [songs, setSongs] = useState([]);
@@ -92,6 +93,16 @@ function MainSearch({ searchQuery }) {
     fetchSearchResults();
   }, [searchQuery]);
 
+  if (!searchQuery) {
+    return (
+        <div className="z-0 bg-neutral-900 rounded-lg flex flex-col h-[calc(100vh-136px)] overflow-hidden">
+            <div className="flex-1 p-4 overflow-y-auto overlay-scroll">
+                <p className="text-white">Vui lòng nhập từ khóa để tìm kiếm</p>
+            </div>
+        </div>
+    );
+}
+
   return (
     <div className="z-0 bg-neutral-900 rounded-lg flex flex-col h-[calc(100vh-136px)] overflow-hidden">
       <div className="flex-1 p-4 overflow-y-auto overlay-scroll">
@@ -150,7 +161,7 @@ function MainSearch({ searchQuery }) {
               <div
                 key={artist.id}
                 className="px-2.5 pt-2.5 pb-3 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group cursor-pointer "
-                onClick={() => navigate(`/FollowSinger/${artist.id}`)}
+                onClick={() => navigate(`/singer/${artist.id}`)}
               >
                 <div className="relative">
                   <img
@@ -277,7 +288,7 @@ function MainSearch({ searchQuery }) {
               <div
                 key={user.id}
                 className="px-2.5 pt-2.5 pb-3 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group cursor-pointer "
-                onClick={() => navigate(`/FollowUser/${user.id}`)}
+                onClick={() => navigate(`/user/${user.id}`)}
               >
                 <div className="relative">
                   <img
