@@ -3,28 +3,44 @@ import React, { useState, useEffect, useRef } from "react";
 
 import axios from "../axios";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-
 
 function MainFollowUser() {
   const { id: userId } = useParams();
+  const navigate = useNavigate();
   const [isFollowing, setIsFollowing] = useState(false);
   const [user, setUser] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentUserLoading, setCurrentUserLoading] = useState(true);
   const [playlists, setPlaylists] = useState([]);
-  const { token } = useAuth();
+  const [followersInfo, setFollowersInfo] = useState({ followers_count: 0, followers: [] });
+  const [followersLoading, setFollowersLoading] = useState(true);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const optionRef = useRef(null);
   const scrollRef = useRef(null);
-  const navigate = useNavigate();
+  const { token } = useAuth();
+
+  // Lấy thông tin người theo dõi
+  useEffect(() => {
+    const fetchFollowersInfo = async () => {
+      try {
+        setFollowersLoading(true);
+        const response = await axios.get(`/api/users/users/${userId}/followers-info/`);
+        setFollowersInfo(response.data);
+      } catch (error) {
+        console.error("Lỗi khi lấy thông tin người theo dõi:", error);
+        toast.error("Không thể tải thông tin người theo dõi!");
+      } finally {
+        setFollowersLoading(false);
+      }
+    };
+    fetchFollowersInfo();
+  }, [userId]);
 
   // Lấy thông tin chi tiết của người dùng
   useEffect(() => {
-
     const fetchUserDetails = async () => {
       try {
         const response = await axios.get(`/api/users/users/${userId}/`);
@@ -36,7 +52,6 @@ function MainFollowUser() {
         setLoading(false);
       }
     };
-
     fetchUserDetails();
   }, [userId]);
 
@@ -49,42 +64,36 @@ function MainFollowUser() {
       } catch (error) {
         console.error("Lỗi khi lấy danh sách playlist:", error);
         if (error.response && error.response.status === 404) {
-          setPlaylists([]); // Đặt playlists rỗng nếu không tìm thấy
+          setPlaylists([]);
           toast.info("Người dùng này chưa có playlist công khai.");
         } else {
           toast.error("Không thể tải danh sách playlist!");
         }
       }
     };
-
     fetchPlaylists();
   }, [userId]);
 
-  // Lấy thông tin người dùng hiện tại để lấy currentUserId
+  // Lấy thông tin người dùng hiện tại
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
         const response = await axios.get(`/api/users/current-user/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (response.data && response.data.id) {
           setCurrentUserId(response.data.id);
-          console.log("ID người dùng hiện tại:", response.data.id);
         } else {
-          console.error("Không tìm thấy ID người dùng hiện tại trong phản hồi:", response.data);
+          console.error("Không tìm thấy ID người dùng hiện tại:", response.data);
           toast.error("Không thể xác định người dùng hiện tại!");
         }
       } catch (error) {
         console.error("Lỗi khi lấy thông tin người dùng hiện tại:", error);
-        console.error("Chi tiết lỗi:", error.response?.data);
         toast.error("Không thể lấy thông tin người dùng hiện tại!");
       } finally {
         setCurrentUserLoading(false);
       }
     };
-
     if (token) {
       fetchCurrentUser();
     } else {
@@ -94,34 +103,28 @@ function MainFollowUser() {
   }, [token]);
 
   // Theo dõi vị trí cuộn để hiển thị/ẩn sticky header
-    useEffect(() => {
-      const handleScroll = () => {
-        if (scrollRef.current && optionRef.current) {
-          const scrollTop = scrollRef.current.scrollTop;
-          const scrollContainerRect = scrollRef.current.getBoundingClientRect();
-          const optionRect = optionRef.current.getBoundingClientRect();
-          const optionTopRelativeToScroll = optionRect.top - scrollContainerRect.top + scrollTop;
-          const optionHeight = optionRef.current.offsetHeight;
-  
-
-          // Hiển thị header khi cuộn đến cuối phần option
-          const isOptionFullyOutOfView = scrollTop > optionTopRelativeToScroll + optionHeight;
-          setShowStickyHeader(isOptionFullyOutOfView);
-        }
-      };
-  
-      const scrollContainer = scrollRef.current;
-      if (scrollContainer) {
-        scrollContainer.addEventListener("scroll", handleScroll);
-        handleScroll();
+  useEffect(() => {
+    const handleScroll = () => {
+      if (scrollRef.current && optionRef.current) {
+        const scrollTop = scrollRef.current.scrollTop;
+        const scrollContainerRect = scrollRef.current.getBoundingClientRect();
+        const optionRect = optionRef.current.getBoundingClientRect();
+        const optionTopRelativeToScroll = optionRect.top - scrollContainerRect.top + scrollTop;
+        const optionHeight = optionRef.current.offsetHeight;
+        setShowStickyHeader(scrollTop > optionTopRelativeToScroll + optionHeight);
       }
-  
-      return () => {
-        if (scrollContainer) {
-          scrollContainer.removeEventListener("scroll", handleScroll);
-        }
-      };
-    }, [user]);
+    };
+    const scrollContainer = scrollRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener("scroll", handleScroll);
+      handleScroll();
+    }
+    return () => {
+      if (scrollContainer) {
+        scrollContainer.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [user]);
 
   // Kiểm tra trạng thái theo dõi
   useEffect(() => {
@@ -131,115 +134,101 @@ function MainFollowUser() {
           console.log("Chưa đăng nhập, không kiểm tra trạng thái theo dõi.");
           return;
         }
-
-        console.log("Kiểm tra trạng thái theo dõi cho userId:", userId);
-        const response = await axios.get(
-          `/api/users/theo-doi-nguoi-dung/?user_id=${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log("Phản hồi từ checkFollowStatus:", response.data);
+        const response = await axios.get(`/api/users/theo-doi-nguoi-dung/?user_id=${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setIsFollowing(response.data.is_following || false);
       } catch (error) {
         console.error("Lỗi khi kiểm tra trạng thái theo dõi:", error);
-        console.error("Chi tiết lỗi:", error.response?.data);
         toast.error("Không thể kiểm tra trạng thái theo dõi!");
       }
     };
-
     if (!currentUserLoading && currentUserId) {
       checkFollowStatus();
     }
   }, [userId, token, currentUserLoading, currentUserId]);
 
-  // Hàm xử lý theo dõi/hủy theo dõi
+  // Xử lý theo dõi/hủy theo dõi
   const handleFollowToggle = async () => {
     if (currentUserLoading) {
       toast.info("Đang tải thông tin người dùng, vui lòng đợi...");
       return;
     }
-
     if (!currentUserId) {
       toast.error("Không thể xác định người dùng hiện tại, vui lòng đăng nhập lại!");
       return;
     }
-
-    // Kiểm tra xem userId có hợp lệ không
     const parsedUserId = parseInt(userId);
     if (isNaN(parsedUserId)) {
       toast.error("ID người dùng không hợp lệ!");
       return;
     }
-
-    // Kiểm tra tự theo dõi phía client
     if (currentUserId === parsedUserId) {
       toast.error("Bạn không thể tự theo dõi chính mình!");
       return;
     }
-
     try {
-      console.log("Token:", token);
       if (!token) {
         toast.error("Vui lòng đăng nhập để theo dõi!");
         return;
       }
-
       if (isFollowing) {
-        console.log("Gửi yêu cầu DELETE để hủy theo dõi:", userId);
-        const response = await axios.delete(
-          `/api/users/theo-doi-nguoi-dung/?following_id=${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log("Phản hồi từ DELETE:", response.data);
+        const response = await axios.delete(`/api/users/theo-doi-nguoi-dung/?following_id=${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         toast.success(response.data.thông_báo || "Đã xóa khỏi danh sách theo dõi.");
         setIsFollowing(false);
       } else {
-        console.log("Gửi yêu cầu POST để theo dõi:", userId);
         const response = await axios.post(
           `/api/users/theo-doi-nguoi-dung/`,
-          { following_id: parsedUserId }, // Gửi parsedUserId đã kiểm tra
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { following_id: parsedUserId },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log("Phản hồi từ POST:", response.data);
         toast.success(response.data.thông_báo || "Đã thêm vào danh sách theo dõi.");
         setIsFollowing(true);
       }
+      // Cập nhật thông tin người theo dõi
+      const fetchUpdatedFollowersInfo = async () => {
+        try {
+          setFollowersLoading(true);
+          const response = await axios.get(`/api/users/users/${userId}/followers-info/`);
+          setFollowersInfo(response.data);
+        } catch (error) {
+          console.error("Lỗi khi cập nhật thông tin người theo dõi:", error);
+          toast.error("Không thể cập nhật thông tin người theo dõi!");
+        } finally {
+          setFollowersLoading(false);
+        }
+      };
+      fetchUpdatedFollowersInfo();
     } catch (error) {
       console.error("Lỗi khi thực hiện theo dõi/hủy theo dõi:", error);
-      console.error("Chi tiết lỗi:", error.response?.data);
       const errorMsg = error.response?.data?.lỗi || "Có lỗi xảy ra, vui lòng thử lại!";
       toast.error(errorMsg);
     }
   };
 
+  // Xử lý chuyển hướng khi nhấn vào số người theo dõi
+  const handleViewFollowers = () => {
+    navigate(`/FollowUser/${userId}/followers`);
+  };
+
   if (loading || currentUserLoading) {
-    return <div>Đang tải...</div>;
+    return <div className="text-center text-white">Đang tải...</div>;
   }
 
   if (!user) {
-    return <div>Không tìm thấy người dùng!</div>;
+    return <div className="text-center text-white">Không tìm thấy người dùng!</div>;
   }
-  
 
   return (
     <div className="z-0 bg-neutral-900 rounded-lg flex flex-col h-[calc(100vh-136px)] overflow-hidden relative">
       {/* Sticky Header */}
       {showStickyHeader && (
         <div className="absolute top-0 left-0 right-0 bg-[#072447] z-50 flex items-center px-2 py-0.5">
-          <button className="">
+          <button>
             <img
-              className="w-16 h-16 hover:brightness-75 transition-all duration-200"
+              className="w-16 h mül h-16 hover:brightness-75 transition-all duration-200"
               src="/icon/Play_GreemHover.png"
               alt="Play button"
             />
@@ -254,69 +243,63 @@ function MainFollowUser() {
               <img
                 alt={user.username || user.email}
                 className="w-full h-[300px] object-cover object-top"
-                height="400"
                 src={
                   user.avatar
-                    ? user.avatar.startWith('http')
+                    ? user.avatar.startsWith("http")
                       ? user.avatar
                       : `https://localhost:3000${user.avatar}`
                     : "https://storage.googleapis.com/a1aa/image/N5Ae48WVgHcJ7vgKi6lA3tz5FvQ3gwiFky_1XteLMpY.jpg"
                 }
-                width="800"
               />
-
               <div className="absolute inset-0 bg-black bg-opacity-10"></div>
               <div className="absolute bottom-7 left-5 space-y-3">
                 <div className="flex items-center">
-                  <img src="/icon/Verification.png" className="w-7 h-7 mr-1" />
-                  <p className="drop-shadow-xl">Người dùng được xác minh</p>
+                  <img src="/icon/Verification.png" className="w-7 h-7 mr-1" alt="Verified" />
+                  <p className="drop-shadow-xl text-white">Người dùng được xác minh</p>
                 </div>
-                <h1 className="text-6xl font-bold drop-shadow-xl tracking-wider">{user.username || user.email}</h1>
-                <p className="drop-shadow-xl pt-2">
-                  <span className="tracking-wider">{user.followers || 0} người theo dõi</span>
-                </p>
+                <h1 className="text-6xl font-bold drop-shadow-xl tracking-wider text-white">
+                  {user.username || user.email}
+                </h1>
+                {followersLoading ? (
+                  <p className="text-gray-400 drop-shadow-xl">Đang tải số người theo dõi...</p>
+                ) : (
+                  <p
+                    className="text-gray-400 drop-shadow-xl cursor-pointer hover:underline"
+                    onClick={handleViewFollowers}
+                  >
+                    {followersInfo.followers_count} người theo dõi
+                  </p>
+                )}
               </div>
             </div>
             <div className="bg-gradient-to-b from-[#072447] to-neutral-900 relative">
               <div ref={optionRef} className="flex items-center px-2 py-4">
-                {/* <button className="">
-                  <img
-                    className="w-20 h-20 hover:brightness-75 transition-all duration-200"
-                    src="/icon/Play_GreemHover.png"
-                    alt="Play button"
-                  />
-                </button> */}
                 <button
                   onClick={handleFollowToggle}
                   disabled={currentUserLoading || !currentUserId || isNaN(parseInt(userId))}
-                  className={`text-white px-6 py-2 ml-2 rounded-full bg-opacity-0 bg-nuetral-900 border-[1px] border-neutral-500 hover:border-[1.5px] hover:border-white`}
+                  className={`text-white px-6 py-2 ml-2 rounded-full bg-opacity-0 bg-neutral-900 border-[1px] border-neutral-500 hover:border-[1.5px] hover:border-white disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {isFollowing ? "Đang theo dõi" : "Theo dõi"}
                 </button>
               </div>
-              <h2 className="text-2xl font-bold px-6 pt-2 pb-2">Playlist công khai</h2>
-
+              <h2 className="text-2xl font-bold px-6 pt-2 pb-2 text-white">Playlist công khai</h2>
             </div>
-            
             <div className="mb-8 px-3">
               {loading ? (
-                <p>Đang tải...</p>
+                <p className="text-white">Đang tải...</p>
               ) : playlists.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {playlists.map((playlist) => (
                     <div
                       key={playlist.id}
                       className="px-2.5 pt-2.5 pb-3 rounded-lg flex-shrink-0 w-[190px] hover:bg-neutral-400 hover:bg-opacity-35 group cursor-pointer"
-                      onClick={() => {
-                        navigate(`/PlaylistDetail/${playlist.id}`, { state: { playlist } });
-                      }}
+                      onClick={() => navigate(`/PlaylistDetail/${playlist.id}`, { state: { playlist } })}
                     >
                       <div className="relative">
                         <img
                           alt={playlist.name}
                           className="mb-2 rounded-lg w-[180px] h-[180px] object-cover"
                           src={playlist.image || "./img/default-avatar.jpg"}
-                          // style={{ height: "140px", width: "125px !important" }}
                         />
                         <img
                           src="/icon/Play_GreemHover.png"
@@ -325,16 +308,14 @@ function MainFollowUser() {
                         />
                       </div>
                       <div className="truncate">
-                        <h3 className="text-base font-bold">{playlist.name}</h3>
+                        <h3 className="text-base font-bold text-white">{playlist.name}</h3>
                       </div>
-                      
                       <p className="text-sm text-gray-400">Playlist</p>
-
                     </div>
                   ))}
                 </div>
               ) : (
-                <p>Không tìm thấy playlist</p>
+                <p className="text-white">Không tìm thấy playlist</p>
               )}
             </div>
           </div>
@@ -345,5 +326,3 @@ function MainFollowUser() {
 }
 
 export default MainFollowUser;
-
-
