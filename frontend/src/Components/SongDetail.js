@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import BottomPlayer_ex from './BottomPlayer_ex';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import MenuSub from './MenuSub';
+import { usePlayer } from '../context/PlayerContext';
+import BottomPlayer_ex from './BottomPlayer_ex';
 
 function SongDetail() {
     const { id } = useParams();
     const [song, setSong] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(false);
     const [currentLyric, setCurrentLyric] = useState("");
     const [lyrics, setLyrics] = useState([]);
     const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
     const [previewEnded, setPreviewEnded] = useState(false);
-    const audioRef = useRef(null);
     const lyricsContainerRef = useRef(null);
     const lyricElementsRef = useRef([]);
     const { user } = useAuth();
@@ -21,13 +21,63 @@ function SongDetail() {
     const previewTimeoutRef = useRef(null);
     const navigate = useNavigate();
     const [listSongRelated, setListSongRelated] = useState([]);
-    // const [currentPlaylist, setCurrentPlaylist] = useState([]);
     const [selectedSongId, setSelectedSongId] = useState(null);
+    const [showMenuSub, setShowMenuSub] = useState(false);
+    const [MenuSubPos, setMenuSubPos] = useState({ x: 0, y: 0 });
+    const [MenuSubSong, setMenuSubSong] = useState(null);
+    const [fullscreenElement, setFullscreenElement] = useState(null);
+    const relatedSongsRef = useRef(null);
+    const isLoadingSongRef = useRef(false);
+    const videoRef = useRef(null);
+
+    const {
+        song: contextCurrentSong,
+        setCurrentSong,
+        isPlaying,
+        setIsPlaying,
+        audioRef,
+        queue,
+        setQueue,
+        setCurrentSongList
+    } = usePlayer();
+
+    useEffect(() => {
+
+        const video = videoRef.current;
+        if (!video || !user?.vip || !song?.url_video) return;
+
+        if (isPlaying) {
+           
+            video.play().catch(e => console.log("Video play error:", e));
+        } else {
+            
+            video.pause();
+        }
+    }, [isPlaying, user?.vip, song?.url_video]);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (video && user?.vip && song?.url_video) {
+            video.play().catch(e => console.log("Autoplay prevented:", e));
+        }
+    }, [song?.url_video, user?.vip]);
+
+    useEffect(() => {
+    
+        if (contextCurrentSong && (!song || contextCurrentSong.id !== song.id)) {
+            setSong(contextCurrentSong);
+            if (contextCurrentSong.url_lyric) fetchLyrics(contextCurrentSong.url_lyric);
+        }
+    }, [contextCurrentSong, song]);
+
+    
+
     useEffect(() => {
         getRelatedSongs();
         axios.get(`https://localhost/api/songs/songs/${id}/`)
             .then(response => {
                 setSong(response.data);
+                setCurrentSong(response.data);
                 const lyricUrl = response.data.url_lyric === null ? null : response.data.url_lyric;
                 if (lyricUrl) fetchLyrics(lyricUrl);
             })
@@ -40,38 +90,91 @@ function SongDetail() {
             if (previewTimeoutRef.current) {
                 clearTimeout(previewTimeoutRef.current);
             }
+            if (videoRef.current) {
+                videoRef.current.pause();
+                videoRef.current.currentTime = 0;
+            }
         };
-    }, [id]);
+    }, [id, setCurrentSong]);
 
-    useEffect(()=>{
-        if (song) fetchLyrics(song.url_lyric)
-    },[song])
-    
-    // useEffect(() => {
-    //     if (song && listSongRelated.length > 0) {
-    //         setCurrentPlaylist([song, ...listSongRelated]);
-    //     }
-    // }, [song, listSongRelated]);
+    useEffect(() => {
+        if (!relatedSongsRef.current) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    relatedSongsRef.current.classList.add('visible');
+                    console.log("listSongRelated displayed");
+                } else {
+                    relatedSongsRef.current.classList.remove('visible');
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        observer.observe(relatedSongsRef.current);
+
+        return () => observer.disconnect();
+    }, [listSongRelated]);
 
     const getRelatedSongs = async () => {
         try {
             const res = await axios.get(`https://localhost/api/songs/related-songs/${id}`);
-            setListSongRelated(res.data);
+            console.log("listSongRelated data:", res.data);
+            setListSongRelated(res.data || []);
+            setCurrentSongList(res.data || []);
         } catch (e) {
-            console.error(e);
+            console.error("Error fetching listSongRelated:", e);
+            setListSongRelated([]);
         }
-    }
+    };
 
-    const handleSongClick = (clickedSong) => {
+    const handleSongClick = async (clickedSong) => {
+        if (isLoadingSongRef.current || clickedSong.id === song?.id) return;
+        isLoadingSongRef.current = true;
+
         setSong(clickedSong);
-        setIsPlaying(true);
+        setCurrentSong(clickedSong);
         setSelectedSongId(clickedSong.id);
         setPreviewEnded(false);
+        const lyricUrl = clickedSong.url_lyric === null ? null : clickedSong.url_lyric;
+        if (lyricUrl) fetchLyrics(lyricUrl);
        
-      fetchLyrics(clickedSong.url_lyric)
-        
-        window.scrollTo(0, 0); 
-    }
+        window.scrollTo(0, 0);
+
+        setIsPlaying(true); 
+        isLoadingSongRef.current = false;
+    };
+
+    const toggleFullScreen = () => {
+        const element = user.vip && song.url_video
+            ? document.querySelector('.video-container')
+            : document.querySelector('.image-container');
+
+        if (!document.fullscreenElement) {
+            element.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+            setFullscreenElement(element);
+        } else {
+            document.exitFullscreen();
+            setFullscreenElement(null);
+        }
+    };
+
+    const handleMenuSub = (e, relatedSong) => {
+        e.preventDefault();
+        setMenuSubSong(relatedSong);
+        setMenuSubPos({ x: e.clientX, y: e.clientY });
+        setShowMenuSub(true);
+    };
+
+    const handleAddToQueue = () => {
+        if (MenuSubSong && !queue.find(s => s.id === MenuSubSong.id)) {
+            setQueue([...queue, MenuSubSong]);
+        }
+        setShowMenuSub(false);
+    };
 
     const fetchLyrics = async (url) => {
         try {
@@ -79,13 +182,13 @@ function SongDetail() {
             setLyrics(parseLyrics(response.data));
         } catch (error) {
             console.error('Error fetching lyrics:', error);
-            setLyrics("");
+            setLyrics([]);
         }
     };
 
     const handleUpgrade = () => {
         navigate('/payment');
-    }
+    };
 
     const parseLyrics = (rawLyrics) => {
         if (!rawLyrics) return [];
@@ -118,7 +221,7 @@ function SongDetail() {
             setShowUpgradePrompt(true);
             return;
         }
-        setIsPlaying(!isPlaying);
+        setIsPlaying(!isPlaying); // Chuyển đổi trạng thái, BottomPlayer_ex sẽ xử lý audio
     };
 
     useEffect(() => {
@@ -153,21 +256,16 @@ function SongDetail() {
         return () => {
             audio.removeEventListener('timeupdate', handleTimeUpdate);
         };
-    }, [lyrics, isPlaying, user?.vip, song?.is_vip]);
+    }, [lyrics, isPlaying, user?.vip, song?.is_vip, audioRef]);
 
     useEffect(() => {
-        if (!audioRef.current || !song) return;
-
-        if (isPlaying) {
-            if (!user?.vip && song?.is_vip) {
-                setPreviewEnded(false);
-                audioRef.current.currentTime = 0;
+        if (currentLyric && lyricElementsRef.current.length > 0) {
+            const activeIndex = lyrics.findIndex(l => l.text === currentLyric);
+            if (activeIndex >= 0 && lyricElementsRef.current[activeIndex]) {
+                smoothScrollToLyric(lyricElementsRef.current[activeIndex]);
             }
-            audioRef.current.play();
-        } else {
-            audioRef.current.pause();
         }
-    }, [isPlaying, song, user?.vip]);
+    }, [currentLyric, lyrics]);
 
     const smoothScrollToLyric = (element) => {
         if (!element || !lyricsContainerRef.current) return;
@@ -199,19 +297,32 @@ function SongDetail() {
     };
 
     useEffect(() => {
-        if (currentLyric && lyricElementsRef.current.length > 0) {
-            const activeIndex = lyrics.findIndex(l => l.text === currentLyric);
-            if (activeIndex >= 0 && lyricElementsRef.current[activeIndex]) {
-                smoothScrollToLyric(lyricElementsRef.current[activeIndex]);
-            }
-        }
-    }, [currentLyric, lyrics]);
+        const handleClickOutside = () => setShowMenuSub(false);
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
+
+ 
 
     if (!song) return <div className="text-white text-center py-8">Loading song...</div>;
     if (!user) return <div className="text-white text-center py-8">Loading user...</div>;
 
     return (
-        <div className="mb-10 bg-gray-900 text-white min-h-screen flex flex-col md:flex-row pb-24">
+        <div className="mb-10 bg-gray-900 text-white min-h-screen flex flex-col md:flex-row" style={{ paddingBottom: '400px', zIndex: 20 }}>
+            <style>
+                {`
+                    .related-songs {
+                        opacity: 0;
+                        transform: translateY(20px);
+                        transition: opacity 0.5s ease, transform 0.5s ease;
+                    }
+                    .related-songs.visible {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                `}
+            </style>
+
             {showUpgradePrompt && (
                 <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
                     <div className="bg-gray-800 p-8 rounded-lg max-w-md w-full text-center">
@@ -223,9 +334,7 @@ function SongDetail() {
                         <div className="flex flex-col space-y-4">
                             <button
                                 className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold text-lg"
-                                onClick={() => {
-                                    handleUpgrade();
-                                }}
+                                onClick={handleUpgrade}
                             >
                                 NÂNG CẤP NGAY
                             </button>
@@ -249,7 +358,7 @@ function SongDetail() {
                     />
                     <div className="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
                         <h1 className="text-xl md:text-2xl font-bold line-clamp-1">{song.name}</h1>
-                        <p className="text-gray-400 text-sm">{song.artists.length >0 ? song.artists.map(a=>a.name).join(','):"Unknown Artist"}</p>
+                        <p className="text-gray-400 text-sm">{song.artists.length > 0 ? song.artists.map(a => a.name).join(',') : "Unknown Artist"}</p>
                         {song.is_vip && (
                             <span className="inline-block mr-6 mt-1 px-2 py-0.5 bg-yellow-500 text-yellow-900 text-xs font-bold rounded">
                                 PREMIUM
@@ -298,67 +407,94 @@ function SongDetail() {
                         )}
                     </div>
                 </div>
+                
                 <div className="mt-8">
-    <h2 className="text-xl font-bold mb-4">Bài hát cùng ca sĩ</h2>
-    <ul>
-        {listSongRelated?.map(relatedSong => (
-            <li 
-                key={relatedSong.id} 
-                className={`flex items-center p-2 rounded-md cursor-pointer transition-colors duration-200 ${
-                    selectedSongId === relatedSong.id 
-                        ? 'bg-gray-700 text-green-400' 
-                        : 'hover:bg-gray-800'
-                }`}
-                onClick={() => handleSongClick(relatedSong)}
-            >
-                <img src={relatedSong.image} alt={relatedSong.name} className="h-10 w-10 object-cover rounded-md mr-4" />
-                <div>
-                    <h3 className={`text-lg font-semibold ${
-                        song?.id === relatedSong.id ? 'text-green-400' : 'text-white'
-                    }`}>
-                        {relatedSong.name}
-                    </h3>
+                    <h2 className="text-xl font-bold mb-4">Bài hát cùng ca sĩ</h2>
+                    <div style={{ maxHeight: '400px', overflowY: 'auto', marginBottom: '300px' }}>
+                        <ul ref={relatedSongsRef} className="related-songs">
+                            {listSongRelated.length === 0 ? (
+                                <p style={{ color: '#9CA3AF', textAlign: 'center', padding: '16px', fontSize: '16px' }}>
+                                    Không có bài hát liên quan
+                                </p>
+                            ) : (
+                                listSongRelated.map(relatedSong => (
+                                    <li 
+                                        key={relatedSong.id} 
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            padding: '8px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.2s',
+                                            backgroundColor: selectedSongId === relatedSong.id ? '#374151' : 'transparent'
+                                        }}
+                                        onClick={() => handleSongClick(relatedSong)}
+                                        onContextMenu={(e) => handleMenuSub(e, relatedSong)}
+                                    >
+                                        <img 
+                                            src={relatedSong.image} 
+                                            alt={relatedSong.name} 
+                                            style={{
+                                                height: '40px',
+                                                width: '40px',
+                                                objectFit: 'cover',
+                                                borderRadius: '6px',
+                                                marginRight: '16px'
+                                            }}
+                                        />
+                                        <div>
+                                            <h3 style={{
+                                                fontSize: '18px',
+                                                fontWeight: '600',
+                                                color: song?.id === relatedSong.id ? '#10B981' : '#FFFFFF'
+                                            }}>
+                                                {relatedSong.name}
+                                            </h3>
+                                        </div>
+                                        <span style={{
+                                            marginLeft: 'auto',
+                                            fontSize: '14px',
+                                            color: song?.id === relatedSong.id ? '#6EE7B7' : '#9CA3AF'
+                                        }}>
+                                            {relatedSong.artists.length > 0 ? relatedSong.artists.map(a => a.name).join(',') : "Unknown Artist"}
+                                        </span>
+                                    </li>
+                                ))
+                            )}
+                        </ul>
+                    </div>
                 </div>
-                <span className={`ml-auto text-sm ${
-                    song?.id === relatedSong.id ? 'text-green-300' : 'text-gray-400'
-                }`}>
-                    {relatedSong.artists.length >0 ? relatedSong.artists.map(a=>a.name).join(','):"Unknown Artist" }
-                </span>
-            </li>
-        ))}
-    </ul>
-</div>
-                <audio ref={audioRef} src={song.url_song} />
             </div>
 
             <div className="w-full md:w-1/3 p-4 sticky top-0 h-screen overflow-hidden">
                 {user.vip && song.url_video ? (
+                    <div className="video-container w-full h-full">
                     <video
-                        src={song.url_video}
-                        className="w-full h-full object-cover rounded-lg"
-                        muted
-                        autoPlay
-                        loop
-                    />
+                            ref={videoRef}
+                            src={song.url_video}
+                            className="w-full h-full object-cover rounded-lg"
+                            muted 
+                            playsInline
+                            loop
+                        />
+                    </div>
                 ) : (
-                    <img 
-                        src={song.image} 
-                        alt={song.name} 
-                        className="w-full h-full object-cover rounded-lg"
-                    />
+                    <div className="image-container w-full h-full">
+                        <img
+                            src={song.image}
+                            alt={song.name}
+                            className="w-full h-full object-cover rounded-lg"
+                        />
+                    </div>
                 )}
             </div>
-
-            {song && (
-                <BottomPlayer_ex
-                    song={song}
-                    isPlaying={isPlaying}
-                    setIsPlaying={setIsPlaying}
-                    audioRef={audioRef}
-                    songList={listSongRelated}
-                    setCurrentSong={setSong}
-                />
-            )}
+            
+            <MenuSub
+                show={showMenuSub}
+                position={MenuSubPos}
+                onAddToQueue={handleAddToQueue}
+            />
         </div>
     );
 }

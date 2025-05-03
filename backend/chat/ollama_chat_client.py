@@ -1,3 +1,4 @@
+
 # backend/chat/ollama_chat_client.py
 import zmq
 import requests
@@ -191,3 +192,4 @@ while True:
 
     print(f"Sending answer to Chat Server: {answer}")
     socket.send_json(answer)
+

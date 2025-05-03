@@ -18,10 +18,14 @@ import SongDetail from './Components/SongDetail';
 
 import Followers from './Pages/Followers';  
 
+import { PlayerProvider } from './context/PlayerContext';
+
+
 const App = () => {
   return (
 
     <GoogleOAuthProvider clientId="660579609549-kogcos0i04ldpherele2li974f9ulm01.apps.googleusercontent.com">
+    <PlayerProvider>
       <div className="App">
 
 
@@ -46,6 +50,7 @@ const App = () => {
         </Routes>
 
       </div>
+      </PlayerProvider>
     </GoogleOAuthProvider>
 
 

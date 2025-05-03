@@ -29,3 +29,4 @@ def chatbot(request):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Phương thức không được hỗ trợ'}, status=405)
+

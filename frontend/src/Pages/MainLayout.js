@@ -5,6 +5,8 @@ import FriendActivity from "../Components/FriendActivity";
 import BottomPlayer from "../Components/BottomPlayer";
 import NavBar from "../Components/NavBar";
 import { useAuth } from "../context/AuthContext";
+import BottomPlayer_ex from "../Components/BottomPlayer_ex";
+
 
 const MainLayout = () => {
     const { user, logout } = useAuth();
@@ -62,7 +64,8 @@ const MainLayout = () => {
                 <div className="w-px bg-black cursor-col-resize resize-x min-w-[4px] px-1"></div>
 
                 {/* Main Content - Dynamic content based on route */}
-                <div className="fixed top-[64px] left-[calc(20%+6px)] h-[calc(100vh-136px)] w-[calc(60%-12px)] z-0">
+                <div className="fixed top-[64px] left-[calc(20%+6px)] h-[calc(100vh-136px)] w-[calc(60%-12px)] z-0 overflow-y-auto">
+
                     <Outlet context={{ searchQuery }} /> {/* Nội dung của Main sẽ render ở đây */}
                 </div>
 
@@ -80,7 +83,8 @@ const MainLayout = () => {
 
             {/* Bottom Player - Fixed at the bottom */}
             <div className="z-10">
-                <BottomPlayer />
+                <BottomPlayer_ex />
+
             </div>
         </div>
     );
