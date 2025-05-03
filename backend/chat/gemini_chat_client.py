@@ -1,11 +1,17 @@
-# backend/chat/ollama_chat_client.py
+# backend/chat/gemini_chat_client.py
 import zmq
 import requests
 import json
+from dotenv import load_dotenv
 import os
+import re
 
-# Định nghĩa endpoint của Ollama API (đã cấu hình để lắng nghe trên 0.0.0.0:11434)
-OLLAMA_API_URL = "http://localhost:11434/api/generate"
+# Load biến môi trường
+load_dotenv("/var/www/demo1/backend/.env")
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY không được tìm thấy trong file .env")
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
@@ -20,7 +26,7 @@ while True:
     db_data = message['context']['db_data']
     conversation_context = message['context']['conversation_context']
 
-    # Tạo prompt cho Ollama (tương tự như với Gemini)
+    # Tạo prompt cho Gemini
     prompt = (
         f"Bạn là một chatbot hỗ trợ người dùng trên một trang web nghe nhạc trực tuyến. "
         f"Người dùng (ID: {user_id}) đã hỏi: '{user_query}'.\n"
@@ -69,7 +75,7 @@ while True:
         for song in songs:
             prompt += f"  + {song['name']} (Thể loại: {song['genre']}, Ngày phát hành: {song['release_date']})\n"
         prompt += (
-            f"Hãy trả lời câu hỏi một cách tự nhiên, thân thiện và giang hồ bằng tiếng Việt, liệt kê danh sách bài hát. "
+            f"Hãy trả lời câu hỏi một cách tự nhiên, thân thiện và thật giang hồ bằng tiếng Việt, liệt kê danh sách bài hát. "
             f"Trả về câu trả lời dưới dạng JSON với key 'answer'."
         )
     elif 'name' in db_data and 'genre' in db_data:  # Thông tin bài hát
@@ -135,7 +141,7 @@ while True:
             f"Hãy trả lời câu hỏi một cách tự nhiên, thân thiện và giang hồ bằng tiếng Việt. "
             f"Trả về câu trả lời dưới dạng JSON với key 'answer'."
         )
-    elif 'total_songs' in db_data:  # Thống kê trang web
+    elif 'total_songs' in db_data:  # Thống kê trang web (cải tiến để bao gồm tất cả trường)
         total_songs = db_data.get('total_songs', 0)
         total_singers = db_data.get('total_singers', 0)
         total_albums = db_data.get('total_albums', 0)
@@ -156,18 +162,21 @@ while True:
             f"Trả về câu trả lời dưới dạng JSON với key 'answer'."
         )
 
-    # Gửi yêu cầu đến Ollama API
+    # Gửi yêu cầu đến API Gemini
     api_payload = {
-        "model": "vina:latest",  # Sử dụng mô hình bạn đã tải (hoặc đổi thành mô hình khác như llama3.2)
-        "prompt": prompt,
-        "stream": False,
-        "format": "json"  # Yêu cầu Ollama trả về kết quả dưới dạng JSON
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt}
+                ]
+            }
+        ]
     }
 
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.post(
-            OLLAMA_API_URL,
+            f'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}',
             headers=headers,
             json=api_payload,
             timeout=30
@@ -176,18 +185,17 @@ while True:
 
         if response.status_code == 200:
             response_data = response.json()
-            # Ollama trả về JSON với key 'response' chứa nội dung
-            content = response_data.get('response', '')
-            # Kiểm tra nếu content đã là JSON, nếu không thì thử parse
-            try:
-                answer = json.loads(content)
-            except json.JSONDecodeError:
-                # Nếu không parse được JSON, trả về dưới dạng answer mặc định
-                answer = {'answer': content if content else 'Không thể trích xuất câu trả lời từ Ollama'}
+            content = response_data['candidates'][0]['content']['parts'][0]['text']
+            json_match = re.search(r'```json\n([\s\S]*?)\n```', content)
+            if json_match:
+                json_str = json_match.group(1)
+                answer = json.loads(json_str)
+            else:
+                answer = {'answer': 'Không thể trích xuất câu trả lời từ Gemini'}
         else:
-            answer = {'answer': f'Lỗi từ Ollama: {response.text}'}
+            answer = {'answer': f'Lỗi từ Gemini: {response.text}'}
     except requests.exceptions.RequestException as e:
-        answer = {'answer': f'Không thể kết nối tới Ollama: {str(e)}'}
+        answer = {'answer': f'Không thể kết nối tới Gemini: {str(e)}'}
 
     print(f"Sending answer to Chat Server: {answer}")
     socket.send_json(answer)
