@@ -4,6 +4,7 @@ import OptionAlbum from '../Modals/OptionAlbum';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { updateAlbumLibraryStatus } from '../../Services/AlbumService';
+import { usePlayer } from '../../context/PlayerContext';
 
 const AlbumHeader = ({
     tracks,
@@ -28,6 +29,16 @@ const AlbumHeader = ({
         console.error('Không thể tải hình ảnh:', albumData?.image);
         setImageError(true);
     };
+     const {
+            song: currentSong,
+            setCurrentSong,
+            isPlaying,
+            setIsPlaying,
+            audioRef,
+            queue,
+            setQueue,
+            setCurrentSongList
+        } = usePlayer();
 
     const optionsButtonRef = useRef(null);
     const handleOpenOptionModal = () => {
@@ -59,6 +70,24 @@ const AlbumHeader = ({
 
     const handleImageClick = () => {
         setIsImageModalOpen(true);
+    };
+
+    const handlePlayAll = () => {
+        const songsArray = tracks.map(item => ({
+            ...item.id_song,
+        
+        }));
+       
+        if (currentSong && songsArray.some(song => song.id === currentSong.id)) {
+            setIsPlaying(!isPlaying);
+            return;
+          }
+        if (songsArray.length === 0) return;
+    
+        setCurrentSong(songsArray)
+        setCurrentSong(songsArray[0]);
+        setQueue([]);
+        setIsPlaying(true);
     };
 
     const handleAddToLibrary = async () => {
@@ -140,8 +169,12 @@ const AlbumHeader = ({
 
         <div ref={controlsRef} className="flex items-center gap-4 mt-6 bg-opacity-35 bg-neutral-900 w-[calc(100%+3rem)] -ml-6">
             <div className="flex items-center pl-6 pt-3">
-                <button className="">
-                <img alt="" src="/icon/Play_GreemHover.png" height="72" width="72" />
+            <button onClick={()=>handlePlayAll()}  className="mr-3">
+            <img 
+            alt={isPlaying ? "Pause" : "Play"} 
+            src={isPlaying ? "/icon/icon-pause.png" : "/icon/Play_GreemHover.png"} 
+            height="50" 
+            width="50" />
                 </button>
                 <div className="relative group">
                     <button

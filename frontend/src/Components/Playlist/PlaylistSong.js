@@ -1,15 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { FaPlay } from 'react-icons/fa';
 import { FiClock } from "react-icons/fi";
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { getSongPlaylist, getSongById, deleteSongFromPlaylist } from '../../Services/PlaylistService';
-
-const PlaylistSong = ({ playlist, token, refreshSongs }) => {
+import { usePlayer } from '../../context/PlayerContext';
+import { FaPause } from "react-icons/fa6";
+import MenuSub from '../MenuSub';
+const PlaylistSong = ({ playlist, token, refreshSongs,playAllTrigger, onPlayAllComplete  }) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [hoveredSongId, setHoveredSongId] = useState(null);
     const [durations, setDurations] = useState({});
+    const [MenuSubPos, setMenuSubPos] = useState({ x: 0, y: 0 });
+    const [showMenuSub, setShowMenuSub] = useState(false);
+    const [MenuSubSong, setMenuSubSong] = useState(null);
+    const isContextMenuTriggered = useRef(false); 
+    const {
+        song: currentSong,
+        setCurrentSong,
+        isPlaying,
+        setIsPlaying,
+        audioRef,
+        queue,
+        setQueue,
+        setCurrentSongList
+    } = usePlayer();
 
     // Hàm định dạng thời gian
     const formatTime = (time) => {
@@ -18,6 +34,12 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
         const seconds = Math.floor(time % 60);
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     };
+    useEffect(() => {
+        if (playAllTrigger && songs.length > 0) {
+          handlePlayAll();
+          onPlayAllComplete(); // Gọi callback để reset trigger
+        }
+      }, [playAllTrigger, songs]);
 
     // Hàm tính khoảng thời gian tương đối
     const formatRelativeTime = (dateString) => {
@@ -71,6 +93,30 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
         }
     };
 
+    const handlePlaySong = (song) => {
+    
+        if (currentSong && currentSong.id === song.id) {
+            setIsPlaying(!isPlaying);
+            return;
+        }
+        
+    
+        setCurrentSong(song);
+        setIsPlaying(true);
+    };
+    const handlePlayAll = () => {
+        if (currentSong && songs.some(song => song.id === currentSong.id)) {
+            setIsPlaying(!isPlaying);
+            return;
+          }
+        if (songs.length === 0) return;
+        setCurrentSongList(songs);
+        
+        setCurrentSong(songs[0]);
+        setQueue([]);
+        setIsPlaying(true);
+    };
+
     const fetchSongs = async () => {
         if (!playlist?.id || !token) {
             console.error('Thiếu ID playlist hoặc token:', { playlistId: playlist?.id, token });
@@ -83,6 +129,8 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
         try {
             const playlistSongs = await getSongPlaylist(playlist.id, token);
             console.log('Danh sách bài hát từ API:', playlistSongs);
+          
+      
 
             if (!Array.isArray(playlistSongs)) {
                 console.error('Dữ liệu bài hát không phải mảng:', playlistSongs);
@@ -104,16 +152,18 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
                 try {
                     const song = await getSongById(item.id_song, token);
                     console.log(`Lấy thông tin bài hát id_song ${item.id_song}:`, song);
+         
                     return {
                         playlistSongId: item.id,
                         id: song.id,
                         title: song.name || 'Không rõ',
                         album: song.album?.name || 'Không rõ',
-                        artist: song.artist || 'Không rõ',
+                        artist:  song.artists.length > 0 ? song.artists.map(a => a.name).join('-') : 'Không rõ',
                         duration: song.duration || '--:--',
                         image: song.image || '/img/null.png',
                         dateAdded: formatRelativeTime(item.date_added),
                         file_audio: song.file_audio,
+                        url_song:song.url_song
                     };
                 } catch (songError) {
                     console.error(`Lỗi khi lấy thông tin bài hát id_song ${item.id_song}:`, songError);
@@ -124,6 +174,8 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
             const fullSongs = (await Promise.all(songDetailsPromises)).filter(song => song !== null);
             console.log('Danh sách bài hát đã xử lý:', fullSongs);
             setSongs(fullSongs);
+            setCurrentSongList(fullSongs)
+    
 
             if (fullSongs.length === 0) {
                 setError('Không thể tải chi tiết bài hát. Vui lòng thử lại.');
@@ -162,6 +214,46 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio || !currentSong) return;
+
+
+        if (audio.src !== currentSong.url_song) {
+            audio.src = currentSong.url_song;
+            if (isPlaying) {
+                audio.play().catch(error => console.error("Error playing audio:", error));
+            }
+        } else if (isPlaying && audio.paused) {
+            audio.play().catch(error => console.error("Error playing audio:", error));
+        } else if (!isPlaying && !audio.paused) {
+            audio.pause();
+        }
+    }, [currentSong, isPlaying, audioRef]);
+
+    const handleMenuSub = (e, song) => {
+        e.preventDefault();
+      
+        const menuWidth = 150;
+        const menuHeight = 50;
+        const maxX = window.innerWidth - menuWidth;
+        const maxY = window.innerHeight - menuHeight;
+        const adjustedX = Math.min(e.clientX, maxX);
+        const adjustedY = Math.min(e.clientY, maxY);
+        setMenuSubSong(song);
+        setMenuSubPos({ x: adjustedX, y: adjustedY });
+        setShowMenuSub(true);
+        isContextMenuTriggered.current = true; 
+    };
+
+    const handleAddToQueue = () => {
+      if (MenuSubSong && !queue.find(s => s.id === MenuSubSong.id)) {
+        setQueue([...queue, MenuSubSong]);
+    }
+    setShowMenuSub(false);
+    };
+
 
     useEffect(() => {
         console.log('PlaylistSong useEffect - playlist.id:', playlist?.id, 'refreshSongs:', refreshSongs);
@@ -226,20 +318,34 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
                     </thead>
                     <tbody>
                         {songs.map((song, index) => (
+                           
                             <tr
                                 key={song.id}
-                                className="hover:bg-neutral-800 rounded"
+                                className="hover:bg-neutral-800 rounded cursor-pointer"
                                 onMouseEnter={() => setHoveredSongId(song.id)}
                                 onMouseLeave={() => setHoveredSongId(null)}
+                              
+                                onContextMenu={(e) => handleMenuSub(e, song)}
                             >
                                 <td className="py-3 px-2">
-                                    <div className="flex items-center">
-                                        {hoveredSongId === song.id ? (
-                                            <FaPlay className="mr-2 text-gray-200" />
-                                        ) : (
-                                            <span className="mr-2">{index + 1}</span>
-                                        )}
-                                    </div>
+                                <div className="flex items-center">
+                            {currentSong?.id === song.id && isPlaying ? (
+                              
+                                <FaPause 
+                                onClick={() => handlePlaySong(song)} 
+                                className="mr-2 text-gray-200 cursor-pointer hover:text-white"
+                                />
+                            ) : hoveredSongId === song.id ? (
+                               
+                                <FaPlay 
+                                onClick={() => handlePlaySong(song)} 
+                                className="mr-2 text-gray-200 cursor-pointer hover:text-white"
+                                />
+                            ) : (
+                            
+                                <span className="mr-2">{index + 1}</span>
+                            )}
+                            </div>
                                 </td>
                                 <td className="py-3 px-2">
                                     <div className="flex items-center">
@@ -261,17 +367,26 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
                                     <div className="flex justify-center items-center h-full">
                                         {hoveredSongId === song.id && (
                                             <RiDeleteBin6Line
-                                                className="text-gray-200 cursor-pointer"
-                                                onClick={() => handleDeleteSong(song.playlistSongId)}
+                                                className="text-gray-200 cursor-pointer hover:text-white"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteSong(song.playlistSongId);
+                                                }}
                                             />
                                         )}
                                     </div>
                                 </td>
+                               
                             </tr>
-                        ))}
+                    
+                                        ))}
                     </tbody>
                 </table>
             )}
+                    <MenuSub
+                    show={showMenuSub}
+                    position={MenuSubPos}
+                    onAddToQueue={handleAddToQueue}/>
         </div>
     );
 };
