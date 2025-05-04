@@ -40,6 +40,21 @@ const AlbumSong = ({ tracks, albumData, hoveredTrackId, setHoveredTrackId, onDur
         setQueue,
         setCurrentSongList
     } = usePlayer();
+      useEffect(() => {
+            const handleClickOutside = (e) => {
+                if (e.button === 0 && !isContextMenuTriggered.current) {
+                    setShowMenuSub(false);
+                }
+             
+                if (isContextMenuTriggered.current) {
+                    setTimeout(() => {
+                        isContextMenuTriggered.current = false;
+                    }, 100);
+                }
+            };
+            document.addEventListener('click', handleClickOutside);
+            return () => document.removeEventListener('click', handleClickOutside);
+        }, []);
     
     useEffect(() => {
         const fetchDurations = async () => {
