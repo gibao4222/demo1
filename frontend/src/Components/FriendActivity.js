@@ -95,15 +95,15 @@ function FriendActivity(){
     const selectedUserName = selectedUser ? selectedUser.username : "Người dùng không xác định";
 
     return (
-        <div className=" bg-neutral-900 p-3 sideBar rounded-lg flex flex-col min-h-[calc(100vh-136px)] ">
+        <div className=" bg-neutral-900 p-3 sideBar rounded-lg flex flex-col min-h-[calc(100vh-136px)]">
             <div className="flex-1 overflow-y-auto overlay-scroll">
-                <ul className="mt-3">
+                <ul className="mt-3 max-h-[calc(100vh-200px)]">
                     <li className="mb-4 li-inline-friend">
                         <span>Friend Activity</span>
-                        <div className="icons">
+                        {/* <div className="icons">
                             
                             <img src="/icon/Close_S.png" alt="Cancel"/>
-                        </div>
+                        </div> */}
                     </li>
                     {/* Phần 1: Danh sách yêu cầu trò chuyện */}
                         <li className="mb-4">
@@ -148,7 +148,7 @@ function FriendActivity(){
                                     {users.map((u) => (
                                         <li
                                             key={u.id}
-                                            className="flex items-center justify-between p-2 border-b border-gray-700 cursor-pointer hover:bg-gray-800"
+                                            className="flex items-center justify-between p-2 border-b border-gray-700 cursor-pointer hover:bg-neutral-800"
                                             onClick={() => toggleChat(u.user.id)}
                                         >
                                             <div className="flex items-center gap-3">

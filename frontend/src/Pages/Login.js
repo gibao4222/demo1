@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import axios from '../axios';
 import { GoogleLogin } from '@react-oauth/google';
@@ -12,15 +12,21 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [step2Data, setStep2Data] = useState(null);
-    const { login } = useAuth();
+    const { user, token, login } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user && token) {
+            console.log('User và token đã sẵn sàng, chuyển hướng đến /home');
+            navigate('/home');
+        }
+    }, [user, token, navigate]);
 
     const handleManualLogin = async (e) => {
         e.preventDefault();
 
         try{
             const response = await axios.post('/api/users/login/step1/',{
-
                 email,
                 password,
             });
@@ -67,6 +73,7 @@ const Login = () => {
                 apiResponse.data.access,
                 apiResponse.data.refresh
             );
+            console.log('Đăng nhập thành công, đang chuyển hướng đến /home');
             navigate('/home');
         } catch (err) {
             console.error(`Error logging in with ${provider}:`, err);
@@ -83,12 +90,17 @@ const Login = () => {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <div className="relative flex items-center justify-center min-h-screen bg-cover bg-center"
+        style={{ backgroundImage: "url('/img/background_login.png')" }}
+        >
+            <div className="absolute inset-0 z-0" style={{
+                background: 'linear-gradient(to right top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0) 100%)'
+            }}></div>
+            <div className="relative bg-white backdrop-blur-md transition-all duration-300 bg-opacity-25 p-8 rounded-lg shadow-lg w-full max-w-md">
                 <h2 className="text-2xl font-bold mb-6 text-center">Đăng nhập</h2>
 
                 {/* Phần đăng nhập bằng mạng xã hội */}
-                <div className="space-y-4 mb-6">
+                <div className="space-y-4 mb-6 items-center justify-center">
                     <GoogleLogin
                         onSuccess={(response) => handleSocialLoginSuccess(response, 'google')}
                         onError={() => handleSocialLoginFailure('google')}
@@ -103,60 +115,48 @@ const Login = () => {
                         className="w-full bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 flex items-center justify-center"
                     />
                     <FacebookLogin
-                        appId="615395524696516" // Thay bằng App ID của bạn
+                        appId="615395524696516"
                         onSuccess={(response) => handleSocialLoginSuccess(response, 'facebook')}
                         onFail={() => handleSocialLoginFailure('facebook')}
-                        className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 flex items-center justify-center"
+                        className="w-[350px] bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 flex items-center justify-center"
                     >
                         Đăng nhập bằng Facebook
                     </FacebookLogin>
-                    {/* Giữ nguyên nút Apple và Số điện thoại */}
-                    <button
-                        className="w-full bg-black text-white p-2 rounded-lg hover:bg-gray-800 flex items-center justify-center"
-                        disabled
-                    >
-                        Đăng nhập bằng Apple
-                    </button>
-                    <button
-                        className="w-full bg-gray-500 text-white p-2 rounded-lg hover:bg-gray-600 flex items-center justify-center"
-                        disabled
-                    >
-                        Đăng nhập bằng Số điện thoại
-                    </button>
+                    
                 </div>
 
                 {/* Phân cách */}
                 <div className="flex items-center justify-center mb-6">
                     <hr className="w-1/3 border-gray-300" />
-                    <span className="mx-4 text-gray-500">Hoặc</span>
+                    <span className="mx-4 text-white">Hoặc</span>
                     <hr className="w-1/3 border-gray-300" />
                 </div>
 
                 {/* Phần đăng nhập thủ công */}
                 <form onSubmit={handleManualLogin}>
                     <div className="mb-4">
-                        <label className="block text-gray-700 mb-2">Email:</label>
+                        <label className="block text-white mb-2">Email:</label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-neutral-700 backdrop-blur-md transition-all duration-300 bg-opacity-25"
                             required
                         />
                     </div>
                     <div className="mb-6">
-                        <label className="block text-gray-700 mb-2">Mật khẩu:</label>
+                        <label className="block text-white mb-2">Mật khẩu:</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-neutral-700 backdrop-blur-md transition-all duration-300 bg-opacity-25"
                             required
                         />
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600"
+                        className="w-full bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
                     >
                         Đăng nhập
                     </button>

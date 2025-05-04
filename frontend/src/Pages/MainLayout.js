@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import SideBar from "../Components/SideBar";
 import FriendActivity from "../Components/FriendActivity";
-import BottomPlayer from "../Components/BottomPlayer";
 import NavBar from "../Components/NavBar";
 import { useAuth } from "../context/AuthContext";
 import BottomPlayer_ex from "../Components/BottomPlayer_ex";
@@ -17,11 +16,6 @@ const MainLayout = () => {
     const initialQuery = searchParams.get('query') || '';
     const [searchQuery, setSearchQuery] = useState(initialQuery);
     // Kiểm tra nếu không có user thì chuyển hướng về login
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-        }
-    }, [user, navigate]);
 
     useEffect(() => {
         const query = searchParams.get('query') || '';

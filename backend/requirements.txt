@@ -40,10 +40,7 @@ incremental==24.7.2
 itsdangerous==2.2.0
 Jinja2==3.1.6
 jmespath==1.0.1
-<<<<<<< HEAD
 joblib==1.4.2
-=======
->>>>>>> thanhduom
 jsonrpcserver==5.0.9
 jsonschema==4.23.0
 jsonschema-specifications==2025.4.1
