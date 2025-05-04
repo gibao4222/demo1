@@ -308,7 +308,7 @@ function SongDetail() {
     if (!user) return <div className="text-white text-center py-8">Loading user...</div>;
 
     return (
-        <div className="mb-10 bg-gray-900 text-white min-h-screen flex flex-col md:flex-row" style={{ paddingBottom: '400px', zIndex: 20 }}>
+        <div className="mb-10 bg-neutral-900 text-white min-h-screen flex flex-col md:flex-row rounded-lg overflow-hidden" style={{ paddingBottom: '400px', zIndex: 20 }}>
             <style>
                 {`
                     .related-songs {

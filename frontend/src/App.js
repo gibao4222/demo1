@@ -17,7 +17,9 @@ import SongList from './Components/SongList';
 import SongDetail from './Components/SongDetail';
 
 import Followers from './Pages/Followers';  
+
 import { PlayerProvider } from './context/PlayerContext';
+
 
 const App = () => {
   return (
