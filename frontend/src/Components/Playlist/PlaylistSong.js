@@ -1,16 +1,42 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { FaPlay } from 'react-icons/fa';
 import { FiClock } from "react-icons/fi";
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { getSongPlaylist, getSongById, deleteSongFromPlaylist } from '../../Services/PlaylistService';
+import { usePlayer } from '../../context/PlayerContext';
+import { FaPause } from "react-icons/fa6";
+import MenuSub from '../MenuSub';
+import { useAuth } from '../../context/AuthContext'; 
+import { useNavigate } from 'react-router-dom'; 
 
-const PlaylistSong = ({ playlist, token, refreshSongs }) => {
+const PlaylistSong = ({ playlist, token, refreshSongs, playAllTrigger, onPlayAllComplete }) => {
+
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [hoveredSongId, setHoveredSongId] = useState(null);
     const [durations, setDurations] = useState({});
+    const [MenuSubPos, setMenuSubPos] = useState({ x: 0, y: 0 });
+    const [showMenuSub, setShowMenuSub] = useState(false);
+    const [MenuSubSong, setMenuSubSong] = useState(null);
+    const isContextMenuTriggered = useRef(false); 
+    
 
+    const [previewEnded, setPreviewEnded] = useState(false);
+    const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+    const { user } = useAuth(); 
+    const navigate = useNavigate(); 
+
+    const {
+        song: currentSong,
+        setCurrentSong,
+        isPlaying,
+        setIsPlaying,
+        audioRef,
+        queue,
+        setQueue,
+        setCurrentSongList
+    } = usePlayer();
     // Hàm định dạng thời gian
     const formatTime = (time) => {
         if (!time) return 'N/A';
@@ -19,56 +45,93 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     };
 
+    useEffect(() => {
+        if (playAllTrigger && songs.length > 0) {
+          handlePlayAll();
+          onPlayAllComplete(); 
+        }
+      }, [playAllTrigger, songs]);
+
+
     // Hàm tính khoảng thời gian tương đối
     const formatRelativeTime = (dateString) => {
-        if (!dateString) return 'Không rõ';
+        if (!dateString) return 'Không rõ';// Kiểm tra ngày không hợp lệ
 
         try {
             const date = new Date(dateString);
-            if (isNaN(date.getTime())) return 'Không rõ'; // Kiểm tra ngày không hợp lệ
+            if (isNaN(date.getTime())) return 'Không rõ';
 
             const now = new Date();
-            const diffInSeconds = Math.floor((now - date) / 1000); // Khoảng cách tính bằng giây
-
+            const diffInSeconds = Math.floor((now - date) / 1000);
             // Nếu thời gian âm (tương lai), trả về "Vừa xong"
             if (diffInSeconds < 0) return 'Vừa xong';
-
             // Dưới 60 giây: hiển thị giây (0-59 giây)
             if (diffInSeconds < 60) {
                 return diffInSeconds === 0 ? 'Vừa xong' : `${diffInSeconds} giây trước`;
             }
-
-            // Dưới 60 phút: hiển thị phút (1-59 phút)
+              // Dưới 60 phút: hiển thị phút (1-59 phút)
             const diffInMinutes = Math.floor(diffInSeconds / 60);
             if (diffInMinutes < 60) {
                 return `${diffInMinutes} phút trước`;
             }
-
-            // Dưới 24 giờ: hiển thị giờ (1-23 giờ)
+              // Dưới 24 giờ: hiển thị giờ (1-23 giờ)
             const diffInHours = Math.floor(diffInMinutes / 60);
             if (diffInHours < 24) {
                 return `${diffInHours} giờ trước`;
             }
-
-            // Từ 24 giờ trở lên: hiển thị số ngày
+             // Từ 24 giờ trở lên: hiển thị số ngày
             const diffInDays = Math.floor(diffInHours / 24);
             if (diffInDays < 30) {
                 return `${diffInDays} ngày trước`;
             }
-
-            // Dưới 12 tháng: hiển thị số tháng
+             // Dưới 12 tháng: hiển thị số tháng
             const diffInMonths = Math.floor(diffInDays / 30);
             if (diffInMonths < 12) {
                 return `${diffInMonths} tháng trước`;
             }
-
-            // Từ 12 tháng trở lên: hiển thị số năm
+               // Từ 12 tháng trở lên: hiển thị số năm
             const diffInYears = Math.floor(diffInMonths / 12);
             return `${diffInYears} năm trước`;
         } catch (error) {
             console.error(`Lỗi định dạng thời gian ${dateString}:`, error);
             return 'Không rõ';
         }
+    };
+
+    
+    const handlePlaySong = (song) => {
+        if (currentSong && currentSong.id === song.id) {
+            setIsPlaying(!isPlaying);
+            return;
+        }
+        
+     
+        if (song.is_vip && !user?.vip) {
+            setCurrentSong(song);
+            setPreviewEnded(false); 
+            setShowUpgradePrompt(false);
+        } else {
+            setCurrentSong(song);
+        }
+    
+        setIsPlaying(true);
+    };
+
+    const handlePlayAll = () => {
+        if (currentSong && songs.some(song => song.id === currentSong.id)) {
+            setIsPlaying(!isPlaying);
+            return;
+        }
+        if (songs.length === 0) return;
+        setCurrentSongList(songs);
+        
+        setCurrentSong(songs[0]);
+        setQueue([]);
+        setIsPlaying(true);
+    };
+
+    const handleUpgrade = () => {
+        navigate("/payment");
     };
 
     const fetchSongs = async () => {
@@ -104,16 +167,19 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
                 try {
                     const song = await getSongById(item.id_song, token);
                     console.log(`Lấy thông tin bài hát id_song ${item.id_song}:`, song);
+         
                     return {
                         playlistSongId: item.id,
                         id: song.id,
                         title: song.name || 'Không rõ',
                         album: song.album?.name || 'Không rõ',
-                        artist: song.artist || 'Không rõ',
+                        artist: song.artists.length > 0 ? song.artists.map(a => a.name).join('-') : 'Không rõ',
                         duration: song.duration || '--:--',
                         image: song.image || '/img/null.png',
                         dateAdded: formatRelativeTime(item.date_added),
                         file_audio: song.file_audio,
+                        url_song: song.url_song,
+                        is_vip: song.is_vip || false 
                     };
                 } catch (songError) {
                     console.error(`Lỗi khi lấy thông tin bài hát id_song ${item.id_song}:`, songError);
@@ -124,6 +190,7 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
             const fullSongs = (await Promise.all(songDetailsPromises)).filter(song => song !== null);
             console.log('Danh sách bài hát đã xử lý:', fullSongs);
             setSongs(fullSongs);
+            setCurrentSongList(fullSongs);
 
             if (fullSongs.length === 0) {
                 setError('Không thể tải chi tiết bài hát. Vui lòng thử lại.');
@@ -164,6 +231,65 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
     };
 
     useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio || !currentSong) return;
+
+        const handleTimeUpdate = () => {
+    
+            if (currentSong.is_vip && !user?.vip && audio.currentTime >= 10 && isPlaying) {
+                audio.pause();
+                setPreviewEnded(true); 
+                setShowUpgradePrompt(true); 
+                setIsPlaying(false); 
+            }
+        };
+
+        audio.addEventListener('timeupdate', handleTimeUpdate);
+        
+        return () => {
+            audio.removeEventListener('timeupdate', handleTimeUpdate);
+        };
+    }, [currentSong, isPlaying, user?.vip, audioRef]);
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio || !currentSong) return;
+
+        if (audio.src !== currentSong.url_song) {
+            audio.src = currentSong.url_song;
+            if (isPlaying) {
+                audio.play().catch(error => console.error("Error playing audio:", error));
+            }
+        } else if (isPlaying && audio.paused) {
+            audio.play().catch(error => console.error("Error playing audio:", error));
+        } else if (!isPlaying && !audio.paused) {
+            audio.pause();
+        }
+    }, [currentSong, isPlaying, audioRef]);
+
+    const handleMenuSub = (e, song) => {
+        e.preventDefault();
+      
+        const menuWidth = 150;
+        const menuHeight = 50;
+        const maxX = window.innerWidth - menuWidth;
+        const maxY = window.innerHeight - menuHeight;
+        const adjustedX = Math.min(e.clientX, maxX);
+        const adjustedY = Math.min(e.clientY, maxY);
+        setMenuSubSong(song);
+        setMenuSubPos({ x: adjustedX, y: adjustedY });
+        setShowMenuSub(true);
+        isContextMenuTriggered.current = true; 
+    };
+
+    const handleAddToQueue = () => {
+      if (MenuSubSong && !queue.find(s => s.id === MenuSubSong.id)) {
+        setQueue([...queue, MenuSubSong]);
+      }
+      setShowMenuSub(false);
+    };
+
+    useEffect(() => {
         console.log('PlaylistSong useEffect - playlist.id:', playlist?.id, 'refreshSongs:', refreshSongs);
         fetchSongs();
     }, [playlist?.id, token, refreshSongs]);
@@ -199,9 +325,51 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
             alert('Không thể xóa bài hát. Vui lòng thử lại.');
         }
     };
+      useEffect(() => {
+            const handleClickOutside = (e) => {
+                if (e.button === 0 && !isContextMenuTriggered.current) {
+                    setShowMenuSub(false);
+                }
+             
+                if (isContextMenuTriggered.current) {
+                    setTimeout(() => {
+                        isContextMenuTriggered.current = false;
+                    }, 100);
+                }
+            };
+            document.addEventListener('click', handleClickOutside);
+            return () => document.removeEventListener('click', handleClickOutside);
+        }, []);
 
     return (
         <div className="mt-8 pl-6 pr-6">
+      
+            {showUpgradePrompt && (
+                <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 p-8 rounded-lg max-w-md w-full text-center">
+                        <h2 className="text-2xl font-bold mb-6 text-green-400">NÂNG CẤP PREMIUM</h2>
+                        <div className="mb-6">
+                            <p className="text-lg mb-2">Theo yêu cầu của đơn vị sở hữu bản quyền,</p>
+                            <p className="text-lg">bạn cần tài khoản PREMIUM để nghe trọn vẹn bài hát này</p>
+                        </div>
+                        <div className="flex flex-col space-y-4">
+                            <button
+                                className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold text-lg"
+                                onClick={handleUpgrade}
+                            >
+                                NÂNG CẤP NGAY
+                            </button>
+                            <button
+                                className="px-6 py-2 text-gray-300 hover:text-white"
+                                onClick={() => setShowUpgradePrompt(false)}
+                            >
+                                Để sau
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {loading ? (
                 <p className="text-gray-400">Đang tải...</p>
             ) : error ? (
@@ -228,14 +396,29 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
                         {songs.map((song, index) => (
                             <tr
                                 key={song.id}
-                                className="hover:bg-neutral-800 rounded"
+                                className="hover:bg-neutral-800 rounded cursor-pointer"
                                 onMouseEnter={() => setHoveredSongId(song.id)}
                                 onMouseLeave={() => setHoveredSongId(null)}
+                                onContextMenu={(e) => handleMenuSub(e, song)}
                             >
                                 <td className="py-3 px-2">
                                     <div className="flex items-center">
-                                        {hoveredSongId === song.id ? (
-                                            <FaPlay className="mr-2 text-gray-200" />
+                                        {currentSong?.id === song.id && isPlaying ? (
+                                            <FaPause 
+                                                onClick={() => handlePlaySong(song)} 
+                                                className={`mr-2 text-gray-200 cursor-pointer hover:text-white ${
+                                                    song.is_vip && !user?.vip && previewEnded ? 'text-gray-400 cursor-not-allowed' : ''
+                                                }`}
+                                                disabled={song.is_vip && !user?.vip && previewEnded}
+                                            />
+                                        ) : hoveredSongId === song.id ? (
+                                            <FaPlay 
+                                                onClick={() => handlePlaySong(song)} 
+                                                className={`mr-2 text-gray-200 cursor-pointer hover:text-white ${
+                                                    song.is_vip && !user?.vip && previewEnded ? 'text-gray-400 cursor-not-allowed' : ''
+                                                }`}
+                                                disabled={song.is_vip && !user?.vip && previewEnded}
+                                            />
                                         ) : (
                                             <span className="mr-2">{index + 1}</span>
                                         )}
@@ -245,7 +428,17 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
                                     <div className="flex items-center">
                                         <img src={song.image} alt={song.title} className="w-10 h-10 rounded mr-3" />
                                         <div>
-                                            <p className="text-white font-medium">{song.title}</p>
+                                            <p className="text-white font-medium">
+                                                {song.title}
+                                            
+                                              
+                                             
+                                                {song.is_vip && (
+                                                    <span className="ml-2 text-xs bg-yellow-500 text-yellow-900 px-1 py-0.5 rounded">
+                                                        PREMIUM
+                                                    </span>
+                                                )}
+                                            </p>
                                             <p className="text-gray-400 text-xs">{song.artist}</p>
                                         </div>
                                     </div>
@@ -261,8 +454,11 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
                                     <div className="flex justify-center items-center h-full">
                                         {hoveredSongId === song.id && (
                                             <RiDeleteBin6Line
-                                                className="text-gray-200 cursor-pointer"
-                                                onClick={() => handleDeleteSong(song.playlistSongId)}
+                                                className="text-gray-200 cursor-pointer hover:text-white"
+                                                onClick={() => {
+                                                  
+                                                    handleDeleteSong(song.playlistSongId);
+                                                }}
                                             />
                                         )}
                                     </div>
@@ -272,6 +468,11 @@ const PlaylistSong = ({ playlist, token, refreshSongs }) => {
                     </tbody>
                 </table>
             )}
+            <MenuSub
+                show={showMenuSub}
+                position={MenuSubPos}
+                onAddToQueue={handleAddToQueue}
+            />
         </div>
     );
 };

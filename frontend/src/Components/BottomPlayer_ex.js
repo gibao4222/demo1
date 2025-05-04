@@ -93,7 +93,9 @@ function BottomPlayer_ex() {
                     setCurrentSong(nextList[nextIndex]);
                     setIsPlaying(true);
                 } else {
-                    setIsPlaying(false);
+                    const nextIndex = (currentIndex + 1) % nextList.length;
+                    setCurrentSong(currentSongList[currentIndex + 1]);
+                    setIsPlaying(true);
                 }
             
             }
