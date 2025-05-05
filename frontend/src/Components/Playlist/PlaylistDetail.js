@@ -9,7 +9,8 @@ import PlaylistSong from './PlaylistSong';
 import { useAuth } from '../../context/AuthContext';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from '../../axios';
-
+import { usePlayer } from '../../context/PlayerContext';
+import { FaPause } from "react-icons/fa6";
 const PlaylistDetail = ({ playlist }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const PlaylistDetail = ({ playlist }) => {
   const optionsButtonRef = useRef(null);
   const searchBarRef = useRef(null);
   const nameRef = useRef(null);
+  const [playAllTrigger, setPlayAllTrigger] = useState(false);
 
   const BACKEND_DOMAIN = 'https://localhost';
 
@@ -50,7 +52,16 @@ const PlaylistDetail = ({ playlist }) => {
   const [dominantColor, setDominantColor] = useState('#434343');
   const [isLoadingColor, setIsLoadingColor] = useState(true);
   const [refreshSongs, setRefreshSongs] = useState(false); // State để làm mới PlaylistSong
-
+    const {
+        song: currentSong,
+        setCurrentSong,
+        isPlaying,
+        setIsPlaying,
+        audioRef,
+        queue,
+        setQueue,
+        setCurrentSongList
+    } = usePlayer();
   // Cập nhật currentPlaylist khi playlist từ props hoặc location.state thay đổi
   useEffect(() => {
     const selectedPlaylist = playlist || location.state?.playlist || { id: null };
@@ -307,6 +318,12 @@ const PlaylistDetail = ({ playlist }) => {
     }
   };
 
+  const handlePlayAllClick = () => {
+    setPlayAllTrigger(prev => !prev);
+  };
+ 
+
+
   return (
     <div className="z-0 bg-neutral-900 rounded-lg flex flex-col h-[calc(100vh-136px)] overflow-hidden">
       <div className="overflow-y-auto overlay-scroll pb-20">
@@ -362,8 +379,13 @@ const PlaylistDetail = ({ playlist }) => {
         </div>
         <div className="relative z-10 bg-gradient-to-b from-neutral-900/35 to-neutral-900/100 -mt-32">
           <div className="flex items-center pl-5 pt-3">
-            <button className="mr-3">
-              <img alt="" src="/icon/Play_GreemHover.png" height="72" width="72" />
+            <button onClick={()=>handlePlayAllClick()}  className="mr-3">
+            <img 
+            alt={isPlaying ? "Pause" : "Play"} 
+            src={isPlaying ? "/icon/icon-pause.png" : "/icon/Play_GreemHover.png"} 
+            height="50" 
+            width="50" 
+          />
             </button>
             {/* <button className="mr-3">
               <img alt="" src="/icon/Heart_XS.png" height="38" width="38"/>
@@ -450,7 +472,8 @@ const PlaylistDetail = ({ playlist }) => {
           />
           <div className="mt-4">
             {currentPlaylist.id ? (
-              <PlaylistSong playlist={currentPlaylist} token={token} refreshSongs={refreshSongs} />
+              <PlaylistSong playlist={currentPlaylist} token={token} refreshSongs={refreshSongs}  playAllTrigger={playAllTrigger}
+            onPlayAllComplete={() => setPlayAllTrigger(false)}  />
             ) : (
               <p className="text-red-400">Không thể tải danh sách bài hát: thiếu ID playlist.</p>
             )}

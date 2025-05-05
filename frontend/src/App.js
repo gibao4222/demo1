@@ -1,7 +1,7 @@
 import './App.css';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route , Navigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Login from './Pages/Login';
 import Register from './Pages/Register';
 import PaymentPage from './Pages/PaymentPage';
@@ -17,9 +17,36 @@ import SongList from './Components/SongList';
 import SongDetail from './Components/SongDetail';
 
 import Followers from './Pages/Followers';  
+import { useAuth } from './context/AuthContext';
 import { PlayerProvider } from './context/PlayerContext';
 
+
+const ProtectedRoute = ({ children }) => {
+  const { user, token } = useAuth();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    // Đợi một chút để đảm bảo trạng thái user và token được cập nhật
+    const timer = setTimeout(() => {
+      setIsCheckingAuth(false);
+    }, 100); // Đợi 100ms để trạng thái được đồng bộ
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isCheckingAuth) {
+    return null; // Không render gì trong khi kiểm tra
+  }
+
+  if (!user || !token) {
+    console.log('Chưa đăng nhập, chuyển hướng về /login');
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
 const App = () => {
+  const { user, token } = useAuth();
+
   return (
 
     <GoogleOAuthProvider clientId="660579609549-kogcos0i04ldpherele2li974f9ulm01.apps.googleusercontent.com">
@@ -35,7 +62,7 @@ const App = () => {
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/payment/result" element={<PaymentResult />} />
 
-          <Route element={<MainLayout />}>
+          <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
             <Route path="/home" element={<MainContent />}/>
             <Route path="/search" element={<MainSearch/>}/>
             <Route path="/user/:id" element={<MainFollowUser />}/>

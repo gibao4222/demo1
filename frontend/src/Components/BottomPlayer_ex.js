@@ -93,7 +93,9 @@ function BottomPlayer_ex() {
                     setCurrentSong(nextList[nextIndex]);
                     setIsPlaying(true);
                 } else {
-                    setIsPlaying(false);
+                    const nextIndex = (currentIndex + 1) % nextList.length;
+                    setCurrentSong(currentSongList[currentIndex + 1]);
+                    setIsPlaying(true);
                 }
             
             }
@@ -214,7 +216,7 @@ function BottomPlayer_ex() {
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 p-2 flex items-center justify-between" style={{ minWidth: '100vw' }}>
+        <div className="fixed bottom-0 left-0 right-0 bg-black p-2 flex items-center justify-between" style={{ minWidth: '100vw' }}>
      
             <div className="flex items-center" style={{ width: '25%', minWidth: '200px', maxWidth: '300px' }}>
                 <img 
@@ -244,6 +246,7 @@ function BottomPlayer_ex() {
                         <img
                             alt={isPlaying ? "Pause" : "Play"}
                             src={isPlaying ? "/icon/Component1.png" : "/icon/play.png"}
+                            className="w-13 h-13"
                         />
                     </button>
                     <button onClick={() => handleNext()} className="mr-4">

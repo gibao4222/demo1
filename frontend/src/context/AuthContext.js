@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
-  const login = async (userData, accessToken, refreshToken) => {
+  const login = async (userData, accessToken, refreshToken, callback) => {
     try {
       const response = await axios.get('/api/users/users/', {
         headers: { Authorization: `Bearer ${accessToken}` }
@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
           throw new Error('Không thể xác định user_id cho người dùng');
         }
       }
+      console.log('Login thành công, user:', userData, 'token:', accessToken);
     } catch (err) {
       console.error('Lỗi khi lấy user_id:', err);
       throw err;
@@ -40,6 +41,7 @@ export const AuthProvider = ({ children }) => {
     setToken(accessToken);
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
+    if (callback) callback();
   };
 
   const logout = async () => {
@@ -74,6 +76,7 @@ export const AuthProvider = ({ children }) => {
       const newAccessToken = response.data.access;
       setToken(newAccessToken);
       localStorage.setItem('access_token', newAccessToken);
+      console.log('Token làm mới thành công:', newAccessToken);
       return newAccessToken;
     } catch (err) {
       console.error('Làm mới token thất bại:', err);
@@ -94,6 +97,7 @@ export const AuthProvider = ({ children }) => {
         const currentUser = response.data.find(u => u.username === user.username);
         if (currentUser) {
             setUser({ ...user, ...currentUser });
+            console.log('Làm mới user thành công:', currentUser);
             return true;
         } else {
             console.error('Không tìm thấy user trong dữ liệu API:', user.username);
@@ -111,6 +115,7 @@ export const AuthProvider = ({ children }) => {
                     const currentUser = response.data.find(u => u.username === user.username);
                     if (currentUser) {
                         setUser({ ...user, ...currentUser });
+                        console.log('Làm mới user thành công sau khi làm mới token:', currentUser);
                         return true;
                     } else {
                         console.error('Không tìm thấy user sau khi làm mới token:', user.username);
