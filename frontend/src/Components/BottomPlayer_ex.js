@@ -194,7 +194,7 @@ function BottomPlayer_ex() {
         else{
             if (show === false) {
                 setShow(true);
-                navigate('/fullscreen', { state: { song: song } });
+                navigate('/fullscreen');
               } else {
                 setShow(false);
                 navigate(-1); // Quay lại trang trước
