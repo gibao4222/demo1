@@ -4,7 +4,9 @@ import { IoShuffle } from "react-icons/io5";
 import { usePlayer } from "../context/PlayerContext";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
-
+import FullScreenMedia from "./FullScreenPlayer";
+import { Minimize2 } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 function BottomPlayer_ex() {
     const { 
         song: currentSong, 
@@ -24,10 +26,13 @@ function BottomPlayer_ex() {
     const [repeatMode, setRepeatMode] = useState("off");
     const [isShuffle, setIsShuffle] = useState(false);
     const [shuffledList, setShuffledList] = useState([]);
+    const navigate = useNavigate();
     const { user } = useAuth();
     const song = currentSong || {};
     const songList = currentSongList || [];
     const [showQueuePopup, setShowQueuePopup] = useState(false);
+    const [show, setShow] = useState(false);
+    const isChanging = useRef(false);
     const updateSongHistory = async (songId) => {
         try {
           
@@ -180,6 +185,34 @@ function BottomPlayer_ex() {
         setIsPlaying(true);
     };
 
+   
+    const handelFullScreen = () => {
+        if (!audioRef.current || !song.id || !song.url_song) {
+            console.log("Không thể phát");
+            return;
+        }
+        else{
+            if (show === false) {
+                setShow(true);
+                navigate('/fullscreen', { state: { song: song } });
+              } else {
+                setShow(false);
+                navigate(-1); // Quay lại trang trước
+              }
+        }
+       
+      };
+      
+  useEffect(() => {
+    // Chạy khi show thay đổi
+    if (!isChanging.current) return;
+
+    // Hiển thị thông báo sau khi show đã thay đổi
+    alert("Toggle: " + show); // Hoặc console.log
+
+    isChanging.current = false; // Đánh dấu đã xong
+  }, [show]);
+
     const handleSeek = (e) => {
         if (!audioRef.current) return;
         const seekTime = (e.target.value / 100) * duration;
@@ -319,10 +352,13 @@ function BottomPlayer_ex() {
                     />
                 </div>
                 <div className="flex items-center">
-                    <button className="ml-1">
-                        <img src="/icon/FullScreen_S.png" alt="Fullscreen" />
-                    </button>
-                </div>
+  <button onClick={() => handelFullScreen()} className="ml-1">
+    {!show ?  <img src="/icon/FullScreen_S.png" alt="Fullscreen" /> :<Minimize2 /> }
+  </button>
+
+ 
+</div>
+
             </div>
 
     
@@ -383,6 +419,7 @@ function BottomPlayer_ex() {
         </div>
     </div>
 )}
+
         </div>
     );
 }

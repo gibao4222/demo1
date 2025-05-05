@@ -179,7 +179,8 @@ const PlaylistSong = ({ playlist, token, refreshSongs, playAllTrigger, onPlayAll
                         dateAdded: formatRelativeTime(item.date_added),
                         file_audio: song.file_audio,
                         url_song: song.url_song,
-                        is_vip: song.is_vip || false 
+                        is_vip: song.is_vip || false,
+                        url_video: song?.url_video
                     };
                 } catch (songError) {
                     console.error(`Lỗi khi lấy thông tin bài hát id_song ${item.id_song}:`, songError);

@@ -42,15 +42,12 @@ function SongDetail() {
     } = usePlayer();
 
     useEffect(() => {
-
         const video = videoRef.current;
         if (!video || !user?.vip || !song?.url_video) return;
 
         if (isPlaying) {
-           
             video.play().catch(e => console.log("Video play error:", e));
         } else {
-            
             video.pause();
         }
     }, [isPlaying, user?.vip, song?.url_video]);
@@ -63,14 +60,11 @@ function SongDetail() {
     }, [song?.url_video, user?.vip]);
 
     useEffect(() => {
-    
         if (contextCurrentSong && (!song || contextCurrentSong.id !== song.id)) {
             setSong(contextCurrentSong);
             if (contextCurrentSong.url_lyric) fetchLyrics(contextCurrentSong.url_lyric);
         }
     }, [contextCurrentSong, song]);
-
-    
 
     useEffect(() => {
         getRelatedSongs();
@@ -221,7 +215,7 @@ function SongDetail() {
             setShowUpgradePrompt(true);
             return;
         }
-        setIsPlaying(!isPlaying); // Chuyển đổi trạng thái, BottomPlayer_ex sẽ xử lý audio
+        setIsPlaying(!isPlaying);
     };
 
     useEffect(() => {
@@ -302,8 +296,6 @@ function SongDetail() {
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
- 
-
     if (!song) return <div className="text-white text-center py-8">Loading song...</div>;
     if (!user) return <div className="text-white text-center py-8">Loading user...</div>;
 
@@ -319,6 +311,21 @@ function SongDetail() {
                     .related-songs.visible {
                         opacity: 1;
                         transform: translateY(0);
+                    }
+                    .song-header {
+                        background-size: cover;
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        position: relative;
+                    }
+                    .song-header::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%);
                     }
                 `}
             </style>
@@ -350,40 +357,51 @@ function SongDetail() {
             )}
 
             <div className="p-4 w-full md:w-2/3">
-                <div className="flex flex-col md:flex-row items-center p-4 md:p-6 sticky top-0 z-10 bg-gray-900/90 backdrop-blur-sm">
-                    <img 
-                        src={song?.image 
-      ? song.image.startsWith("http")
-        ? song.image 
-        : `/media/${song.image}`
-      : "https://i.pinimg.com/736x/3a/1f/d0/3a1fd088e3521120d68c7567bad13f6c.jpg"} 
-                        alt={song.name} 
-                        className="h-24 w-24 md:h-32 md:w-32 object-cover rounded-md"
-                    />
-                    <div className="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
-                        <h1 className="text-xl md:text-2xl font-bold line-clamp-1">{song.name}</h1>
-                        <p className="text-gray-400 text-sm">{song.artists.length > 0 ? song.artists.map(a => a.name).join(',') : "Unknown Artist"}</p>
-                        {song.is_vip && (
-                            <span className="inline-block mr-6 mt-1 px-2 py-0.5 bg-yellow-500 text-yellow-900 text-xs font-bold rounded">
-                                PREMIUM
-                            </span>
-                        )}
-                        <button
-                            onClick={handlePlayPause}
-                            className={`mt-3 px-6 py-1 rounded-full text-sm font-bold ${
-                                !user.vip && song.is_vip && previewEnded
-                                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                    : 'bg-green-500 hover:bg-green-600 text-white'
-                            }`}
-                            disabled={!user.vip && song.is_vip && previewEnded}
-                        >
-                            {isPlaying ? "PAUSE" : "PLAY"}
-                        </button>
-                        {!user.vip && song.is_vip && (
-                            <p className="text-xs text-gray-400 mt-1">
-                                {previewEnded ? 'Bạn đã nghe hết 10 giây preview' : 'Đang phát bản preview 10 giây'}
-                            </p>
-                        )}
+                <div 
+                    className="song-header flex flex-col md:flex-row items-center p-4 md:p-6 sticky top-0 z-10"
+                    style={{
+                        backgroundImage: `url(${song?.image 
+                            ? song.image.startsWith("http")
+                                ? song.image 
+                                : `/media/${song.image}`
+                            : "https://i.pinimg.com/736x/3a/1f/d0/3a1fd088e3521120d68c7567bad13f6c.jpg"})`
+                    }}
+                >
+                    <div className="relative z-10 flex flex-col md:flex-row items-center w-full">
+                        <img 
+                            src={song?.image 
+                                ? song.image.startsWith("http")
+                                    ? song.image 
+                                    : `/media/${song.image}`
+                                : "https://i.pinimg.com/736x/3a/1f/d0/3a1fd088e3521120d68c7567bad13f6c.jpg"} 
+                            alt={song.name} 
+                            className="h-20 w-20 md:h-24 md:w-24 object-cover rounded-md"
+                        />
+                        <div className="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
+                            <h1 className="text-xl md:text-2xl font-bold line-clamp-2">{song.name}</h1>
+                            <p className="text-gray-400 text-sm">{song.artists.length > 0 ? song.artists.map(a => a.name).join(',') : "Unknown Artist"}</p>
+                            {song.is_vip && (
+                                <span className="inline-block mr-6 mt-1 px-2 py-0.5 bg-yellow-500 text-yellow-900 text-xs font-bold rounded">
+                                    PREMIUM
+                                </span>
+                            )}
+                            <button
+                                onClick={handlePlayPause}
+                                className={`mt-3 px-6 py-1 rounded-full text-sm font-bold ${
+                                    !user.vip && song.is_vip && previewEnded
+                                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                        : 'bg-green-500 hover:bg-green-600 text-white'
+                                }`}
+                                disabled={!user.vip && song.is_vip && previewEnded}
+                            >
+                                {isPlaying ? "PAUSE" : "PLAY"}
+                            </button>
+                            {!user.vip && song.is_vip && (
+                                <p className="text-xs text-gray-400 mt-1">
+                                    {previewEnded ? 'Bạn đã nghe hết 10 giây preview' : 'Đang phát bản preview 10 giây'}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -471,41 +489,39 @@ function SongDetail() {
                 </div>
             </div>
 
-            <div className="w-full md:w-1/3 p-4 sticky top-0" style={{ height: "calc(100vh - 200px)" }}> {/* Điều chỉnh 200px theo nhu cầu */}
-  {user.vip && song.url_video ? (
-    <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
-  
-      <div className="relative w-full h-full">
-        <video
-          ref={videoRef}
-          src={song.url_video}
-          className="absolute inset-0 w-full h-full object-cover rounded-lg"
-          style={{ aspectRatio: "16/9" }}
-          muted
-          playsInline
-          loop
-          autoPlay
-        />
-      </div>
-    </div>
-  ) : (
-    <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
-      
-      <img
-        src={
-          song?.image
-            ? song.image.startsWith("http")
-              ? song.image
-              : `/media/${song.image}`
-            : "https://i.pinimg.com/736x/3a/1f/d0/3a1fd088e3521120d68c7567bad13f6c.jpg"
-        }
-        alt={song.name}
-        className="w-full h-full object-cover rounded-lg"
-        style={{ aspectRatio: "1/1" }} 
-      />
-    </div>
-  )}
-</div>
+            <div className="w-full md:w-1/3  sticky top-0" style={{ height: "calc(150vh - 200px)" }}>
+                {user.vip && song.url_video ? (
+                    <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
+                        <div className="relative w-full h-full">
+                            <video
+                                ref={videoRef}
+                                src={song.url_video}
+                                className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                                style={{ aspectRatio: "16/9" }}
+                                muted
+                                playsInline
+                                loop
+                                autoPlay
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
+                        <img
+                            src={
+                                song?.image
+                                    ? song.image.startsWith("http")
+                                        ? song.image
+                                        : `/media/${song.image}`
+                                    : "https://i.pinimg.com/736x/3a/1f/d0/3a1fd088e3521120d68c7567bad13f6c.jpg"
+                            }
+                            alt={song.name}
+                            className="w-full h-full object-cover rounded-lg"
+                            style={{ aspectRatio: "1/1" }} 
+                        />
+                    </div>
+                )}
+            </div>
             
             <MenuSub
                 show={showMenuSub}
