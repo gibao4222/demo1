@@ -15,6 +15,7 @@ from django.utils import timezone
 import random
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
+from spotify_user.models import SpotifyUser
 
 
 APPLE_MUSIC_STYLE_IMAGES = [

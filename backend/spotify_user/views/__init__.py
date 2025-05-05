@@ -127,8 +127,8 @@ class SongSearchView(generics.ListAPIView):
         search_term_no_diacritics = unidecode(search_term).lower().replace(" ", "")
         return Song.objects.filter(
             Q(name__icontains=search_term_no_diacritics) |
-            Q(song_singers__id_singer__name__icontains=search_term_no_diacritics)
-        ).prefetch_related('song_singers__id_singer').distinct()
+            Q(song_singer__id_singer__name__icontains=search_term_no_diacritics)
+        ).prefetch_related('song_singer__id_singer').distinct()
     
 
 

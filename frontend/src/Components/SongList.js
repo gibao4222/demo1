@@ -136,7 +136,7 @@ function SongList() {
     }
 
     return (
-        <div className="p-4 text-white">
+        <div className="p-4 text-white bg-neutral-900">
             {showUpgradePrompt && (
                 <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
                     <div className="bg-gray-800 p-8 rounded-lg max-w-md w-full text-center">
@@ -224,7 +224,7 @@ function SongList() {
                             )}
                         </div>
 
-                        <div className="p-3 flex-1 flex flex-col justify-center">
+                        <div className="px-3 py-1 flex-1 flex flex-col justify-center bg-neutral-800">
                             <h3 className="text-md font-semibold truncate">
                                 {song.name}
                                 {song.is_vip && !user?.vip && currentSong?.id === song.id && previewEnded && (

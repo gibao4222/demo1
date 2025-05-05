@@ -22,8 +22,8 @@ import { PlayerProvider } from './context/PlayerContext';
 
 import Chatbot from './Components/Chatbot';
 
-import Profile from './Pages/Profile';
-
+// import Profile from './Pages/Profile';
+import MainProfile from './Components/MainProfile';
 
 const ProtectedRoute = ({ children }) => {
   const { user, token } = useAuth();
@@ -67,7 +67,6 @@ const App = () => {
           <Route path="/payment/result" element={<PaymentResult />} />
           <Route path="/chatbot" element={<Chatbot />} />
           {/* <Route path="/" render={() => <div><a href="/chatbot">Go to Chatbot</a></div>} /> */}
-          <Route path="/profile/" element={<Profile />} />
 
 
           <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
@@ -79,6 +78,8 @@ const App = () => {
             <Route path="/AlbumDetail/:id" element={<AlbumDetail />}/>
             <Route path="/song" element={<SongList />} />
             <Route path="/song/:id" element={<SongDetail />} />
+            <Route path="/profile/" element={<MainProfile />} />
+
           </Route>
         </Routes>
 
