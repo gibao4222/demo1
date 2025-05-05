@@ -12,7 +12,7 @@ from album.models import Album
 from playlist.serializers import PlaylistSerializer
 from album.serializers import AlbumSerializer
 from django.db.models import Q
-from ..serializers import SpotifyUserSerializer, UserAlbumSerializer, UserSingerSerializer, UserSongSerializer, UserFollowingSerializer
+from ..serializers import SpotifyUserProfileSerializer, SpotifyUserSerializer, UserAlbumSerializer, UserSingerSerializer, UserSongSerializer, UserFollowingSerializer
 from ..models import SpotifyUser, UserAlbum, UserSinger, UserSong, UserFollowing
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -387,3 +387,39 @@ class FollowersInfoView(APIView):
             'followers_count': followers_count,
             'followers': followers_data
         }, status=status.HTTP_200_OK)
+        
+        
+        
+# API Lấy thông tin hồ sơ người dùng
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Lấy thông tin hồ sơ người dùng hiện tại"""
+        try:
+            spotify_user = SpotifyUser.objects.get(user=request.user)
+            serializer = SpotifyUserProfileSerializer(spotify_user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except SpotifyUser.DoesNotExist:
+            return Response(
+                {"lỗi": "Không tìm thấy thông tin người dùng"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    def put(self, request):
+        """Cập nhật thông tin hồ sơ người dùng"""
+        try:
+            spotify_user = SpotifyUser.objects.get(user=request.user)
+            serializer = SpotifyUserProfileSerializer(spotify_user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(
+                    {"thông_báo": "Cập nhật hồ sơ thành công", "dữ_liệu": serializer.data},
+                    status=status.HTTP_200_OK
+                )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except SpotifyUser.DoesNotExist:
+            return Response(
+                {"lỗi": "Không tìm thấy thông tin người dùng"},
+                status=status.HTTP_404_NOT_FOUND
+            )
