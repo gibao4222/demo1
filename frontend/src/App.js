@@ -19,6 +19,7 @@ import SongDetail from './Components/SongDetail';
 import Followers from './Pages/Followers';  
 import { useAuth } from './context/AuthContext';
 import { PlayerProvider } from './context/PlayerContext';
+import Profile from './Pages/Profile';
 
 
 const ProtectedRoute = ({ children }) => {
@@ -61,6 +62,7 @@ const App = () => {
           <Route path="/FollowUser/:id/followers" element={<Followers/>} />
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/payment/result" element={<PaymentResult />} />
+          <Route path="/profile/" element={<Profile />} />
 
           <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
             <Route path="/home" element={<MainContent />}/>

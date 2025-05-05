@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
       });
       const currentUser = response.data.find(u => u.username === userData.username);
       if (currentUser) {
-        userData.user_id = currentUser.user.id;
+        userData.user_id = currentUser.user.id; // Lưu auth_user.id
       } else {
         console.error('Không tìm thấy người dùng trong danh sách trả về từ API');
         if (!userData.user_id) {
@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }) => {
         });
         const currentUser = response.data.find(u => u.username === user.username);
         if (currentUser) {
-            setUser({ ...user, ...currentUser });
+            setUser({ ...user, ...currentUser, user_id: currentUser.user.id }); // Đồng bộ user_id với auth_user.id
             console.log('Làm mới user thành công:', currentUser);
             return true;
         } else {
@@ -114,7 +114,7 @@ export const AuthProvider = ({ children }) => {
                     });
                     const currentUser = response.data.find(u => u.username === user.username);
                     if (currentUser) {
-                        setUser({ ...user, ...currentUser });
+                        setUser({ ...user, ...currentUser, user_id: currentUser.user.id }); // Đồng bộ user_id
                         console.log('Làm mới user thành công sau khi làm mới token:', currentUser);
                         return true;
                     } else {
