@@ -130,6 +130,7 @@ const Chat = ({ userId, targetId, token, targetUsername }) => {
                     if (targetSpotifyUser) {
                         setPendingRequestFromTarget({ ...targetSentPending, spotifyUserId: targetSpotifyUser.id });
                     } else {
+                        console.warn('Không tìm thấy SpotifyUser cho targetId:', targetId);
                         setPendingRequestFromTarget(targetSentPending);
                     }
                 } catch (permErr) {
@@ -298,6 +299,10 @@ const Chat = ({ userId, targetId, token, targetUsername }) => {
             return;
         }
         const requesterId = pendingRequestFromTarget.spotifyUserId || pendingRequestFromTarget.sender_id;
+        if (!requesterId) {
+            setErrorMessage('Không thể xác định ID của người gửi yêu cầu');
+            return;
+        }
         console.log('Gửi yêu cầu xử lý ChatPermission:', { requester_id: requesterId, action });
         try {
             setErrorMessage('');

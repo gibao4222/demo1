@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }) => {
         });
         const currentUser = response.data.find(u => u.username === user.username);
         if (currentUser) {
-            setUser({ ...user, ...currentUser });
+            setUser({ ...user, ...currentUser, user_id: currentUser.user.id }); // Đồng bộ user_id với auth_user.id
             console.log('Làm mới user thành công:', currentUser);
             return true;
         } else {
@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }) => {
                     });
                     const currentUser = response.data.find(u => u.username === user.username);
                     if (currentUser) {
-                        setUser({ ...user, ...currentUser });
+                        setUser({ ...user, ...currentUser, user_id: currentUser.user.id }); // Đồng bộ user_id
                         console.log('Làm mới user thành công sau khi làm mới token:', currentUser);
                         return true;
                     } else {

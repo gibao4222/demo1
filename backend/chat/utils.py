@@ -1,6 +1,7 @@
 from django.db.models import Q
 from spotify_user.models import UserFollowing
 from .models import ChatPermission, Message
+from django.db import transaction
 
 def can_chat_directly(sender, receiver):
     sender_follows_receiver = UserFollowing.objects.filter(
@@ -46,19 +47,30 @@ def can_send_message_with_limit(sender, receiver):
         return True, True, True
     return True, True, False
 
-def convert_pending_messages(sender, receiver):
+# utils.py
+def convert_pending_messages(requester, target):
     """
-    Chuyển tất cả tin nhắn pending giữa sender và receiver thành trực tiếp.
-    Trả về danh sách tin nhắn đã được cập nhật.
+    Chuyển tất cả tin nhắn pending giữa requester và target thành trực tiếp.
+    Trả về số lượng tin nhắn đã được cập nhật.
     """
     try:
         with transaction.atomic():
+            # Log thông tin requester và target
+            print(f"Requester: {requester.id}, Target: {target.id}")
+            
+            # Kiểm tra xem có tin nhắn pending nào tồn tại không
             pending_messages = Message.objects.filter(
-                Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender),
+                Q(sender=requester, receiver=target) | Q(sender=target, receiver=requester),
                 is_pending=True
             )
-            pending_messages.update(is_pending=False)
-            return list(pending_messages)
+            print(f"Found {pending_messages.count()} pending messages before update")
+            for msg in pending_messages:
+                print(f"Pending message: ID={msg.id}, Sender={msg.sender.id}, Receiver={msg.receiver.id}, Content={msg.content}, Is_Pending={msg.is_pending}")
+
+            # Cập nhật tin nhắn
+            updated_count = pending_messages.update(is_pending=False)
+            print(f"Updated {updated_count} pending messages in convert_pending_messages")
+            return updated_count
     except Exception as e:
         print(f"Error in convert_pending_messages: {e}")
-        return []
+        return 0

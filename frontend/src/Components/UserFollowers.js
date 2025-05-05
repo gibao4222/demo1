@@ -57,7 +57,7 @@ function UserFollowers() {
             <div
               key={follower.id}
               className="flex items-center p-4 bg-gray-800 rounded-lg shadow-md hover:bg-gray-700 transition cursor-pointer"
-              onClick={() => navigate(`/FollowUser/${follower.id}`)}
+              onClick={() => navigate(`/User/${follower.id}`)}
             >
               <img
                 src="https://storage.googleapis.com/a1aa/image/N5Ae48WVgHcJ7vgKi6lA3tz5FvQ3gwiFky_1XteLMpY.jpg"
