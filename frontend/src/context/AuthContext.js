@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }) => {
       const currentUser = response.data.find(u => u.username === userData.username);
       if (currentUser) {
         userData.user_id = currentUser.user.id;
+        userData.id_spotify_user = currentUser.id;
       } else {
         console.error('Không tìm thấy người dùng trong danh sách trả về từ API');
         if (!userData.user_id) {

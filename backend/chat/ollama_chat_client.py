@@ -147,7 +147,8 @@ while True:
             f"- Tổng số album: {total_albums}\n"
             f"- Tổng số thể loại: {total_genres}\n"
             f"Hãy trả lời câu hỏi một cách tự nhiên, thân thiện và giang hồ bằng tiếng Việt, liệt kê tất cả thông tin thống kê có sẵn. "
-            f"Trả về câu trả lời dưới dạng JSON với key 'answer'."
+            f"Đảm bảo trả về câu trả lời dưới dạng JSON với key 'answer' chứa một chuỗi văn bản, ví dụ: "
+            f'```json\n{{"answer": "Trang web có 7 bài hát, 3 nghệ sĩ, 3 album và 11 thể loại!"}}\n```'
         )
     else:
         prompt += (
@@ -171,7 +172,7 @@ while True:
             OLLAMA_API_URL,
             headers=headers,
             json=api_payload,
-            timeout=30
+            timeout=120
         )
         print(f"Response status code: {response.status_code}")
 

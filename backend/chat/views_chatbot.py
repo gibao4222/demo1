@@ -1,32 +1,21 @@
-# backend/chat/views_chatbot.py
+import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-import zmq
-import json
+from django.views.decorators.http import require_POST
 
 @csrf_exempt
+@require_POST
 def chatbot(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            query = data.get('query', '')
-            user_id = data.get('user_id', None)
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        query = data.get('prompt', data.get('query'))  # Hỗ trợ cả prompt (từ Open WebUI) và query (từ React)
 
-            if not query:
-                return JsonResponse({'error': 'Câu hỏi không được để trống'}, status=400)
+        # Logic xử lý query với mcp_chat_server và ollama_chat_client
+        # Giả sử bạn đã có hàm xử lý trả về answer
+        answer = "Trang web có 7 bài hát..."  # Thay bằng logic thực tế
 
-            # Gửi câu hỏi qua ZMQ tới chat_server
-            context = zmq.Context()
-            socket = context.socket(zmq.REQ)
-            socket.connect("tcp://localhost:5557")  # Cổng mới cho chatbot
-            socket.send_json({'action': 'chat_query', 'user_id': user_id, 'query': query})  # Thêm action
-
-            # Nhận phản hồi
-            response = socket.recv_json()
-            socket.close()
-
-            return JsonResponse(response)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-    return JsonResponse({'error': 'Phương thức không được hỗ trợ'}, status=405)
-
+        # Định dạng lại phản hồi để tương thích với Open WebUI
+        return JsonResponse({"response": answer})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

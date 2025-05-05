@@ -97,7 +97,7 @@ function SideBar({ onToggleExpand, isExpanded }) {
         description: 'Thêm phần mô tả không bắt buộc',
         image: '/img/null.png',
         create_date: currentDate,
-        id_user: user.user_id,
+        id_user: user.id_spotify_user,
         is_active: true,
       };
 
@@ -131,7 +131,7 @@ function SideBar({ onToggleExpand, isExpanded }) {
           Authorization: `Bearer ${token}`, // Assuming token is required for auth
         },
         body: JSON.stringify({
-          user_id: user.user_id,
+          user_id: user.id_spotify_user,
         }),
       });
 
