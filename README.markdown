@@ -2,6 +2,10 @@
 
 Chào mừng đến với **Demo1**, một ứng dụng web được xây dựng bằng React và Django REST Framework. Dự án này cho phép người dùng tạo, quản lý và thưởng thức các danh sách phát nhạc với các tính năng như xác thực người dùng, tạo playlist, và tạo playlist thông minh bằng AI. Nó tích hợp với dữ liệu người dùng để mang đến trải nghiệm cá nhân hóa.
 
+## 📸 Ảnh Demo
+Dưới đây là giao diện của ứng dụng Demo1:
+![Giao diện Demo1](https://github.com/gibao4222/demo1/blob/main/frontend/public/demo/Screenshot_demo.png)
+
 ## 🚀 Tính năng
 
 - **Xác thực Người dùng**: Đăng nhập/đăng xuất an toàn với các phương thức bao gồm:
