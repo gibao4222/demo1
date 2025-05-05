@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "../axios";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { createPortal } from 'react-dom';
 import OptionSongAlbum from "./Modals/OptionSongAlbum";
+import { usePlayer } from "../context/PlayerContext";
+import { FaPause, FaPlay } from "react-icons/fa";
+import MenuSub from "./MenuSub";
 
 function MainFollowSinger() {
   const { id: singerId } = useParams();
@@ -23,6 +26,16 @@ function MainFollowSinger() {
   const [selectedSongId, setSelectedSongId] = useState(null);
   const optionButtonRefs = useRef({});
 
+      const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+      const [previewEnded, setPreviewEnded] = useState(false);
+      const previewTimeoutRef = useRef(null);
+      const navigate = useNavigate();
+      const [MenuSubPos, setMenuSubPos] = useState({ x: 0, y: 0 });
+      const [showMenuSub, setShowMenuSub] = useState(false);
+      const [MenuSubSong, setMenuSubSong] = useState(null);
+      const { user } = useAuth();
+      const isContextMenuTriggered = useRef(false); 
+
   // Lấy thông tin chi tiết nghệ sĩ
   useEffect(() => {
     const fetchArtistDetails = async () => {
@@ -39,6 +52,112 @@ function MainFollowSinger() {
 
     fetchArtistDetails();
   }, [singerId]);
+     const {
+        song: currentSong,
+        setCurrentSong,
+        isPlaying,
+        setIsPlaying,
+        audioRef,
+        queue,
+        setQueue,
+        setCurrentSongList
+      } = usePlayer();
+
+      const playSong = (song) => {
+     
+        if (currentSong && currentSong.id === song.id) {
+            setIsPlaying(!isPlaying);
+            return;
+        }
+
+        
+        if (song.is_vip && !user?.vip) {
+            setCurrentSong(song);
+            setPreviewEnded(false);
+            setShowUpgradePrompt(false);
+        } else {
+            setCurrentSong(song);
+        }
+
+        setIsPlaying(true); 
+    };
+
+    const handlePlayAll = () => {
+    
+      if (currentSong && songs.some(song => song.id === currentSong.id)) {
+          setIsPlaying(!isPlaying);
+          return;
+        }
+      if (songs.length === 0) return;
+  
+      setCurrentSong(songs)
+      setCurrentSong(songs[0]);
+      setQueue([]);
+      setIsPlaying(true);
+  };
+  const handleUpgrade = () => {
+    navigate("/payment");
+};
+  useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio || !currentSong) return;
+
+        const handleTimeUpdate = () => {
+    
+            if (currentSong.is_vip && !user?.vip && audio.currentTime >= 10 && isPlaying) {
+                audio.pause();
+                setPreviewEnded(true); 
+                setShowUpgradePrompt(true); 
+                setIsPlaying(false); 
+            }
+        };
+
+        audio.addEventListener('timeupdate', handleTimeUpdate);
+        
+        return () => {
+            audio.removeEventListener('timeupdate', handleTimeUpdate);
+        };
+    }, [currentSong, isPlaying, user?.vip, audioRef]);
+
+    
+    const handleMenuSub = (e, song) => {
+      e.preventDefault();
+    
+      const menuWidth = 150;
+      const menuHeight = 50;
+      const maxX = window.innerWidth - menuWidth;
+      const maxY = window.innerHeight - menuHeight;
+      const adjustedX = Math.min(e.clientX, maxX);
+      const adjustedY = Math.min(e.clientY, maxY);
+      setMenuSubSong(song);
+      setMenuSubPos({ x: adjustedX, y: adjustedY });
+      setShowMenuSub(true);
+      isContextMenuTriggered.current = true; 
+  };
+
+  
+  const handleAddToQueue = () => {
+    if (MenuSubSong && !queue.find(s => s.id === MenuSubSong.id)) {
+      setQueue([...queue, MenuSubSong]);
+    }
+    setShowMenuSub(false);
+  };
+  useEffect(() => {
+            const handleClickOutside = (e) => {
+                if (e.button === 0 && !isContextMenuTriggered.current) {
+                    setShowMenuSub(false);
+                }
+             
+                if (isContextMenuTriggered.current) {
+                    setTimeout(() => {
+                        isContextMenuTriggered.current = false;
+                    }, 100);
+                }
+            };
+            document.addEventListener('click', handleClickOutside);
+            return () => document.removeEventListener('click', handleClickOutside);
+        }, []);
+
 
   // Lấy danh sách bài hát của ca sĩ
   useEffect(() => {
@@ -46,6 +165,8 @@ function MainFollowSinger() {
       try {
         const response = await axios.get(`/api/songs/singers/${singerId}/songs/`);
         setSongs(response.data);
+        setCurrentSongList(response.data)
+        console.log("SONG",response.data)
       } catch (error) {
         console.error("Lỗi khi lấy danh sách bài hát:", error);
         toast.error("Không thể tải danh sách bài hát!");
@@ -249,6 +370,31 @@ function MainFollowSinger() {
 
   return (
     <div className="z-0 bg-neutral-900 rounded-lg flex flex-col h-[calc(100vh-136px)] overflow-hidden relative">
+      {showUpgradePrompt && (
+                <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 p-8 rounded-lg max-w-md w-full text-center">
+                        <h2 className="text-2xl font-bold mb-6 text-green-400">NÂNG CẤP PREMIUM</h2>
+                        <div className="mb-6">
+                            <p className="text-lg mb-2">Theo yêu cầu của đơn vị sở hữu bản quyền,</p>
+                            <p className="text-lg">bạn cần tài khoản PREMIUM để nghe trọn vẹn bài hát này</p>
+                        </div>
+                        <div className="flex flex-col space-y-4">
+                            <button
+                                className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold text-lg"
+                                onClick={handleUpgrade}
+                            >
+                                NÂNG CẤP NGAY
+                            </button>
+                            <button
+                                className="px-6 py-2 text-gray-300 hover:text-white"
+                                onClick={() => setShowUpgradePrompt(false)}
+                            >
+                                Để sau
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
       {/* Sticky Header */}
       {showStickyHeader && (
         <div className="absolute top-0 left-0 right-0 bg-[#072447] z-50 flex items-center px-2 py-0.5">
@@ -298,13 +444,13 @@ function MainFollowSinger() {
               <div className="bg-gradient-to-b from-[#072447] to-neutral-900 relative">
                 {/* Phần option */}
                 <div ref={optionRef} className="flex items-center px-2 py-2">
-                  <button className="">
-                    <img
-                      className="w-20 h-20 hover:brightness-75 transition-all duration-200"
-                      src="/icon/Play_GreemHover.png"
-                      alt="Play button"
-                    />
-                  </button>
+                <button onClick={()=>handlePlayAll()}  className="mr-3">
+                    <img 
+                    alt={isPlaying ? "Pause" : "Play"} 
+                    src={isPlaying ? "/icon/icon-pause.png" : "/icon/Play_GreemHover.png"} 
+                    height="50" 
+                    width="50" />
+                </button>
                   <button className="px-2">
                     <img
                       className="w-10 h-10 hover:brightness-75 transition-all duration-200"
@@ -325,16 +471,31 @@ function MainFollowSinger() {
 
             <div className="mt-4 px-8">
               {displayedSongs.map((song, index) => (
-                <div key={song.id} className="flex items-center justify-between py-2.5 hover:bg-neutral-800 group">
+                <div       onContextMenu={(e) => handleMenuSub(e, song)} key={song.id} className="flex items-center justify-between py-2.5 hover:bg-neutral-800 group">
+          
                   <div className="flex items-center">
-                    <div className="w-8 flex items-center justify-center ml-4 mr-2">
-                      <span className="text-gray-400 group-hover:hidden">{index + 1}</span>
-                      <img
-                        src="/icon/PlayWhite.png"
-                        alt="Play"
-                        className="hidden group-hover:block h-4 w-4 transform"
+                  <div className="w-8 flex items-center justify-center ml-4 mr-2">
+
+                  <span className="text-gray-400 group-hover:hidden">{index + 1}</span>
+
+                  <div className="hidden group-hover:flex items-center justify-center">
+                    {currentSong?.id === song.id && isPlaying ? (
+                      <FaPause 
+                        onClick={() => !(song.is_vip && !user?.vip && previewEnded) && playSong(song)} 
+                        className={`mr-2 text-gray-200 cursor-pointer hover:text-white ${
+                          song.is_vip && !user?.vip && previewEnded ? 'text-gray-400 cursor-not-allowed' : ''
+                        }`}
                       />
-                    </div>
+                    ) : (
+                      <FaPlay 
+                        onClick={() => !(song.is_vip && !user?.vip && previewEnded) && playSong(song)} 
+                        className={`mr-2 text-gray-200 cursor-pointer hover:text-white ${
+                          song.is_vip && !user?.vip && previewEnded ? 'text-gray-400 cursor-not-allowed' : ''
+                        }`}
+                      />
+                    )}
+                  </div>
+                </div>
                     <img src={
                       artist.image
                         ? song.image.startsWith("http")
@@ -343,7 +504,14 @@ function MainFollowSinger() {
                         : "https://storage.googleapis.com/a1aa/image/_CJYsizjY3hL_rf2L0alx_iaUDz0EXttAkg_pl1vBNE.jpg"
                     }
                       className="w-9 h-9 rounded-sm" />
-                    <p className="ml-4">{song.name}</p>
+                    <p className="ml-4">{song.name}
+                    {song.is_vip && (
+                                                    <span className="ml-2 text-xs bg-yellow-500 text-yellow-900 px-1 py-0.5 rounded">
+                                                        VIP
+                                                    </span>
+                                                )}
+                    </p>
+                     
                   </div>
                   <div className="flex items-center">
                     <p className="text-gray-400 mr-[145px]">{song.popularity.toLocaleString()}</p>
@@ -390,6 +558,11 @@ function MainFollowSinger() {
           />,
           document.body
         )}
+        <MenuSub
+                show={showMenuSub}
+                position={MenuSubPos}
+                onAddToQueue={handleAddToQueue}
+            />
     </div>
   );
 }

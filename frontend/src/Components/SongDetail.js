@@ -352,7 +352,11 @@ function SongDetail() {
             <div className="p-4 w-full md:w-2/3">
                 <div className="flex flex-col md:flex-row items-center p-4 md:p-6 sticky top-0 z-10 bg-gray-900/90 backdrop-blur-sm">
                     <img 
-                        src={song.image} 
+                        src={song?.image 
+      ? song.image.startsWith("http")
+        ? song.image 
+        : `/media/${song.image}`
+      : "https://i.pinimg.com/736x/3a/1f/d0/3a1fd088e3521120d68c7567bad13f6c.jpg"} 
                         alt={song.name} 
                         className="h-24 w-24 md:h-32 md:w-32 object-cover rounded-md"
                     />
@@ -467,28 +471,41 @@ function SongDetail() {
                 </div>
             </div>
 
-            <div className="w-full md:w-1/3 p-4 sticky top-0 h-screen overflow-hidden">
-                {user.vip && song.url_video ? (
-                    <div className="video-container w-full h-full">
-                    <video
-                            ref={videoRef}
-                            src={song.url_video}
-                            className="w-full h-full object-cover rounded-lg"
-                            muted 
-                            playsInline
-                            loop
-                        />
-                    </div>
-                ) : (
-                    <div className="image-container w-full h-full">
-                        <img
-                            src={song.image}
-                            alt={song.name}
-                            className="w-full h-full object-cover rounded-lg"
-                        />
-                    </div>
-                )}
-            </div>
+            <div className="w-full md:w-1/3 p-4 sticky top-0" style={{ height: "calc(100vh - 200px)" }}> {/* Điều chỉnh 200px theo nhu cầu */}
+  {user.vip && song.url_video ? (
+    <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
+  
+      <div className="relative w-full h-full">
+        <video
+          ref={videoRef}
+          src={song.url_video}
+          className="absolute inset-0 w-full h-full object-cover rounded-lg"
+          style={{ aspectRatio: "16/9" }}
+          muted
+          playsInline
+          loop
+          autoPlay
+        />
+      </div>
+    </div>
+  ) : (
+    <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
+      
+      <img
+        src={
+          song?.image
+            ? song.image.startsWith("http")
+              ? song.image
+              : `/media/${song.image}`
+            : "https://i.pinimg.com/736x/3a/1f/d0/3a1fd088e3521120d68c7567bad13f6c.jpg"
+        }
+        alt={song.name}
+        className="w-full h-full object-cover rounded-lg"
+        style={{ aspectRatio: "1/1" }} 
+      />
+    </div>
+  )}
+</div>
             
             <MenuSub
                 show={showMenuSub}

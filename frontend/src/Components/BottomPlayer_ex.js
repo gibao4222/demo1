@@ -27,8 +27,7 @@ function BottomPlayer_ex() {
     const { user } = useAuth();
     const song = currentSong || {};
     const songList = currentSongList || [];
-
-  
+    const [showQueuePopup, setShowQueuePopup] = useState(false);
     const updateSongHistory = async (songId) => {
         try {
           
@@ -214,16 +213,39 @@ function BottomPlayer_ex() {
         const seconds = Math.floor(time % 60);
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     };
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            const queueButton = document.querySelector('button[onClick*="setShowQueue"]');
+            const queuePopup = document.querySelector('.fixed.bottom-20.right-4.w-80');
+            
+            if (queuePopup && queueButton && 
+                !queuePopup.contains(event.target) && 
+                !queueButton.contains(event.target)) {
+                setShowQueuePopup(false);
+            }
+        };
+    
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-black p-2 flex items-center justify-between" style={{ minWidth: '100vw' }}>
+        
+        
+        <div className="fixed bottom-0 left-0 right-0 bg-black p-2 flex items-center justify-between overflow-hidden" style={{ minWidth: '100vw' }}>
      
             <div className="flex items-center" style={{ width: '25%', minWidth: '200px', maxWidth: '300px' }}>
                 <img 
                     alt="" 
                     className="mr-4 rounded" 
                     height="60" 
-                    src={song.image || ""} 
+                    src={song?.image 
+      ? song.image.startsWith("http")
+        ? song.image 
+        : `/media/${song.image}`
+      : "https://i.pinimg.com/736x/3a/1f/d0/3a1fd088e3521120d68c7567bad13f6c.jpg"}
                     width="60" 
                 />
                 <div style={{ overflow: 'hidden' }}>
@@ -275,8 +297,9 @@ function BottomPlayer_ex() {
 
             <div className="flex items-center" style={{ width: '25%', minWidth: '200px', justifyContent: 'flex-end' }}>
                 <div className="flex items-center">
-                    <button className="mr-1">
+                    <button id="queueBtn"  onClick={() => setShowQueuePopup(!showQueuePopup)} className="mr-1">
                         <img alt="Queue" src="/icon/Queue_XS.png" />
+                       
                     </button>
                     <button className="mr-1">
                         <img alt="Devices" src="/icon/Devices_XS.png" />
@@ -304,6 +327,62 @@ function BottomPlayer_ex() {
 
     
             <audio ref={audioRef} />
+            {showQueuePopup && (
+                <div className="fixed bottom-20 right-4 w-80 max-h-96 bg-gray-800 rounded-lg shadow-xl overflow-hidden z-50 border border-gray-700">
+        <div className="flex justify-between items-center p-4 border-b border-gray-700 bg-gray-900">
+            <h3 className="font-medium text-white">Hàng đợi ({queue.length})</h3>
+            <button 
+                onClick={() => setShowQueuePopup(false)}
+                className="text-gray-400 hover:text-white text-xl"
+            >
+                &times;
+            </button>
+        </div>
+        
+        <div className="overflow-y-auto max-h-80">
+            {queue.length > 0 ? (
+                queue.map((song, index) => (
+                    <div 
+                        key={`queue-${song.id}-${index}`}
+                        className={`p-3 border-b border-gray-700 hover:bg-gray-700 cursor-pointer flex items-center ${
+                            currentSong?.id === song.id ? 'bg-gray-700' : ''
+                        }`}
+                        onClick={() => {
+                            setCurrentSong(song);
+                            setQueue(prev => prev.filter((_, i) => i !== index));
+                            setIsPlaying(true);
+                        }}
+                    >
+                        <img 
+                            src={song.image || "https://i.pinimg.com/736x/3a/1f/d0/3a1fd088e3521120d68c7567bad13f6c.jpg"} 
+                            className="w-10 h-10 rounded mr-3 object-cover" 
+                            alt={song.name} 
+                        />
+                        <div className="flex-1 min-w-0">
+                            <p className="font-medium text-white truncate">{song.name}</p>
+                            <p className="text-sm text-gray-400 truncate">
+                                {song.artists.length > 0 ? song.artists.map(a => a.name).join(',') : 'Unknown Artist'}
+                            </p>
+                        </div>
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setQueue(prev => prev.filter((_, i) => i !== index));
+                            }}
+                            className="text-gray-400 hover:text-white ml-2"
+                        >
+                            ×
+                        </button>
+                    </div>
+                ))
+            ) : (
+                <div className="p-4 text-center text-gray-400">
+                    Hàng đợi trống
+                </div>
+            )}
+        </div>
+    </div>
+)}
         </div>
     );
 }

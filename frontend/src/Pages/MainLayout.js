@@ -70,9 +70,9 @@ const MainLayout = () => {
                 <div className="w-px bg-black cursor-col-resize resize-x min-w-[4px] px-1"></div>
 
                 {/* FriendActivity - Fixed on the right */}
-                <div className="fixed top-[64px] right-0 h-[calc(100vh-136px)] w-1/5 z-10">
+                 <div className="fixed top-[64px] right-0 h-[calc(100vh-136px)] w-1/5 z-10">
                     <FriendActivity />
-                </div>
+                </div> 
             </div>
 
             {/* Bottom Player - Fixed at the bottom */}

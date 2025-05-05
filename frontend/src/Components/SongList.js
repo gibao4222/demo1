@@ -181,11 +181,15 @@ function SongList() {
 
                         <div className="relative w-full h-[180px]" onContextMenu={(e) => handleMenuSub(e, song)}>
                             <img 
-                                src={song.image} 
+                                src={song?.image 
+      ? song.image.startsWith("http")
+        ? song.image 
+        : `/media/${song.image}`
+      : "https://i.pinimg.com/736x/3a/1f/d0/3a1fd088e3521120d68c7567bad13f6c.jpg"} 
                                 alt={song.name} 
                                 className="w-full h-full object-cover"
                             />
-                            
+                              
                             {hoveredSongId === song.id && (
                                 <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black bg-opacity-50 transition duration-300">
                                     <button
