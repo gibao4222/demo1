@@ -1,21 +1,89 @@
+import zmq
 import json
-from django.http import JsonResponse
+import logging
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.utils.decorators import method_decorator
 
-@csrf_exempt
-@require_POST
-def chatbot(request):
-    try:
-        data = json.loads(request.body)
-        user_id = data.get('user_id')
-        query = data.get('prompt', data.get('query'))  # Hỗ trợ cả prompt (từ Open WebUI) và query (từ React)
+# Thiết lập logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
-        # Logic xử lý query với mcp_chat_server và ollama_chat_client
-        # Giả sử bạn đã có hàm xử lý trả về answer
-        answer = "Trang web có 7 bài hát..."  # Thay bằng logic thực tế
+@method_decorator(csrf_exempt, name='dispatch')
+class ChatbotView(APIView):
+    def post(self, request):
+        try:
+            # Lấy dữ liệu từ request
+            data = request.data
+            user_id = data.get('user_id')
+            query = data.get('prompt') or data.get('query')
 
-        # Định dạng lại phản hồi để tương thích với Open WebUI
-        return JsonResponse({"response": answer})
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+            # Kiểm tra dữ liệu đầu vào
+            if not user_id or not query:
+                logger.error("Missing user_id or query in request")
+                return Response(
+                    {"error": "user_id và query là bắt buộc"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Thiết lập ZeroMQ
+            context = zmq.Context()
+            socket = context.socket(zmq.REQ)
+            socket.setsockopt(zmq.RCVTIMEO, 60000)
+            socket.connect("tcp://localhost:5557")
+
+            # Gửi yêu cầu đến mcp_chat_server
+            message = {
+                "action": "chat_query",
+                "user_id": user_id,
+                "query": query
+            }
+            logger.debug(f"Sending message to mcp_chat_server: {message}")
+            socket.send_json(message)
+
+            # Nhận phản hồi
+            try:
+                response = socket.recv_json()
+                logger.debug(f"Received response from mcp_chat_server: {response}")
+                if 'error' in response:
+                    return Response(
+                        {"error": response['error']},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+                # Định dạng phản hồi cho Open WebUI và frontend
+                # Xử lý các trường hợp phản hồi không có khóa 'answer'
+                answer = response.get('answer', response.get('chúc mừng', 'Không có câu trả lời'))
+                if isinstance(answer, list):
+                    answer = "Danh sách bài hát: " + ", ".join(answer)
+                return Response(
+                    {"response": answer},
+                    status=status.HTTP_200_OK
+                )
+            except zmq.error.Again:
+                logger.error("Timeout waiting for response from mcp_chat_server")
+                return Response(
+                    {"error": "Timeout khi chờ phản hồi từ server"},
+                    status=status.HTTP_504_GATEWAY_TIMEOUT
+                )
+            except Exception as e:
+                logger.error(f"Error receiving response from mcp_chat_server: {str(e)}")
+                return Response(
+                    {"error": f"Lỗi giao tiếp với server: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            finally:
+                socket.close()
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON in request body")
+            return Response(
+                {"error": "Dữ liệu JSON không hợp lệ"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Error in ChatbotView: {str(e)}")
+            return Response(
+                {"error": f"Lỗi hệ thống: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

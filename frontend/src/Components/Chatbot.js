@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import axios from '../axios'; // Import instance Axios đã cấu hình
 
-const Chatbot: React.FC = () => {
+const Chatbot = () => {
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setResponse('');
 
     try {
-      const res = await axios.post('/chatbot', {
+      const res = await axios.post('/api/chat/chatbot/', {
         user_id: 17, // Giả sử user_id là 17, bạn có thể lấy từ localStorage hoặc context
         query,
       });
@@ -35,6 +35,7 @@ const Chatbot: React.FC = () => {
           placeholder="Nhập câu hỏi..."
           style={{ flex: 1, padding: '8px' }}
           disabled={loading}
+          className='bg-neutral-900'
         />
         <button
           type="submit"
@@ -55,7 +56,7 @@ const Chatbot: React.FC = () => {
           style={{
             marginTop: '20px',
             padding: '10px',
-            backgroundColor: '#f8f9fa',
+            backgroundColor: '#8c96a1',
             borderRadius: '4px',
           }}
         >

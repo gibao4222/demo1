@@ -3,10 +3,9 @@ import sys
 import django
 import zmq
 import json
-from datetime import datetime, timedelta
 import logging
-import random
-
+import requests
+import time
 
 # Thiết lập logging
 logging.basicConfig(level=logging.DEBUG)
@@ -16,45 +15,34 @@ logger = logging.getLogger(__name__)
 BASE_DIR = '/var/www/demo1/backend'
 sys.path.append(BASE_DIR)
 
-# Kiểm tra sys.path
-logger.debug(f"sys.path: {sys.path}")
-
 # Thiết lập DJANGO_SETTINGS_MODULE
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
-logger.debug(f"DJANGO_SETTINGS_MODULE: {os.environ.get('DJANGO_SETTINGS_MODULE')}")
 
-# Kiểm tra file settings có tồn tại không
+# Kiểm tra và khởi tạo Django
 try:
     from myproject import settings
-    logger.debug("Tìm thấy module myproject.settings")
-except ImportError as e:
-    logger.error(f"Lỗi: Không tìm thấy module myproject.settings. Kiểm tra đường dẫn và tên file settings. Lỗi: {e}")
-    sys.exit(1)
-
-# Khởi tạo Django
-try:
     django.setup()
     logger.debug("Khởi tạo Django thành công")
+except ImportError as e:
+    logger.error(f"Lỗi: Không tìm thấy module myproject.settings: {e}")
+    sys.exit(1)
 except Exception as e:
     logger.error(f"Lỗi khi khởi tạo Django: {e}")
     sys.exit(1)
 
-# Import các module Django sau khi django.setup()
-from django.db.models import Q, Count, Sum
+# Import các module Django
+from django.db.models import Q
 from django.contrib.auth.models import User
 from song.models import Song
 from singer.models import Singer
 from genre.models import Genre
 from playlist.models import Playlist
-from history.models import History
-from spotify_user.models import SpotifyUser
 from album.models import Album
-from underthesea import word_tokenize, pos_tag
+from spotify_user.models import SpotifyUser
 
+# Thiết lập ZeroMQ
 context = zmq.Context()
 socket = context.socket(zmq.REP)
-
-# Bind socket trên cổng 5557
 try:
     socket.bind("tcp://*:5557")
     logger.debug("Bind socket thành công trên cổng 5557")
@@ -62,21 +50,19 @@ except zmq.error.ZMQError as e:
     logger.error(f"Lỗi khi bind socket: {e}")
     sys.exit(1)
 
-# Biến toàn cục để lưu ngữ cảnh cuộc trò chuyện
+# Biến toàn cục lưu ngữ cảnh
 conversation_context = {}
-
+OLLAMA_API_URL = "http://localhost:11434/api/generate"
 
 def get_spotify_user(user_id):
     """
-    Lấy SpotifyUser dựa trên user_id (có thể là SpotifyUser.id hoặc auth.User.id)
+    Lấy SpotifyUser dựa trên user_id
     """
     try:
-        logger.debug(f"Looking for SpotifyUser with id: {user_id}")
         spotify_user = SpotifyUser.objects.get(id=user_id)
         return spotify_user
     except SpotifyUser.DoesNotExist:
         try:
-            logger.debug(f"Looking for auth.User with id: {user_id}")
             auth_user = User.objects.get(id=user_id)
             spotify_user = SpotifyUser.objects.get(user=auth_user)
             return spotify_user
@@ -84,83 +70,80 @@ def get_spotify_user(user_id):
             logger.error(f"User with id {user_id} not found")
             return None
 
-
 def analyze_query(user_query, user_id):
-    user_query = user_query.lower()
-    tokens = word_tokenize(user_query)
-    pos_tags = pos_tag(user_query)
-    logger.debug(f"Tokens: {tokens}, POS tags: {pos_tags}")
+    """
+    Phân tích câu hỏi người dùng bằng VinaLLama với cơ chế thử lại
+    """
+    user_query = user_query.lower().strip()
+    if not user_query:
+        return None, None, None
 
-    entities = {
-        "song": ["bài hát", "song", "track"],
-        "singer": ["ca sĩ", "singer", "artist", "nghệ sĩ"],
-        "album": ["album"],
-        "genre": ["thể loại", "genre"],
-        "website": ["trang web", "website"],
-        "playlist": ["playlist", "danh sách phát"]
+    # Kiểm tra câu hỏi về tên trang web
+    if "tên" in user_query and any(kw in user_query for kw in ["trang web", "website", "ứng dụng", "app"]):
+        return "website", "name", {}
+
+    # Tạo prompt để phân tích ý định và thực thể
+    prompt = (
+        f"Bạn là một AI phân tích câu hỏi người dùng cho một trang web nghe nhạc trực tuyến. "
+        f"Nhiệm vụ của bạn là xác định ý định (intent) và các thực thể (entities) từ câu hỏi sau: '{user_query}'.\n"
+        f"Các ý định (action) có thể là: info, list, count, find_singer, find_album, find_genre.\n"
+        f"Các thực thể (entity_type) có thể là: song, singer, album, genre, playlist, website.\n"
+        f"Trả về kết quả dưới dạng JSON với các key: entity_type, action, params.\n"
+        f"Ví dụ:\n"
+        f'- Câu hỏi: "Thông tin bài hát Shape of You" -> {{"entity_type": "song", "action": "info", "params": {{"song_name": "Shape of You"}}}}\n'
+        f'- Câu hỏi: "Danh sách bài hát của Sơn Tùng" -> {{"entity_type": "song", "action": "list", "params": {{"artist_name": "Sơn Tùng"}}}}\n'
+        f'- Câu hỏi: "Có bao nhiêu bài hát trong hệ thống?" -> {{"entity_type": "website", "action": "stats", "params": {{}}}}\n'
+        f'Nếu không xác định được, trả về: {{"entity_type": null, "action": null, "params": {{}}}}'
+    )
+
+    # Gửi yêu cầu đến Ollama với cơ chế thử lại
+    api_payload = {
+        "model": "vina:latest",
+        "prompt": prompt,
+        "stream": False,
+        "format": "json"
     }
-    actions = {
-        "info": ["thông tin", "là gì", "là ai", "chi tiết", "về", "biết thêm"],
-        "list": ["danh sách", "liệt kê", "các"],
-        "count": ["bao nhiêu", "số lượng"],
-        "find_singer": ["của ca sĩ nào", "trình bày bởi", "do ai"],
-        "find_album": ["thuộc album nào"],
-        "find_genre": ["thuộc thể loại nào"]
-    }
+    headers = {'Content-Type': 'application/json'}
+    max_retries = 3
+    retry_delay = 5  # giây
 
-    # Ưu tiên website
-    if any(kw in user_query for kw in entities["website"]) and any(kw in user_query for kw in actions["count"] + actions["list"]):
-        return "website", "stats" if "bao nhiêu" in user_query else "list", {}
-
-    entity_type = None
-    entity_name = None
-    for entity, keywords in entities.items():
-        for keyword in keywords:
-            if keyword in user_query:
-                entity_type = entity
-                # Tìm vị trí từ khóa
-                words = user_query.split()
-                keyword_idx = next((i for i, w in enumerate(words) if keyword in w), -1)
-                if keyword_idx != -1:
-                    # Lấy phạm vi danh từ trước từ khóa
-                    pos_list = [tag[1] for tag in pos_tag(" ".join(words[:keyword_idx]))]
-                    name_start = max(0, len(pos_list) - 2) if "N" in pos_list else 0
-                    entity_name = " ".join(words[name_start:keyword_idx]).strip()
-                    # Loại bỏ từ dừng dựa trên POS
-                    stop_pos = ["E", "R", "CH", "V"]
-                    entity_name = " ".join(w for i, w in enumerate(entity_name.split()) if pos_tag(w)[0][1] not in stop_pos)
-                break
-        if entity_type:
-            break
-
-    action = next((act for act, kws in actions.items() if any(kw in user_query for kw in kws)), None)
-
-    params = {}
-    if entity_type == "song" and action == "find_singer":
-        if "của" in tokens:
-            song_end_idx = tokens.index("của")
-            params["song_name"] = " ".join(tokens[:song_end_idx]).replace("bài hát", "").strip()
-        else:
-            params["song_name"] = entity_name or " ".join(t for t, tag in pos_tag(" ".join(tokens)) if tag == "N").strip()
-    elif entity_type == "singer":
-        if "ca sĩ" in tokens:
-            singer_start_idx = tokens.index("ca sĩ") + 1
-            params["artist_name"] = " ".join(tokens[singer_start_idx:]).strip()
-        else:
-            params["artist_name"] = entity_name or " ".join(t for t, tag in pos_tag(" ".join(tokens)) if tag == "N").strip()
-    elif entity_type == "album" and action == "find_singer":
-        if "của" in tokens:
-            album_end_idx = tokens.index("của")
-            params["album_name"] = " ".join(tokens[:album_end_idx]).strip()
-        else:
-            params["album_name"] = entity_name or " ".join(t for t, tag in pos_tag(" ".join(tokens)) if tag == "N").strip()
-    elif entity_type == "genre":
-        params["genre_name"] = entity_name or " ".join(t for t, tag in pos_tag(" ".join(tokens)) if tag == "N").strip()
-
-    logger.debug(f"Analyzed query - entity_type: {entity_type}, action: {action}, params: {params}")
-    return entity_type, action, params if entity_type and action else (None, None, None)
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(OLLAMA_API_URL, headers=headers, json=api_payload, timeout=30)
+            if response.status_code == 200:
+                result = response.json().get('response', '')
+                try:
+                    parsed = json.loads(result)
+                    entity_type = parsed.get('entity_type')
+                    action = parsed.get('action')
+                    params = parsed.get('params', {})
+                    logger.debug(f"Analyzed query - entity_type: {entity_type}, action: {action}, params: {params}")
+                    return entity_type, action, params
+                except json.JSONDecodeError:
+                    logger.error(f"Failed to parse Ollama response: {result}")
+                    return None, None, None
+            elif response.status_code == 500 and "llm server loading model" in response.text:
+                logger.warning(f"Ollama model is still loading, retrying in {retry_delay} seconds (attempt {attempt + 1}/{max_retries})")
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay)
+                    continue
+                logger.error("Ollama model failed to load after max retries")
+                return None, None, None
+            else:
+                logger.error(f"Ollama API error: {response.text}")
+                return None, None, None
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error connecting to Ollama: {str(e)}")
+            if attempt < max_retries - 1:
+                logger.warning(f"Retrying in {retry_delay} seconds (attempt {attempt + 1}/{max_retries})")
+                time.sleep(retry_delay)
+                continue
+            return None, None, None
 
 def query_database(entity_type, action, params, context=None):
+    """
+    Truy vấn database dựa trên entity_type, action và params
+    """
     try:
         if entity_type == "song":
             if action == "info":
@@ -251,8 +234,9 @@ def query_database(entity_type, action, params, context=None):
                 return {"error": "Vui lòng cung cấp tên thể loại"}
 
         elif entity_type == "website":
-            if action == "stats":
-                # Bổ sung total_genres vào kết quả
+            if action == "name":
+                return {"website_name": "Spotify Clone"}
+            elif action == "stats":
                 total_genres = Genre.objects.count()
                 return {
                     "total_songs": Song.objects.count(),
@@ -261,10 +245,16 @@ def query_database(entity_type, action, params, context=None):
                     "total_genres": total_genres
                 }
             elif action == "list":
-                # Thêm danh sách genres vào phản hồi list
+                songs = Song.objects.select_related('id_genre').values('name', 'id_genre__name', 'release_date')[:5]
                 genres = Genre.objects.values('name')[:5]
                 return {
-                    "songs": list(Song.objects.values('name')[:5]),
+                    "songs": [
+                        {
+                            "name": s['name'],
+                            "genre": s['id_genre__name'] if s['id_genre__name'] else "Không xác định",
+                            "release_date": s['release_date'].strftime('%Y-%m-%d') if s['release_date'] else None
+                        } for s in songs
+                    ],
                     "singers": list(Singer.objects.values('name')[:5]),
                     "albums": list(Album.objects.values('name')[:5]),
                     "genres": list(genres)
@@ -275,7 +265,6 @@ def query_database(entity_type, action, params, context=None):
     except Exception as e:
         logger.error(f"Database query error: {str(e)}")
         return {"error": f"Lỗi truy vấn database: {str(e)}"}
-
 
 while True:
     try:
@@ -298,7 +287,7 @@ while True:
             if user_id not in conversation_context:
                 conversation_context[user_id] = {}
 
-            # Phân tích câu hỏi
+            # Phân tích câu hỏi bằng VinaLLama
             entity_type, action, params = analyze_query(user_query, user_id)
 
             # Nếu câu hỏi liên quan đến playlist, cần truyền thêm spotify_user
@@ -312,13 +301,14 @@ while True:
                 db_data = {"general_query": True}
 
             # Cập nhật ngữ cảnh
-            if entity_type == "song" and action == "list_by_singer" and "songs" in db_data:
+            if entity_type == "song" and action == "list" and "songs" in db_data:
                 conversation_context[user_id]["last_songs"] = [song["name"] for song in db_data["songs"]]
 
-            logger.debug("Connecting to gemini_chat_client on port 5558")
-            gemini_socket = context.socket(zmq.REQ)
-            gemini_socket.setsockopt(zmq.RCVTIMEO, 60000)
-            gemini_socket.connect("tcp://localhost:5558")
+            # Gửi dữ liệu đến ollama_chat_client
+            logger.debug("Connecting to ollama_chat_client on port 5558")
+            ollama_socket = context.socket(zmq.REQ)
+            ollama_socket.setsockopt(zmq.RCVTIMEO, 60000)
+            ollama_socket.connect("tcp://localhost:5558")
             mcp_data = {
                 'context': {
                     'user_id': user_id,
@@ -328,22 +318,22 @@ while True:
                 },
                 'request': 'chat_response'
             }
-            logger.debug(f"Sending data to gemini_chat_client: {mcp_data}")
-            gemini_socket.send_json(mcp_data)
+            logger.debug(f"Sending data to ollama_chat_client: {mcp_data}")
+            ollama_socket.send_json(mcp_data)
 
             try:
-                logger.debug("Waiting for response from gemini_chat_client")
-                response = gemini_socket.recv_json()
-                logger.debug(f"Received response from gemini_chat_client: {response}")
+                logger.debug("Waiting for response from ollama_chat_client")
+                response = ollama_socket.recv_json()
+                logger.debug(f"Received response from ollama_chat_client: {response}")
                 socket.send_json(response)
             except zmq.error.Again:
-                logger.error("Timeout waiting for response from gemini_chat_client")
-                socket.send_json({'error': 'Timeout waiting for response from gemini_chat_client'})
+                logger.error("Timeout waiting for response from ollama_chat_client")
+                socket.send_json({'error': 'Timeout waiting for response from ollama_chat_client'})
             except Exception as e:
-                logger.error(f"Error receiving response from gemini_chat_client: {str(e)}")
-                socket.send_json({'error': f'Error communicating with gemini_chat_client: {str(e)}'})
+                logger.error(f"Error receiving response from ollama_chat_client: {str(e)}")
+                socket.send_json({'error': f'Error communicating with ollama_chat_client: {str(e)}'})
             finally:
-                gemini_socket.close()
+                ollama_socket.close()
 
         else:
             logger.error(f"Invalid action: {action}")
