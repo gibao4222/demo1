@@ -1,0 +1,456 @@
+1
+00:00:00,389 --> 00:00:05,389
+(birds chirping)
+(church bells ringing)
+
+2
+00:00:09,738 --> 00:00:10,571
+(engine revving)
+
+3
+00:00:10,571 --> 00:00:12,390
+- It's December 6, 2014.
+
+4
+00:00:12,390 --> 00:00:15,570
+We're gonna drive LA and hit
+every wedding we possibly can.
+
+5
+00:00:15,570 --> 00:00:17,437
+It's gonna be awesome and we're late.
+
+6
+00:00:17,437 --> 00:00:18,525
+(engine revving)
+(tyres squealing)
+
+7
+00:00:18,525 --> 00:00:19,685
+Let me get your door for you.
+
+8
+00:00:19,685 --> 00:00:21,764
+- Thanks, man.
+
+9
+00:00:21,764 --> 00:00:23,013
+(engine revving)
+
+10
+00:00:23,013 --> 00:00:24,930
+- Woohoo!
+- Let's do it!
+
+11
+00:00:26,736 --> 00:00:29,319
+(upbeat music)
+
+12
+00:00:32,013 --> 00:00:35,846
+(people indistinctly talking)
+
+13
+00:00:42,970 --> 00:00:44,950
+♪ I'm hurting, baby ♪
+
+14
+00:00:44,950 --> 00:00:46,939
+♪ I'm broken down ♪
+
+15
+00:00:46,939 --> 00:00:48,903
+♪ I need your loving, loving ♪
+
+16
+00:00:48,903 --> 00:00:50,981
+♪ I need it now ♪
+
+17
+00:00:50,981 --> 00:00:52,903
+♪ When I'm without you ♪
+
+18
+00:00:52,903 --> 00:00:54,941
+♪ I'm something weak ♪
+
+19
+00:00:54,941 --> 00:00:56,889
+♪ You got me begging, begging ♪
+
+20
+00:00:56,889 --> 00:00:58,730
+♪ I'm on my knees ♪
+
+21
+00:00:58,730 --> 00:01:00,919
+♪ I don't wanna be needing your love ♪
+
+22
+00:01:00,919 --> 00:01:02,902
+♪ I just wanna be deep in your love ♪
+
+23
+00:01:02,902 --> 00:01:06,922
+♪ And it's killing me when
+you're away, ooh, baby ♪
+
+24
+00:01:06,922 --> 00:01:08,892
+♪ 'Cause I really don't
+care where you are ♪
+
+25
+00:01:08,892 --> 00:01:10,869
+♪ I just wanna be there where you are ♪
+
+26
+00:01:10,869 --> 00:01:13,943
+♪ And I gotta get one little taste ♪
+
+27
+00:01:13,943 --> 00:01:15,981
+♪ Your sugar ♪
+
+28
+00:01:15,981 --> 00:01:17,942
+♪ Yes, please ♪
+
+29
+00:01:17,942 --> 00:01:22,011
+♪ Won't you come and put it down on me ♪
+
+30
+00:01:22,011 --> 00:01:25,863
+♪ I'm right here 'cause I need ♪
+
+31
+00:01:25,863 --> 00:01:29,962
+♪ Little love, a little sympathy ♪
+
+32
+00:01:29,962 --> 00:01:32,362
+♪ Yeah, you show me good loving ♪
+
+33
+00:01:32,362 --> 00:01:34,440
+♪ Make it alright ♪
+
+34
+00:01:34,440 --> 00:01:37,979
+♪ Need a little sweetness in my life ♪
+
+35
+00:01:37,979 --> 00:01:40,009
+♪ Your sugar ♪
+
+36
+00:01:40,009 --> 00:01:41,978
+♪ Yes, please ♪
+
+37
+00:01:41,978 --> 00:01:46,860
+♪ Won't you come and put it down on me ♪
+
+38
+00:01:46,860 --> 00:01:48,921
+♪ My broken pieces ♪
+
+39
+00:01:48,921 --> 00:01:50,938
+♪ You pick them up ♪
+
+40
+00:01:50,938 --> 00:01:52,809
+♪ Don't leave me hanging, hanging ♪
+
+41
+00:01:52,809 --> 00:01:54,842
+♪ Come give me some ♪
+
+42
+00:01:54,842 --> 00:01:56,441
+♪ When I'm without ya ♪
+
+43
+00:01:56,441 --> 00:01:58,949
+♪ I'm so insecure ♪
+
+44
+00:01:58,949 --> 00:02:00,841
+♪ You are the one thing, one thing ♪
+
+45
+00:02:00,841 --> 00:02:02,942
+♪ I'm living for ♪
+
+46
+00:02:02,942 --> 00:02:04,940
+♪ I don't wanna be needing your love ♪
+
+47
+00:02:04,940 --> 00:02:06,841
+♪ I just wanna be deep in your love ♪
+
+48
+00:02:06,841 --> 00:02:10,901
+♪ And it's killing me when
+you're away, ooh, baby ♪
+
+49
+00:02:10,901 --> 00:02:12,892
+♪ 'Cause I really don't
+care where you are ♪
+
+50
+00:02:12,892 --> 00:02:14,892
+♪ I just wanna be there where you are ♪
+
+51
+00:02:14,892 --> 00:02:18,021
+♪ And I gotta get one little taste ♪
+
+52
+00:02:18,021 --> 00:02:20,201
+♪ Your sugar ♪
+
+53
+00:02:20,201 --> 00:02:21,960
+♪ Yes, please ♪
+
+54
+00:02:21,960 --> 00:02:25,980
+♪ Won't you come and put it down on me ♪
+
+55
+00:02:25,980 --> 00:02:27,980
+♪ I'm right here ♪
+
+56
+00:02:27,980 --> 00:02:29,991
+♪ 'Cause I need ♪
+
+57
+00:02:29,991 --> 00:02:33,941
+♪ Little love, a little sympathy ♪
+
+58
+00:02:33,941 --> 00:02:36,362
+♪ Yeah, you show me good loving ♪
+
+59
+00:02:36,362 --> 00:02:38,423
+♪ Make it alright ♪
+
+60
+00:02:38,423 --> 00:02:41,961
+♪ Need a little sweetness in my life ♪
+
+61
+00:02:41,961 --> 00:02:43,099
+♪ Your sugar ♪
+
+62
+00:02:43,099 --> 00:02:43,979
+♪ Sugar ♪
+
+63
+00:02:43,979 --> 00:02:44,858
+♪ Yes, please ♪
+
+64
+00:02:44,858 --> 00:02:46,009
+♪ Yes, please ♪
+
+65
+00:02:46,009 --> 00:02:50,869
+♪ Won't you come and put
+it down on me, yeah ♪
+
+66
+00:02:50,869 --> 00:02:52,822
+♪ I want that red velvet ♪
+
+67
+00:02:52,822 --> 00:02:54,839
+♪ I want that sugar sweet ♪
+
+68
+00:02:54,839 --> 00:02:58,871
+♪ Don't let nobody touch it
+unless that somebody's me ♪
+
+69
+00:02:58,871 --> 00:03:00,871
+♪ I gotta be your man ♪
+
+70
+00:03:00,871 --> 00:03:02,870
+♪ There ain't no other way ♪
+
+71
+00:03:02,870 --> 00:03:07,143
+♪ 'Cause girl you're hotter
+than a southern California day ♪
+
+72
+00:03:07,143 --> 00:03:08,942
+♪ I don't wanna play no games ♪
+
+73
+00:03:08,942 --> 00:03:10,890
+♪ You don't gotta be afraid ♪
+
+74
+00:03:10,890 --> 00:03:12,362
+♪ Don't give me all that shy shit ♪
+
+75
+00:03:12,362 --> 00:03:13,671
+♪ No make-up on ♪
+
+76
+00:03:13,671 --> 00:03:15,781
+♪ That's my sugar ♪
+
+77
+00:03:15,781 --> 00:03:17,899
+♪ Yes, please ♪
+
+78
+00:03:17,899 --> 00:03:21,928
+♪ Won't you come and put it down on me ♪
+
+79
+00:03:21,928 --> 00:03:23,977
+♪ I'm right here, right here ♪
+
+80
+00:03:23,977 --> 00:03:26,028
+♪ 'Cause I need, 'cause I need ♪
+
+81
+00:03:26,028 --> 00:03:29,356
+♪ Little love, a little sympathy ♪
+
+82
+00:03:29,356 --> 00:03:32,249
+♪ So, baby, yeah you show me good loving ♪
+
+83
+00:03:32,249 --> 00:03:34,327
+♪ Make it alright ♪
+
+84
+00:03:34,327 --> 00:03:37,926
+♪ Need a little sweetness in my life ♪
+
+85
+00:03:37,926 --> 00:03:39,079
+♪ Your sugar ♪
+
+86
+00:03:39,079 --> 00:03:40,007
+♪ Sugar ♪
+
+87
+00:03:40,007 --> 00:03:41,038
+♪ Yes, please ♪
+
+88
+00:03:41,038 --> 00:03:41,948
+♪ Yes, please ♪
+
+89
+00:03:41,948 --> 00:03:45,479
+♪ Won't you come and put it down on me ♪
+
+90
+00:03:45,479 --> 00:03:46,312
+♪ Down on me ♪
+
+91
+00:03:46,312 --> 00:03:48,189
+♪ Sugar ♪
+
+92
+00:03:48,189 --> 00:03:49,960
+♪ Yes, please ♪
+
+93
+00:03:49,960 --> 00:03:52,921
+♪ Won't you come and put it down on me ♪
+
+94
+00:03:52,921 --> 00:03:54,201
+♪ Down on me ♪
+
+95
+00:03:54,201 --> 00:03:57,998
+♪ I'm right here 'cause I need ♪
+
+96
+00:03:57,998 --> 00:04:00,839
+♪ Little love, a little sympathy ♪
+
+97
+00:04:00,839 --> 00:04:04,316
+♪ Yeah, you show me good loving ♪
+
+98
+00:04:04,316 --> 00:04:06,347
+♪ Make it alright ♪
+
+99
+00:04:06,347 --> 00:04:09,949
+♪ Need a little sweetness in my life ♪
+
+100
+00:04:09,949 --> 00:04:11,047
+♪ Your sugar ♪
+
+101
+00:04:11,047 --> 00:04:11,929
+♪ Sugar ♪
+
+102
+00:04:11,929 --> 00:04:12,958
+♪ Yes, please ♪
+
+103
+00:04:12,958 --> 00:04:13,897
+♪ Yes, please ♪
+
+104
+00:04:13,897 --> 00:04:17,000
+♪ Won't you come and put it down on me ♪
+
+105
+00:04:17,000 --> 00:04:20,120
+♪ Down on me, down on me ♪
+
+106
+00:04:20,120 --> 00:04:21,740
+♪ Woo ♪
+
+107
+00:04:21,740 --> 00:04:24,323
+(upbeat music)
+
+108
+00:04:26,119 --> 00:04:28,952
+(people cheering)
+
+109
+00:04:39,462 --> 00:04:40,660
+- Good night, guys, thank you so much.
+
+110
+00:04:40,660 --> 00:04:43,978
+This was the coolest thing
+ever, ever, ever, ever.
+
+111
+00:04:43,978 --> 00:04:46,811
+(people cheering)
+
