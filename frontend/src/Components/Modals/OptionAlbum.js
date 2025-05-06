@@ -18,27 +18,36 @@ const OptionAlbum = ({ onClose, position, tracks, albumData }) => {
 
     useEffect(() => {
         const fetchPlaylists = async () => {
-            if (!token) {
-                setError("Thiếu token xác thực");
+            if (!user || !user.id_spotify_user) {
+                console.error('Thiếu thông tin user hoặc id_spotify_user:', user);
+                setPlaylists([]);
                 return;
             }
-
+    
             setLoading(true);
             try {
-                const data = await getPlaylists(token);
-                const validPlaylists = Array.isArray(data)
-                    ? data.filter(p => p && p.name && typeof p.name === 'string')
-                    : [];
-                setPlaylists(validPlaylists);
-            } catch (err) {
-                setError("Không thể tải danh sách phát");
+                const data = await getPlaylists(token, user.id_spotify_user);
+                if (!Array.isArray(data) || data.length === 0) {
+                    setPlaylists([]);
+                    console.error('Không có danh sách phát nào cho user hiện tại.');
+                    return;
+                }
+                // Lọc playlist dựa trên id_spotify_user
+                const filteredPlaylists = data.filter(
+                    playlist => playlist.id_user === user.id_spotify_user
+                );
+                setPlaylists([...filteredPlaylists]);
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách phát:', error);
+                alert('Không thể tải danh sách phát. Vui lòng thử lại sau.');
+                setPlaylists([]);
             } finally {
                 setLoading(false);
             }
         };
-
-        fetchPlaylists();
-    }, [token]);
+    
+        fetchPlaylists(); 
+    }, [token, user]);
 
     const handleCreatePlaylist = async () => {
         try {

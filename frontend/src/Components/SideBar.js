@@ -21,19 +21,26 @@ function SideBar({ onToggleExpand, isExpanded }) {
 
   const fetchPlaylists = useCallback(async () => {
     try {
-      const data = await getPlaylists(token);
-      if (!Array.isArray(data) || data.length === 0) {
+      if (!user || !user.id_spotify_user) {
+        console.error('Thiếu thông tin user hoặc id_spotify_user:', user);
         setPlaylists([]);
-        console.error('Không có danh sách phát nào.');
         return;
       }
-      setPlaylists([...data]);
+      const data = await getPlaylists(token, user.id_spotify_user);
+      if (!Array.isArray(data) || data.length === 0) {
+        setPlaylists([]);
+        console.error('Không có danh sách phát nào cho user hiện tại.');
+        return;
+      }
+      // Lọc playlist dựa trên id_spotify_user
+      const filteredPlaylists = data.filter(playlist => playlist.id_user === user.id_spotify_user);
+      setPlaylists([...filteredPlaylists]);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách phát:', error);
       alert('Không thể tải danh sách phát. Vui lòng thử lại sau.');
       setPlaylists([]);
     }
-  }, [token]);
+  }, [token, user]);
 
   const fetchLibraryAlbums = useCallback(async () => {
     try {
@@ -97,7 +104,7 @@ function SideBar({ onToggleExpand, isExpanded }) {
         description: 'Thêm phần mô tả không bắt buộc',
         image: '/img/null.png',
         create_date: currentDate,
-        id_user: user.user_id,
+        id_user: user.id_spotify_user,
         is_active: true,
       };
 
@@ -136,7 +143,9 @@ function SideBar({ onToggleExpand, isExpanded }) {
       });
 
       if (!response.ok) {
-        throw new Error('Lỗi khi tạo playlist AI');
+        const errorData = await response.json();
+        console.error('Phản hồi lỗi từ server:', errorData);
+        throw new Error(`Lỗi khi tạo playlist AI: ${response.status} - ${errorData.error || 'Không có thông tin lỗi'}`);
       }
 
       const newPlaylist = await response.json();

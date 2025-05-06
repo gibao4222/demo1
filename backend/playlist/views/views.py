@@ -17,6 +17,7 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 
 
+
 APPLE_MUSIC_STYLE_IMAGES = [
     "https://i.pinimg.com/736x/93/a6/19/93a61965a5b5de881ce78b62f1ea8364.jpg",
     "https://i.pinimg.com/736x/26/4c/3b/264c3b4fbc20fdfb7d313fd42c1f7e77.jpg",

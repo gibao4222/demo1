@@ -133,47 +133,95 @@ class ChatPermissionView(APIView):
         permission = ChatPermission.objects.create(requester=requester, target=target)
         return Response({"thông báo": "Yêu cầu trò chuyện đã được gửi"}, status=status.HTTP_201_CREATED)
 
+    def post(self, request):
+        try:
+            requester = SpotifyUser.objects.get(user=request.user)
+        except SpotifyUser.DoesNotExist:
+            return Response({"lỗi": "Không tìm thấy SpotifyUser cho người dùng này"}, status=status.HTTP_404_NOT_FOUND)
+
+        target_id = request.data.get('target_id')
+        if not target_id:
+            return Response({"lỗi": "target_id là bắt buộc"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            target = SpotifyUser.objects.get(id=target_id)
+        except SpotifyUser.DoesNotExist:
+            return Response({"lỗi": "Người dùng không tồn tại"}, status=status.HTTP_404_NOT_FOUND)
+
+        if requester == target:
+            return Response({"lỗi": "Không thể gửi yêu cầu trò chuyện cho chính mình"}, status=status.HTTP_400_BAD_REQUEST)
+    
+        if ChatPermission.objects.filter(requester=requester, target=target).exists():
+            return Response({"lỗi": "Yêu cầu trò chuyện đã tồn tại"}, status=status.HTTP_400_BAD_REQUEST)
+
+        permission = ChatPermission.objects.create(requester=requester, target=target)
+        return Response({"thông báo": "Yêu cầu trò chuyện đã được gửi"}, status=status.HTTP_201_CREATED)
+
     def put(self, request):
+        logger.debug("Received PUT request with data: %s", request.data)
         try:
             target = SpotifyUser.objects.get(user=request.user)
+            logger.debug(f"Found target SpotifyUser: {target.id}")
         except SpotifyUser.DoesNotExist:
+            logger.error("SpotifyUser not found for user: %s", request.user)
             return Response({"lỗi": "Không tìm thấy SpotifyUser cho người dùng này"}, status=status.HTTP_404_NOT_FOUND)
 
         requester_id = request.data.get('requester_id')
         action = request.data.get('action')
+        logger.debug(f"requester_id: {requester_id}, action: {action}")
 
         if not requester_id or not action:
+            logger.error("Missing requester_id or action")
             return Response({"lỗi": "requester_id và action là bắt buộc"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             permission = ChatPermission.objects.get(requester__id=requester_id, target=target, is_accepted=False)
+            logger.debug(f"Found ChatPermission: {permission.id}")
         except ChatPermission.DoesNotExist:
+            logger.error(f"ChatPermission not found for requester_id: {requester_id}, target: {target.id}")
             return Response({"lỗi": "Không tìm thấy yêu cầu trò chuyện"}, status=status.HTTP_404_NOT_FOUND)
 
         if action == 'accept':
             permission.is_accepted = True
             permission.save()
-            # Chuyển tin nhắn pending thành trực tiếp
-            updated_messages = convert_pending_messages(permission.requester, target)
-            # Cập nhật Redis
-            room_key = f"chat:{min(permission.requester.user.id, target.user.id)}_{max(permission.requester.user.id, target.user.id)}"
-            redis_client.delete(room_key)
-            messages = Message.objects.filter(
-                Q(sender=permission.requester, receiver=target) | Q(sender=target, receiver=permission.requester)
-            ).order_by('created_at')
-            for message in messages:
-                store_message_in_redis(message)
-            redis_client.expire(room_key, 24 * 60 * 60)
-            channel_layer = get_channel_layer()
-            room_name = f"{min(permission.requester.user.id, target.user.id)}_{max(permission.requester.user.id, target.user.id)}"
-            async_to_sync(channel_layer.group_send)(
-                f'chat_{room_name}',
-                {
-                    'type': 'permission_update',
-                    'permission_id': permission.id,
-                    'is_accepted': True
-                }
-            )
+            logger.debug("Set is_accepted to True")
+
+            updated_count = convert_pending_messages(permission.requester, target)
+            if updated_count > 0:
+                logger.debug(f"Cập nhật {updated_count} tin nhắn pending thành không pending.")
+            else:
+                logger.warning("Không tìm thấy tin nhắn pending để cập nhật.")
+
+            # Đồng bộ dữ liệu vào Redis và gửi thông báo qua Channels
+            try:
+                room_key = f"chat:{min(permission.requester.user.id, target.user.id)}_{max(permission.requester.user.id, target.user.id)}"
+                redis_client.delete(room_key)
+                logger.debug(f"Deleted Redis key: {room_key}")
+
+                messages = Message.objects.filter(
+                    Q(sender=permission.requester, receiver=target) | Q(sender=target, receiver=permission.requester)
+                ).order_by('created_at')
+                for message in messages:
+                    store_message_in_redis(message)
+                    logger.debug(f"Stored message {message.id} in Redis")
+                redis_client.expire(room_key, 24 * 60 * 60)
+                logger.debug(f"Set Redis key {room_key} to expire in 24h")
+
+                channel_layer = get_channel_layer()
+                room_name = f"{min(permission.requester.user.id, target.user.id)}_{max(permission.requester.user.id, target.user.id)}"
+                async_to_sync(channel_layer.group_send)(
+                    f'chat_{room_name}',
+                    {
+                        'type': 'permission_update',
+                        'permission_id': permission.id,
+                        'is_accepted': True
+                    }
+                )
+                logger.debug(f"Sent permission update to channel: {room_name}")
+            except Exception as e:
+                logger.error(f"Error in Redis/Channels processing: {e}")
+                pass
+
             return Response({"thông báo": "Đã chấp nhận yêu cầu trò chuyện"}, status=status.HTTP_200_OK)
         elif action == 'reject':
             permission.delete()
@@ -399,8 +447,8 @@ class MessageListView(APIView):
             return Response({"lỗi": "target_id là bắt buộc"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            target_user = User.objects.get(id=target_id)  # Lấy User từ auth_user
-            target = SpotifyUser.objects.get(user=target_user)  # Lấy SpotifyUser tương ứng
+            target_user = User.objects.get(id=target_id)
+            target = SpotifyUser.objects.get(user=target_user)
         except User.DoesNotExist:
             return Response({"lỗi": "Người dùng không tồn tại"}, status=status.HTTP_404_NOT_FOUND)
         except SpotifyUser.DoesNotExist:
@@ -428,7 +476,7 @@ class MessageListView(APIView):
                 redis_client.expire(room_key, 24 * 60 * 60)
         else:
             messages_query = Message.objects.filter(
-                (Q(sender=user, receiver=target) | Q(sender=target, receiver=user))
+                Q(sender=user, receiver=target) | Q(sender=target, receiver=user)
             ).order_by('created_at')
             serializer = MessageSerializers(messages_query, many=True)
             messages = serializer.data
