@@ -1,8 +1,6 @@
 import { LuRepeat, LuRepeat1 } from "react-icons/lu";
 import { IoShuffle } from "react-icons/io5";
 import React, { useState, useRef, useEffect } from "react";
-import { LuRepeat, LuRepeat1 } from "react-icons/lu";
-import { IoShuffle } from "react-icons/io5";
 import { usePlayer } from "../context/PlayerContext";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";

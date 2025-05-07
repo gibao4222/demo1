@@ -71,7 +71,7 @@ const MainLayout = () => {
 
                 {/* FriendActivity - Fixed on the right */}
                 <div className="fixed top-[64px] right-0 h-[calc(100vh-136px)] w-1/5 z-10">
-                    {/* <FriendActivity /> */}
+                    <FriendActivity />
                 </div>
             </div>
 
