@@ -12,6 +12,7 @@ class SongSerializer(serializers.ModelSerializer):
     class Meta:
         model = Song
         fields ='__all__'
+        read_only_fields = ['fingerprint']
         
     
     def get_album(self, obj):

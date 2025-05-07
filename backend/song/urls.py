@@ -17,7 +17,7 @@ urlpatterns = [
     path("stream/<int:song_id>/", StreamSongView.as_view(), name="stream-song"),
     path("related-songs/<int:pk>", SongRelatedSinger.as_view(),name='related-songs'),
     path('singers/<int:singer_id>/songs/', SingerSongListView.as_view(), name='singer-songs'),
-
+    path('search-by-audio/', SongViewSet.as_view({'post': 'search_song_by_audio'}), name='search_by_audio'),
 ]
 
 

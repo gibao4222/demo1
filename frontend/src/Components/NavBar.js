@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import NavItem from './Item/NavItem';
 import { useNavigate, useLocation } from 'react-router-dom';
-
+import axios from "../axios";
+import { FaMicrophoneLines } from "react-icons/fa6";
+import { FaMicrophoneLinesSlash } from "react-icons/fa6";
+import AudioSearch from './AudioSearch';
 
 const NavBar = ({ user, onLogout, onSearch }) => {
     const navigate = useNavigate();
@@ -10,10 +13,11 @@ const NavBar = ({ user, onLogout, onSearch }) => {
     const location = useLocation();
     const searchInputRef = useRef(null);
 
+
     const handleItemClick = (item) => {
         setActiveItem((prev) => (prev === item ? null : item));
         if (item === 'Home') {
-            navigate('/home'); 
+            navigate('/home');
         }
     };
 
@@ -22,7 +26,7 @@ const NavBar = ({ user, onLogout, onSearch }) => {
             searchInputRef.current.focus();
         }
     }, [location.search]);
-    
+
 
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
@@ -34,20 +38,20 @@ const NavBar = ({ user, onLogout, onSearch }) => {
         }
     };
 
-    
+
     const handleBack = () => {
-        navigate(-1); 
+        navigate(-1);
     };
 
     const handleForward = () => {
-        navigate(1); 
+        navigate(1);
     };
 
     const handleSpotifyClick = () => {
-        navigate('/home'); 
+        navigate('/home');
     };
 
-    
+
     const handleProfileClick = () => {
         if (user && user.id_spotify_user) {
             navigate(`/user/${user.id_spotify_user}`);
@@ -56,8 +60,81 @@ const NavBar = ({ user, onLogout, onSearch }) => {
     };
 
     const handlePayment = () => {
-        navigate('/payment'); 
+        navigate('/payment');
     }
+
+    // const startRecording = async () => {
+    //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    //     mediaRecorderRef.current = new MediaRecorder(stream);
+    //     audioChunksRef.current = [];
+
+    //     mediaRecorderRef.current.ondataavailable = (event) => {
+    //         if (event.data.size > 0) {
+    //             audioChunksRef.current.push(event.data);
+    //         }
+    //     };
+
+    //     mediaRecorderRef.current.onstop = async () => {
+    //         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+    //         const audioFile = new File([audioBlob], "recorded_audio.wav", { type: "audio/wav" });
+
+    //         // Debug: Kiểm tra file trước khi gửi
+    //         console.log("Audio file details:", {
+    //             name: audioFile.name,
+    //             size: audioFile.size,
+    //             type: audioFile.type
+    //         });
+
+    //         const formData = new FormData();
+    //         formData.append('audio', audioFile);
+
+    //         // Debug: Kiểm tra FormData
+    //         for (let [key, value] of formData.entries()) {
+    //             console.log(key, value);
+    //         }
+
+    //         try {
+    //             const res = await axios.post('/api/songs/search-by-audio/', formData, {
+    //                 headers: {
+    //                     'Content-Type': 'multipart/form-data',
+
+    //                 }
+    //             });
+    //             console.log(res)
+    //             if (res.data.results && res.data.results.length > 0) {
+    //                 const bestMatch = res.data.results[0];
+    //                 alert(`Kết quả: ${bestMatch.name} (${Math.round(bestMatch.similarity * 100)}%)`);
+    //             } else {
+    //                 alert('Không tìm thấy bài hát phù hợp');
+    //             }
+    //         } catch (err) {
+    //             console.error("Error details:", {
+    //                 message: err.message,
+    //                 response: err.response?.data,
+    //                 status: err.response?.status
+    //             });
+    //             alert('Không tìm thấy bài hát hoặc có lỗi xảy ra! Chi tiết: ' +
+    //                 (err.response?.data?.message || err.message));
+    //         }
+    //     };
+
+    //     mediaRecorderRef.current.start();
+    //     setRecording(true);
+    // };
+
+
+    // const stopRecording = async () => {
+    //     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+    //         mediaRecorderRef.current.stop();
+
+    //         // Dừng tất cả các track của stream để giải phóng microphone
+    //         mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+
+    //         setRecording(false);
+    //     }
+    // };
+
+
     return (
         <div className="sticky top-0 z-50 w-full bg-black px-4 py-2.5 flex items-center relative">
             <div className="flex-shrink-0 flex items-center space-x-0.5">
@@ -107,16 +184,10 @@ const NavBar = ({ user, onLogout, onSearch }) => {
                         alt="Tìm kiếm"
                         className="w-5 h-5 text-neutral-400 absolute left-3 top-1/2 transform -translate-y-1/2 opacity-50"
                     />
-                    <div className="absolute right-16 top-1/2 transform -translate-y-1/2 h-5 w-px bg-white opacity-50" />
-                    {/* Nút Duyệt tìm */}
-                    <button className="absolute right-2 top-1/2 transform -translate-y-1/2  p-1">
-                        <img
-                            src="/icon/browser.webp"
-                            alt="Duyệt tìm"
-                            className="w-12 h-10 brightness-0 invert opacity-50"
-                        />
-                    </button>
+
+
                 </div>
+                <AudioSearch onSearch={onSearch}></AudioSearch>
             </div>
 
             <div className="ml-auto flex items-center space-x-6">
