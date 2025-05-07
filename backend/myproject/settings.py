@@ -94,7 +94,6 @@ INSTALLED_APPS = [
     'payment',
     'channels',
     'django_crontab',
-    
 ]
 
 MIDDLEWARE = [
