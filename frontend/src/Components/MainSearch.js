@@ -47,7 +47,7 @@ function MainSearch() {
         }
 
         // Tìm kiếm bài hát
-        const songResponse = await axios.get(`/api/songs/songs/?search=${searchQuery}`);
+        const songResponse = await axios.get(`/api/users/songs/songs/?search=${searchQuery}`);
         console.log("Dữ liệu bài hát từ API:", songResponse.data);
         if (Array.isArray(songResponse.data)) {
           setSongs(songResponse.data);

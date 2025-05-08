@@ -19,7 +19,12 @@ import SongDetail from './Components/SongDetail';
 import Followers from './Pages/Followers';  
 import { useAuth } from './context/AuthContext';
 import { PlayerProvider } from './context/PlayerContext';
+
 import Chatbot from './Components/Chatbot';
+import FullScreenPlayer from './Components/FullScreenPlayer';
+
+// import Profile from './Pages/Profile';
+import MainProfile from './Components/MainProfile';
 
 const ProtectedRoute = ({ children }) => {
   const { user, token } = useAuth();
@@ -74,6 +79,10 @@ const App = () => {
             <Route path="/AlbumDetail/:id" element={<AlbumDetail />}/>
             <Route path="/song" element={<SongList />} />
             <Route path="/song/:id" element={<SongDetail />} />
+            <Route path='/fullscreen' element={<FullScreenPlayer/>}/>
+            <Route path="/profile/" element={<MainProfile />} />
+
+
           </Route>
         </Routes>
 

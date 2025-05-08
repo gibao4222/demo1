@@ -138,12 +138,14 @@ function SideBar({ onToggleExpand, isExpanded }) {
           Authorization: `Bearer ${token}`, // Assuming token is required for auth
         },
         body: JSON.stringify({
-          user_id: user.id_spotify_user,
+          user_id: user.user_id,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Lỗi khi tạo playlist AI');
+        const errorData = await response.json();
+        console.error('Phản hồi lỗi từ server:', errorData);
+        throw new Error(`Lỗi khi tạo playlist AI: ${response.status} - ${errorData.error || 'Không có thông tin lỗi'}`);
       }
 
       const newPlaylist = await response.json();

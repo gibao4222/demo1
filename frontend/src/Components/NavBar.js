@@ -13,7 +13,7 @@ const NavBar = ({ user, onLogout, onSearch }) => {
     const handleItemClick = (item) => {
         setActiveItem((prev) => (prev === item ? null : item));
         if (item === 'Home') {
-            navigate('/home'); // Điều hướng đến trang chủ
+            navigate('/home'); 
         }
     };
 
@@ -34,18 +34,30 @@ const NavBar = ({ user, onLogout, onSearch }) => {
         }
     };
 
-    // Hàm điều hướng Back và Forward
+    
     const handleBack = () => {
-        navigate(-1); // Quay lại trang trước
+        navigate(-1); 
     };
 
     const handleForward = () => {
-        navigate(1); // Tiến tới trang tiếp theo
+        navigate(1); 
     };
 
     const handleSpotifyClick = () => {
-        navigate('/home'); // Điều hướng đến trang chủ
+        navigate('/home'); 
     };
+
+    
+    const handleProfileClick = () => {
+        if (user && user.id_spotify_user) {
+            navigate(`/user/${user.id_spotify_user}`);
+        }
+        setIsDropdownOpen(false);
+    };
+
+    const handlePayment = () => {
+        navigate('/payment'); 
+    }
     return (
         <div className="sticky top-0 z-50 w-full bg-black px-4 py-2.5 flex items-center relative">
             <div className="flex-shrink-0 flex items-center space-x-0.5">
@@ -141,10 +153,10 @@ const NavBar = ({ user, onLogout, onSearch }) => {
                                 <li className="px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer">
                                     Tài khoản
                                 </li>
-                                <li className="px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer">
+                                <li className="px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer" onClick={handleProfileClick}>
                                     Hồ sơ
                                 </li>
-                                <li className="px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer">
+                                <li className="px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer" onClick={handlePayment}>
                                     Nâng cấp lên Premium
                                 </li>
                                 <li className="px-4 py-2 text-white hover:bg-neutral-700 cursor-pointer">

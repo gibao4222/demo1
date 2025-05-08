@@ -94,7 +94,6 @@ INSTALLED_APPS = [
     'payment',
     'channels',
     'django_crontab',
-    
 ]
 
 MIDDLEWARE = [
@@ -135,12 +134,21 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'demo1_db',
+<<<<<<< HEAD
  	    'USER': 'user1',
  	    'PASSWORD': '123456',
  	    'HOST': 'localhost',
  	    'PORT': '3306',
      }
  }
+=======
+  	    'USER': 'user1',
+  	    'PASSWORD': '3120410057',
+  	    'HOST': 'localhost',
+  	    'PORT': '3306',
+      }
+  }
+>>>>>>> gibao
 
 
 

@@ -55,7 +55,7 @@ while True:
             summary = summarize_listening_history(user_id, days=7)
 
             # Kiểm tra nếu không có lịch sử nghe
-            if not summary['song_stats']:  # Sửa từ 'song_names_with_frequency' thành 'song_stats'
+            if not summary['song_stats']:  
                 socket.send_json({'error': 'No listening history found for this user'})
                 continue
 
