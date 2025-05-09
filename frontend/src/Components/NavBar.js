@@ -13,7 +13,7 @@ const NavBar = ({ user, onLogout, onSearch }) => {
     const handleItemClick = (item) => {
         setActiveItem((prev) => (prev === item ? null : item));
         if (item === 'Home') {
-            navigate('/home'); 
+            navigate('/home');
         }
     };
 
@@ -22,7 +22,7 @@ const NavBar = ({ user, onLogout, onSearch }) => {
             searchInputRef.current.focus();
         }
     }, [location.search]);
-    
+
 
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
@@ -34,20 +34,20 @@ const NavBar = ({ user, onLogout, onSearch }) => {
         }
     };
 
-    
+
     const handleBack = () => {
-        navigate(-1); 
+        navigate(-1);
     };
 
     const handleForward = () => {
-        navigate(1); 
+        navigate(1);
     };
 
     const handleSpotifyClick = () => {
-        navigate('/home'); 
+        navigate('/home');
     };
 
-    
+
     const handleProfileClick = () => {
         if (user && user.id_spotify_user) {
             navigate(`/user/${user.id_spotify_user}`);
@@ -56,7 +56,7 @@ const NavBar = ({ user, onLogout, onSearch }) => {
     };
 
     const handlePayment = () => {
-        navigate('/payment'); 
+        navigate('/premium-options');
     }
     return (
         <div className="sticky top-0 z-50 w-full bg-black px-4 py-2.5 flex items-center relative">
@@ -123,7 +123,7 @@ const NavBar = ({ user, onLogout, onSearch }) => {
                 {!user?.vip && (
                     <button
                         className="bg-white text-black rounded-full px-4 py-2 text-sm font-semibold hover:bg-gray-500 truncate"
-                        onClick={() => navigate("/payment")}
+                        onClick={() => navigate("/premium-options")}
                     >
                         Khám phá Premium
                     </button>

@@ -1,0 +1,15 @@
+{% extends "base_layout.html" %}
+{% block content %}
+    <h3>{{ title }}</h3>
+    <div class="table-responsive">
+        <div class="panel panel-default">
+            <div class="panel-heading">Chọn phương thức thanh toán Premium</div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li class="list-group-item"><a href="{% url "payment" %}">Thanh toán trực tiếp</a></li>
+                    <li class="list-group-item"><a href="{% url "scan_qr" %}">Quét mã QR</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

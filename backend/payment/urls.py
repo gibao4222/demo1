@@ -9,5 +9,6 @@ urlpatterns = [
  
     path('vnpay/query/', views.QueryView.as_view(), name='payment_query'),
     path('vnpay/refund/', views.RefundView.as_view(), name='payment_refund'),
-
+    path('premium-options/', views.PremiumOptionsView.as_view(), name='premium_options'),
+    path('scan-qr/', views.ScanQRView.as_view(), name='scan_qr'),
 ]

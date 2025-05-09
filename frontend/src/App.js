@@ -1,5 +1,5 @@
 import './App.css';
-import { Routes, Route , Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import React, { useState, useEffect } from "react";
 import Login from './Pages/Login';
@@ -15,8 +15,10 @@ import AlbumDetail from './Components/Album/AlbumDetail';
 import PlaylistDetail from './Components/Playlist/PlaylistDetail';
 import SongList from './Components/SongList';
 import SongDetail from './Components/SongDetail';
+import ScanQRPage from './Pages/ScanQRPage';
+import PremiumOptionsPage from './Pages/PreniumOptionPage';
 
-import Followers from './Pages/Followers';  
+import Followers from './Pages/Followers';
 import { useAuth } from './context/AuthContext';
 import { PlayerProvider } from './context/PlayerContext';
 
@@ -55,38 +57,40 @@ const App = () => {
   return (
 
     <GoogleOAuthProvider clientId="660579609549-kogcos0i04ldpherele2li974f9ulm01.apps.googleusercontent.com">
-    <PlayerProvider>
-      <div className="App">
+      <PlayerProvider>
+        <div className="App">
 
 
-        <Routes>
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Login />} />
-          <Route path="/FollowUser/:id/followers" element={<Followers/>} />
-          <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/payment/result" element={<PaymentResult />} />
-          <Route path="/chatbot" element={<Chatbot />} />
-          {/* <Route path="/" render={() => <div><a href="/chatbot">Go to Chatbot</a></div>} /> */}
+          <Routes>
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Login />} />
+            <Route path="/FollowUser/:id/followers" element={<Followers />} />
+            <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/payment/result" element={<PaymentResult />} />
+            <Route path="/premium-options" element={<PremiumOptionsPage />} />
+            <Route path="/scan-qr" element={<ScanQRPage />} />
+            <Route path="/chatbot" element={<Chatbot />} />
+            {/* <Route path="/" render={() => <div><a href="/chatbot">Go to Chatbot</a></div>} /> */}
 
 
-          <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-            <Route path="/home" element={<MainContent />}/>
-            <Route path="/search" element={<MainSearch/>}/>
-            <Route path="/user/:id" element={<MainFollowUser />}/>
-            <Route path="/singer/:id" element={<MainFollowSinger />}/>
-            <Route path="/PlaylistDetail/:id" element={<PlaylistDetail />}/>
-            <Route path="/AlbumDetail/:id" element={<AlbumDetail />}/>
-            <Route path="/song" element={<SongList />} />
-            <Route path="/song/:id" element={<SongDetail />} />
-            <Route path='/fullscreen' element={<FullScreenPlayer/>}/>
-            <Route path="/profile/" element={<MainProfile />} />
+            <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+              <Route path="/home" element={<MainContent />} />
+              <Route path="/search" element={<MainSearch />} />
+              <Route path="/user/:id" element={<MainFollowUser />} />
+              <Route path="/singer/:id" element={<MainFollowSinger />} />
+              <Route path="/PlaylistDetail/:id" element={<PlaylistDetail />} />
+              <Route path="/AlbumDetail/:id" element={<AlbumDetail />} />
+              <Route path="/song" element={<SongList />} />
+              <Route path="/song/:id" element={<SongDetail />} />
+              <Route path='/fullscreen' element={<FullScreenPlayer />} />
+              <Route path="/profile/" element={<MainProfile />} />
 
 
-          </Route>
-        </Routes>
+            </Route>
+          </Routes>
 
-      </div>
+        </div>
       </PlayerProvider>
     </GoogleOAuthProvider>
 

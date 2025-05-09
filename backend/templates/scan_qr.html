@@ -1,0 +1,13 @@
+{% extends "base_layout.html" %}
+{% block content %}
+    <h3>{{ title }}</h3>
+    <div class="table-responsive">
+        <div class="panel panel-default">
+            <div class="panel-heading">Quét mã QR để thanh toán</div>
+            <div class="panel-body">
+                <img src="data:image/png;base64,{{ qr_image }}" alt="QR Code" style="max-width: 100%;">
+                <p>Hướng dẫn: Sử dụng ứng dụng quét mã QR để hoàn tất thanh toán.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

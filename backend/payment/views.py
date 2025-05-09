@@ -26,6 +26,26 @@ from .vnpay import vnpay
 
 logger = logging.getLogger(__name__)
 
+class PremiumOptionsView(APIView):
+    def get(self, request):
+        return render(request, 'premium_options.html', {'title': 'Chọn phương thức Premium'})
+
+class ScanQRView(APIView):
+    def get(self, request):
+        import qrcode
+        from io import BytesIO
+        import base64
+
+        order_id = "ORDER_" + datetime.now().strftime("%Y%m%d%H%M%S")
+        qr_data = f"https://yourdomain.com/vnpay/return/?order_id={order_id}&amount=10000"
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+        img = qr.make_image(fill="black", back_color="white")
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        qr_image = base64.b64encode(buffer.getvalue()).decode()
+        return render(request, 'scan_qr.html', {'title': 'Quét mã QR', 'qr_image': qr_image})
 
 class CreatePaymentView(APIView):
     permission_classes = [IsAuthenticated]
