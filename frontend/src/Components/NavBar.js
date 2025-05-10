@@ -5,6 +5,7 @@ import axios from "../axios";
 import { FaMicrophoneLines } from "react-icons/fa6";
 import { FaMicrophoneLinesSlash } from "react-icons/fa6";
 import AudioSearch from './AudioSearch';
+import AudioRecorderModal from './AudioRecorderModal';
 
 const NavBar = ({ user, onLogout, onSearch }) => {
     const navigate = useNavigate();
@@ -12,7 +13,12 @@ const NavBar = ({ user, onLogout, onSearch }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const location = useLocation();
     const searchInputRef = useRef(null);
+    const [isModalAudioOpen, setIsModalAudiOpen] = useState(false);
+    const [AudioSongResult, setAudioSongResult] = useState(null);
 
+    const handleResult = (result) => {
+    setAudioSongResult(result);
+  };
 
     const handleItemClick = (item) => {
         setActiveItem((prev) => (prev === item ? null : item));
@@ -62,6 +68,7 @@ const NavBar = ({ user, onLogout, onSearch }) => {
     const handlePayment = () => {
         navigate('/payment');
     }
+   
 
     // const startRecording = async () => {
     //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -185,9 +192,14 @@ const NavBar = ({ user, onLogout, onSearch }) => {
                         className="w-5 h-5 text-neutral-400 absolute left-3 top-1/2 transform -translate-y-1/2 opacity-50"
                     />
 
-
+        <div className="absolute right-16 top-1/2 transform -translate-y-1/2 h-5 w-px bg-white opacity-50" />
+            <button className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1">
+               <FaMicrophoneLines onClick={() => setIsModalAudiOpen(true)}/>
+            </button>
                 </div>
-                <AudioSearch onSearch={onSearch}></AudioSearch>
+                {/* <AudioSearch ></AudioSearch> */}
+        
+                
             </div>
 
             <div className="ml-auto flex items-center space-x-6">
@@ -255,6 +267,11 @@ const NavBar = ({ user, onLogout, onSearch }) => {
 
                 </div >
             </div >
+            <AudioRecorderModal
+        isOpen={isModalAudioOpen}
+        onClose={() => setIsModalAudiOpen(false)}
+        onResult={handleResult}
+      />
         </div >
     );
 };

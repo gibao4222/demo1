@@ -24,6 +24,7 @@ const AudioSearch = ({ onSearch }) => {
 
             const formData = new FormData();
             formData.append('audio', audioFile);
+            console.log("FILE",audioFile)
 
             try {
                 const res = await axios.post('/api/songs/search-by-audio/', formData, {
@@ -34,6 +35,7 @@ const AudioSearch = ({ onSearch }) => {
 
                 if (res.data.results && res.data.results.length > 0) {
                     const bestMatch = res.data.results[0];
+                    console.log("DATA",res.data.results)
                     alert(`Kết quả: ${bestMatch.name} (${Math.round(bestMatch.similarity * 100)}%)`);
                 } else {
                     alert('Không tìm thấy bài hát phù hợp');

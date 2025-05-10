@@ -106,7 +106,7 @@ class SongViewSet(viewsets.ModelViewSet):
             
             return Response({
                 'success': True,
-                'results': results[:10],  # Trả về top 10 kết quả
+                'results': results[:1], 
                 'message': 'Search completed successfully'
             })
             
