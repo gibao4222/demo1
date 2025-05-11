@@ -26,15 +26,16 @@ function MainFollowSinger() {
   const [selectedSongId, setSelectedSongId] = useState(null);
   const optionButtonRefs = useRef({});
 
-      const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
-      const [previewEnded, setPreviewEnded] = useState(false);
-      const previewTimeoutRef = useRef(null);
-      const navigate = useNavigate();
-      const [MenuSubPos, setMenuSubPos] = useState({ x: 0, y: 0 });
-      const [showMenuSub, setShowMenuSub] = useState(false);
-      const [MenuSubSong, setMenuSubSong] = useState(null);
-      const { user } = useAuth();
-      const isContextMenuTriggered = useRef(false); 
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [previewEnded, setPreviewEnded] = useState(false);
+  const previewTimeoutRef = useRef(null);
+  const navigate = useNavigate();
+  const [MenuSubPos, setMenuSubPos] = useState({ x: 0, y: 0 });
+  const [showMenuSub, setShowMenuSub] = useState(false);
+  const [MenuSubSong, setMenuSubSong] = useState(null);
+  const { user } = useAuth();
+  const isContextMenuTriggered = useRef(false); 
+  
 
   // Lấy thông tin chi tiết nghệ sĩ
   useEffect(() => {

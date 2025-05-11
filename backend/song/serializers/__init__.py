@@ -35,12 +35,13 @@ class SongSerializer(serializers.ModelSerializer):
             return None
         
     def get_artists(self, obj):
+        song_singers = obj.song_singer.all()
         return [
             {
                 'id': ss.id_singer.id,
                 'name': ss.id_singer.name
             }
-            for ss in getattr(obj, 'singer_song', [])
+            for ss in song_singers
         ]
 
 

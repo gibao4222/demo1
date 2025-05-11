@@ -1,4 +1,3 @@
-// src/components/MusicPlayer.js
 
 import React, { useState, useRef } from 'react';
 

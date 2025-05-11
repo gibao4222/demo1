@@ -5,16 +5,19 @@ import FriendActivity from "../Components/FriendActivity";
 import NavBar from "../Components/NavBar";
 import { useAuth } from "../context/AuthContext";
 import BottomPlayer_ex from "../Components/BottomPlayer_ex";
-
+import MusicBar from "../Components/MusicBar";
+import { usePlayer } from "../context/PlayerContext";
 
 const MainLayout = () => {
     const { user, logout } = useAuth();
+    const { song: currentSong } = usePlayer();
     const navigate = useNavigate();
     const location = useLocation();
 
     const searchParams = new URLSearchParams(location.search);
     const initialQuery = searchParams.get('query') || '';
     const [searchQuery, setSearchQuery] = useState(initialQuery);
+    const [showFriendActivity, setShowFriendActivity] = useState(true);
     // Kiểm tra nếu không có user thì chuyển hướng về login
 
     useEffect(() => {
@@ -35,14 +38,22 @@ const MainLayout = () => {
         }
     };
 
+    const toggleFriendActivity = () => {
+        setShowFriendActivity((prev) => !prev);
+    };
+
     if (!user) {
         return null; // Không render gì nếu không có user
     }
 
+    const shouldShowMusicBar = currentSong !== null;
+
     return (
         <div className="min-h-screen bg-black text-white flex flex-col">
             {/* NavBar - Full width and sticky */}
-            <NavBar user={user} onLogout={handleLogout} onSearch={handleSearch} />
+            <NavBar user={user} onLogout={handleLogout} onSearch={handleSearch} toggleFriendActivity={toggleFriendActivity}
+                showFriendActivity={showFriendActivity}
+                shouldShowMusicBar={shouldShowMusicBar}/>
 
             {/* Main Content Area - Flex container for Sidebar, MainContent, and FriendActivity */}
             <div className="flex flex-1">
@@ -70,8 +81,8 @@ const MainLayout = () => {
                 <div className="w-px bg-black cursor-col-resize resize-x min-w-[4px] px-1"></div>
 
                 {/* FriendActivity - Fixed on the right */}
-                 <div className="fixed top-[64px] right-0 h-[calc(100vh-136px)] w-1/5 z-10">
-                    <FriendActivity />
+                 <div className="fixed top-[64px] right-0 h-[calc(100vh-136px)] w-1/5 z-10 overflow-y-auto overlay-scroll">
+                    {shouldShowMusicBar && !showFriendActivity ? <MusicBar /> : <FriendActivity />}
                 </div> 
             </div>
 
