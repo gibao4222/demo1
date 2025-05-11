@@ -84,6 +84,7 @@ const MainLayout = () => {
                  <div className="fixed top-[64px] right-0 h-[calc(100vh-136px)] w-1/5 z-10 overflow-y-auto overlay-scroll">
                     {shouldShowMusicBar && !showFriendActivity ? <MusicBar /> : <FriendActivity />}
                 </div> 
+
             </div>
 
             {/* Bottom Player - Fixed at the bottom */}
