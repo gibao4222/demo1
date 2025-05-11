@@ -516,7 +516,7 @@ function MusicBar() {
                         <h2 className="font-bold text-2xl mb-1 leading-tight hover:text-green-500">
                             {currentSong?.name || "Không có bài hát"}
                         </h2>
-                        <p className="text-gray-300 hover:text-green-500 cursor-pointer" onClick={() => song && song.artists && song.artists.length > 0 && navigate(`/singer/${song.artists[0].id}`)}>
+                        <p className="text-gray-300 hover:text-green-500 cursor-pointer" onClick={() => currentSong && currentSong.artists && currentSong.artists.length > 0 && navigate(`/singer/${currentSong.artists[0].id}`)}>
                             {currentSong?.artists && currentSong.artists.length > 0 
                             ? currentSong.artists.map(a => a.name).join(',') 
                             : "Không có nghệ sĩ"}
@@ -539,8 +539,8 @@ function MusicBar() {
                         </button>
                     </div>
                     <div className='flex items-center'>
-                        <div className="">
-                            <p className="text-gray-300 font-semibold cursor-pointer" onClick={() => song && song.artists && song.artists.length > 0 && navigate(`/singer/${song.artists[0].id}`)}>
+                        <div className="" onClick={() => currentSong && currentSong.artists && currentSong.artists.length > 0 && navigate(`/singer/${currentSong.artists[0].id}`)}>
+                            <p className="text-gray-300 font-semibold cursor-pointer" >
                             {currentSong?.artists && currentSong.artists.length > 0 
                             ? currentSong.artists.map(a => a.name).join(',') 
                             : "Không có nghệ sĩ"}    
