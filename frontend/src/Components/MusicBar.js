@@ -33,6 +33,8 @@ function MusicBar() {
     const [song, setSong] = useState(null);
     const [selectedSongId, setSelectedSongId] = useState(null);
     const [previewEnded, setPreviewEnded] = useState(false);
+    
+    
 
     const playlistRef = useRef(null);
     const modalPlaylistRef = useRef(null);
@@ -178,11 +180,72 @@ function MusicBar() {
     };
 
     const handleCreatePlaylist = async () => {
-        // Logic tạo playlist...
+        try {
+            if (!user || !user.user_id) {
+                setError("Thiếu thông tin người dùng");
+                console.log('Hiển thị alert error: Thiếu thông tin người dùng');
+                alert("Thiếu thông tin người dùng");
+                return;
+            }
+
+            if (!currentSong.id || !token) {
+                setError("Thiếu thông tin bài hát hoặc token");
+                console.log('Hiển thị alert error: Thiếu thông tin bài hát hoặc token');
+                alert("Thiếu thông tin bài hát hoặc token");
+                return;
+            }
+
+            const currentDate = new Date().toISOString().split('T')[0];
+
+            const playlistData = {
+                name: currentSong.album.name,
+                description: 'Thêm phần mô tả không bắt buộc',
+                image: currentSong.album.image || '/img/null.png',
+                create_date: currentDate,
+                id_user: user.id_spotify_user,
+                is_active: true,
+            };
+
+            // Tạo playlist mới
+            const newPlaylist = await createPlaylist(playlistData, token);
+            setPlaylists([...playlists, newPlaylist]);
+
+            // Thêm bài hát vừa chọn (trackId) vào playlist mới
+            await addSongToPlaylist(newPlaylist.id, currentSong.id, token);
+
+            window.dispatchEvent(new Event('playlistUpdated'));
+            console.log('Hiển thị alert success: Đã tạo danh sách phát mới và thêm bài hát');
+            alert("Đã tạo danh sách phát mới và thêm bài hát");
+            setIsPlaylistOpen(false);
+            setIsOpen(false);
+        } catch (error) {
+            setError("Không thể tạo danh sách phát hoặc thêm bài hát");
+            console.log('Hiển thị alert error:', error.response?.data?.error || "Không thể tạo danh sách phát hoặc thêm bài hát");
+            alert(error.response?.data?.error || "Không thể tạo danh sách phát hoặc thêm bài hát");
+            console.error('Lỗi khi tạo danh sách phát hoặc thêm bài hát:', error.response?.data || error.message);
+        }
     };
 
     const handleAddSongToPlaylist = async (playlistId) => {
-        // Logic thêm bài hát vào playlist...
+        if (!playlistId || !currentSong.id || !token) {
+            setError("Thiếu thông tin playlist hoặc bài hát");
+            console.log('Hiển thị alert error: Thiếu thông tin playlist hoặc bài hát');
+            alert("Thiếu thông tin playlist hoặc bài hát");
+            return;
+        }
+
+        try {
+            await addSongToPlaylist(playlistId, currentSong.id, token);
+            console.log('Hiển thị alert success: Đã thêm bài hát vào playlist');
+            alert("Đã thêm bài hát vào playlist");
+            setIsPlaylistOpen(false);
+            setIsOpen(false);
+        } catch (error) {
+            setError("Không thể thêm bài hát vào playlist");
+            console.log('Hiển thị alert error:', error.response?.data?.error || "Không thể thêm bài hát vào playlist");
+            alert(error.response?.data?.error || "Không thể thêm bài hát vào playlist");
+            console.error('Lỗi khi thêm bài hát:', error.response?.data || error.message);
+        }
     };
 
     const filteredPlaylists = playlists.filter((p) =>
