@@ -356,7 +356,7 @@ function SongDetail() {
                 </div>
             )}
 
-            <div className="p-4 w-full md:w-2/3">
+            <div className="p-4 w-full md:w-3/3">
                 <div
                     className="song-header flex flex-col md:flex-row items-center p-4 md:p-6 sticky top-0 z-10"
                     style={{
@@ -487,7 +487,7 @@ function SongDetail() {
                 </div>
             </div>
 
-            <div className="w-full md:w-1/3  sticky top-0" style={{ height: "calc(150vh - 200px)" }}>
+            {/* <div className="w-full md:w-1/3  sticky top-0" style={{ height: "calc(150vh - 200px)" }}>
                 {user.vip && song.url_video ? (
                     <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
                         <div className="relative w-full h-full">
@@ -519,7 +519,7 @@ function SongDetail() {
                         />
                     </div>
                 )}
-            </div>
+            </div> */}
 
             <MenuSub
                 show={showMenuSub}
