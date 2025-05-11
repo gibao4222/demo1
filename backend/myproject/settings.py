@@ -145,6 +145,7 @@ DATABASES = {
 
 
 
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -191,6 +192,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://localhost:3000",
     "https://127.0.0.1:3000",
+
 ]
 CORS_ALLOW_METHODS = [
     "DELETE",

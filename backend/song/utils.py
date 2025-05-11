@@ -1,5 +1,6 @@
 import boto3
 import uuid
+import librosa
 import os
 from myproject import settings
 from botocore.exceptions import NoCredentialsError

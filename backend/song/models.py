@@ -1,8 +1,10 @@
 from django.db import models
 from genre.models import Genre
+import json
 from song.utils import upload_mp3_file
 from song.utils import upload_video_file
 from song.utils import upload_lyric_file
+from song.fingerprint import get_audio_fingerprint
 # Create your models here.
 class Song(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -19,7 +21,8 @@ class Song(models.Model):
     file_lyric=models.FileField(blank=True,null=True)
     is_vip = models.BooleanField(default=False)
     id_genre = models.ForeignKey(Genre, on_delete=models.CASCADE, related_name='songs', db_column='id_genre_id', default=1)
- 
+    fingerprint = models.TextField(blank=True, null=True)
+
     class Meta:
         db_table = 'song_song'
 
@@ -39,6 +42,12 @@ class Song(models.Model):
 
         if self.file_audio and (is_new or (old and old.file_audio != self.file_audio)):
             file_path = self.file_audio.path
+            try:
+                fp = get_audio_fingerprint(file_path)
+                self.fingerprint = json.dumps(fp.tolist())
+                super().save(update_fields=['fingerprint'])
+            except Exception as e:
+                print(f"Lỗi khi tạo fingerprint: {e}")
             file_audio_url = upload_mp3_file(file_path)
         if file_audio_url:
             self.url_song = file_audio_url

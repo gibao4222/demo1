@@ -12,6 +12,18 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Prefetch
 
+import os
+import json
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+from rest_framework.parsers import MultiPartParser
+from ..fingerprint import get_audio_fingerprint, compare_fingerprints
+import tempfile
+
+import logging
+from django.core.cache import cache
+from rest_framework import status, viewsets
+
 
 class SongViewSet(viewsets.ModelViewSet):
     queryset = Song.objects.prefetch_related(
@@ -48,6 +60,67 @@ class SongViewSet(viewsets.ModelViewSet):
         song = self.get_object()
         song.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=False, methods=['POST'], url_path='search-by-audio')
+    def search_song_by_audio(self, request):
+        """
+        Tìm kiếm bài hát bằng file audio
+        """
+        audio_file = request.FILES.get('audio')
+        if not audio_file:
+            return Response({'error': 'No audio file provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Lưu file tạm thời
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as tmp_file:
+                for chunk in audio_file.chunks():
+                    tmp_file.write(chunk)
+                tmp_path = tmp_file.name
+            
+            # Tạo fingerprint từ file gửi lên
+            query_fp = get_audio_fingerprint(tmp_path)
+            
+            if query_fp is None:
+                return Response({'error': 'Could not process audio file'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # So sánh với tất cả bài hát trong database
+            songs = Song.objects.exclude(fingerprint__isnull=True).prefetch_related(
+                Prefetch(
+                    'song_singer',
+                    queryset=SingerSong.objects.select_related('id_singer'),
+                    to_attr='singer_song'
+                )
+            )
+            
+            results = []
+            for song in songs:
+                similarity = compare_fingerprints(query_fp, song.fingerprint)
+                if similarity > 0.3:  # Ngưỡng similarity
+                    serializer = self.get_serializer(song)
+                    song_data = serializer.data
+                    song_data['similarity'] = float(similarity)
+                    results.append(song_data)
+            
+            # Sắp xếp theo độ tương đồng giảm dần
+            results.sort(key=lambda x: x['similarity'], reverse=True)
+            
+            return Response({
+                'success': True,
+                'results': results[:1], 
+                'message': 'Search completed successfully'
+            })
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'error': str(e),
+                'message': 'An error occurred during audio search'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        finally:
+            # Đảm bảo xóa file tạm dù có lỗi hay không
+            if 'tmp_path' in locals() and os.path.exists(tmp_path):
+                os.unlink(tmp_path)
    
 
 class SongListView(APIView):
