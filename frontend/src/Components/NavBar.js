@@ -3,7 +3,7 @@ import NavItem from './Item/NavItem';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 
-const NavBar = ({ user, onLogout, onSearch }) => {
+const NavBar = ({ user, onLogout, onSearch, toggleFriendActivity, showFriendActivity, shouldShowMusicBar }) => {
     const navigate = useNavigate();
     const [activeItem, setActiveItem] = useState('null');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -140,6 +140,21 @@ const NavBar = ({ user, onLogout, onSearch }) => {
                             <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z" />
                         </svg>
                     </button>
+
+                    {/* Friend Activity Icon */}
+                    <button
+                        onClick={shouldShowMusicBar ? toggleFriendActivity : undefined}
+                        className={`${
+                            shouldShowMusicBar && showFriendActivity ? 'text-white' : 'text-neutral-400'
+                        } hover:text-white ${!shouldShowMusicBar ? 'cursor-default' : ''}`}
+                    >
+                        <img
+                            src="/icon/friendActivity.png"
+                            alt="Friend Activity"
+                            className="w-7 h-7 items-center"
+                        />
+                    </button>
+
                     <div className='flex bg-neutral-700 rounded-full h-9 w-9 items-center justify-center' onClick={toggleDropdown}>
                         <img
                             src="/images/blog/blog-10.jpg"

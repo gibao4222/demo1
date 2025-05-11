@@ -102,7 +102,7 @@ function MainSearch() {
         </div>
     );
 }
-
+console.log("nghệ sĩ:", songs[0]);
   return (
     <div className="z-0 bg-neutral-900 rounded-lg flex flex-col h-[calc(100vh-136px)] overflow-hidden">
       <div className="flex-1 p-4 overflow-y-auto overlay-scroll">

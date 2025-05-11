@@ -282,30 +282,33 @@ function BottomPlayer_ex() {
                     width="60" 
                 />
                 <div style={{ overflow: 'hidden' }}>
-                    <h3 className="font-bold" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <h3 className="font-bold mb-1" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {song.name || ""}
                     </h3>
+                    <h6>
+                    {/* {song.artists.length > 0 ? song.artists.map(a => a.name).join(',') : "Unknown Artist"} */}
+                    </h6>
                 </div>
             </div>
 
             <div className="flex flex-col items-center" style={{ flex: 1, maxWidth: '600px' }}>
                 <div className="flex items-center">
                     <button className="mr-4" onClick={toggleShuffle}>
-                        <IoShuffle className={isShuffle ? "text-green-500 w-7 h-7" : "text-gray-400 w-7 h-7"} />
+                        <IoShuffle className={isShuffle ? "text-green-500 w-6 h-6" : "text-gray-400 w-6 h-6"} />
                     </button>
 
                     <button onClick={() => handlePrev()} className="mr-4">
-                        <img alt="Previous" src="/icon/Component2.png" />
+                        <img className="w-6 h-6" alt="Previous" src="/icon/Component2.png" />
                     </button>
                     <button className="mr-4" onClick={togglePlay}>
                         <img
                             alt={isPlaying ? "Pause" : "Play"}
                             src={isPlaying ? "/icon/Component1.png" : "/icon/play.png"}
-                            className="w-13 h-13"
+                            className="w-10 h-10"
                         />
                     </button>
                     <button onClick={() => handleNext()} className="mr-4">
-                        <img alt="Next" src="/icon/Component3.png" />
+                        <img className="w-6 h-6" alt="Next" src="/icon/Component3.png" />
                     </button>
                     <button onClick={toggleRepeat}>
                         {repeatMode === "off" && <LuRepeat className="text-gray-400 w-5 h-5" />}
@@ -331,14 +334,14 @@ function BottomPlayer_ex() {
             <div className="flex items-center" style={{ width: '25%', minWidth: '200px', justifyContent: 'flex-end' }}>
                 <div className="flex items-center">
                     <button id="queueBtn"  onClick={() => setShowQueuePopup(!showQueuePopup)} className="mr-1">
-                        <img alt="Queue" src="/icon/Queue_XS.png" />
+                        <img alt="Queue" src="/icon/Queue_XS.png" className="w-6 h-6" />
                        
                     </button>
                     <button className="mr-1">
-                        <img alt="Devices" src="/icon/Devices_XS.png" />
+                        <img alt="Devices" src="/icon/Devices_XS.png" className="w-6 h-6"/>
                     </button>
-                    <button className="mr-1">
-                        <img onClick={() => handleTurnChange()} alt="Volume" src={volume === 0 ? "/icon/speaker3.png" : volume > 0 && volume < 70 ? "/icon/speaker2.png" : "/icon/speaker1.png"} />
+                    <button className="mr-1 w-5 h-5">
+                        <img onClick={() => handleTurnChange()} alt="Volume" src={volume === 0 ? "/icon/speaker3.png" : volume > 0 && volume < 70 ? "/icon/speaker2.png" : "/icon/speaker1.png"} className=""/>
                     </button>
                 </div>
                 <div className="w-24 h-6 flex items-center">
@@ -353,7 +356,7 @@ function BottomPlayer_ex() {
                 </div>
                 <div className="flex items-center">
   <button onClick={() => handelFullScreen()} className="ml-1">
-    {!show ?  <img src="/icon/FullScreen_S.png" alt="Fullscreen" /> :<Minimize2 /> }
+    {!show ?  <img className="w-7 h-7" src="/icon/FullScreen_S.png" alt="Fullscreen" /> :<Minimize2 /> }
   </button>
 
  

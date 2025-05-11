@@ -135,7 +135,7 @@ const MainContent = () => {
                 >
                     <div className="flex space-x-3 pb-2.5">
                         <button className="px-3.5 py-1 bg-white text-black rounded-full bg-opacity-75">Tất cả</button>
-                        <button className="px-3.5 py-1 bg-neutral-500 text-white rounded-full bg-opacity-35 hover:bg-neutral-600 hover:bg-opacity-35">Âm nhạc</button>
+                        <button className="px-3.5 py-1 bg-neutral-500 text-white rounded-full bg-opacity-35 hover:bg-neutral-600 hover:bg-opacity-35" onClick={() => navigate(`/song`)}>Âm nhạc</button>
                         <button className="px-3.5 py-1 bg-neutral-500 text-white rounded-full bg-opacity-35 font hover:bg-neutral-600 hover:bg-opacity-35">Podcast</button>
                     </div>
                 </div>

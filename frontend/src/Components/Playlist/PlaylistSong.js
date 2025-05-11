@@ -115,6 +115,7 @@ const PlaylistSong = ({ playlist, token, refreshSongs, playAllTrigger, onPlayAll
         }
     
         setIsPlaying(true);
+        
     };
 
     const handlePlayAll = () => {
