@@ -374,7 +374,7 @@ function BottomPlayer_ex() {
             {showQueuePopup && (
                 <div className="fixed bottom-20 right-4 w-80 max-h-96 bg-gray-800 rounded-lg shadow-xl overflow-hidden z-50 border border-gray-700">
                     <div className="flex justify-between items-center p-4 border-b border-gray-700 bg-gray-900">
-                        <h3 className="font-medium text-white">Hàng đợi ({queue.length})</h3>
+                        <h3 className="font-medium text-white">Hàng đợi ({queue?.length})</h3>
                         <button
                             onClick={() => setShowQueuePopup(false)}
                             className="text-gray-400 hover:text-white text-xl"
@@ -384,8 +384,8 @@ function BottomPlayer_ex() {
                     </div>
 
                     <div className="overflow-y-auto max-h-80">
-                        {queue.length > 0 ? (
-                            queue.map((song, index) => (
+                        {queue?.length > 0 ? (
+                            queue?.map((song, index) => (
                                 <div
                                     key={`queue-${song.id}-${index}`}
                                     className={`p-3 border-b border-gray-700 hover:bg-gray-700 cursor-pointer flex items-center ${currentSong?.id === song.id ? 'bg-gray-700' : ''

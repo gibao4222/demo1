@@ -181,7 +181,9 @@ const PlaylistSong = ({ playlist, token, refreshSongs, playAllTrigger, onPlayAll
                         file_audio: song.file_audio,
                         url_song: song.url_song,
                         is_vip: song.is_vip || false,
-                        url_video: song?.url_video
+                        url_video: song?.url_video,
+                        name:song.name,
+                        artists:song.artists
                     };
                 } catch (songError) {
                     console.error(`Lỗi khi lấy thông tin bài hát id_song ${item.id_song}:`, songError);
@@ -282,12 +284,14 @@ const PlaylistSong = ({ playlist, token, refreshSongs, playAllTrigger, onPlayAll
         setMenuSubPos({ x: adjustedX, y: adjustedY });
         setShowMenuSub(true);
         isContextMenuTriggered.current = true; 
+        console.log("SONG",MenuSubSong)
     };
 
     const handleAddToQueue = () => {
       if (MenuSubSong && !queue.find(s => s.id === MenuSubSong.id)) {
         setQueue([...queue, MenuSubSong]);
       }
+      console.log("QUEUe",queue)
       setShowMenuSub(false);
     };
 
