@@ -64,7 +64,7 @@ const OptionAlbum = ({ onClose, position, tracks, albumData }) => {
                 description: 'Thêm phần mô tả không bắt buộc',
                 image: '/img/null.png',
                 create_date: currentDate,
-                id_user: user.user_id,
+                id_user: user.id_spotify_user,
                 is_active: true,
             };
 

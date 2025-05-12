@@ -15,7 +15,6 @@ import AlbumDetail from './Components/Album/AlbumDetail';
 import PlaylistDetail from './Components/Playlist/PlaylistDetail';
 import SongList from './Components/SongList';
 import SongDetail from './Components/SongDetail';
-
 import Followers from './Pages/Followers';  
 import { useAuth } from './context/AuthContext';
 import { PlayerProvider } from './context/PlayerContext';

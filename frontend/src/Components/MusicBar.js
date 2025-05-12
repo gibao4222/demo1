@@ -198,9 +198,9 @@ function MusicBar() {
             const currentDate = new Date().toISOString().split('T')[0];
 
             const playlistData = {
-                name: currentSong.album.name,
+                name: currentSong.name,
                 description: 'Thêm phần mô tả không bắt buộc',
-                image: currentSong.album.image || '/img/null.png',
+                image: currentSong.image || '/img/null.png',
                 create_date: currentDate,
                 id_user: user.id_spotify_user,
                 is_active: true,
